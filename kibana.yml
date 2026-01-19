@@ -1,0 +1,10 @@
+server.host: "0.0.0.0"
+server.port: 5601
+server.name: "kibana"
+
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+
+i18n.locale: "en"
+
+elasticsearch.requestTimeout: 30000
+elasticsearch.pingTimeout: 30000
