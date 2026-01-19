@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@elastic/elasticsearch':
+        specifier: ^9.2.0
+        version: 9.2.0
       '@emrecolak-23/jobber-share':
         specifier: 0.0.2
         version: 0.0.2
