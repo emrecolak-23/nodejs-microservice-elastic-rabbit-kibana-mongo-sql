@@ -12,8 +12,8 @@ importers:
         specifier: ^9.2.0
         version: 9.2.0
       '@emrecolak-23/jobber-share':
-        specifier: 0.0.2
-        version: 0.0.2
+        specifier: 0.0.7
+        version: 0.0.7
       amqplib:
         specifier: ^0.10.9
         version: 0.10.9
@@ -271,8 +271,8 @@ packages:
     resolution: {integrity: sha512-GtfjGjxhJBdLYYhdRxd7/tWBQ9JsntZNDFZiSJp9fymrup9Kj7IojucojwxpC+7QN9yQzeTUU7M67x6uPnAGpg==}
     engines: {node: '>=20'}
 
-  '@emrecolak-23/jobber-share@0.0.2':
-    resolution: {integrity: sha512-Lu7dS/RC02ZODVIPSZ4EbLYuEqRdaWdWkL+stENNCJ0ZNG4E8nuE/mFriWsqdFRpzF4TyalSGfEkxx0KV6hFuQ==, tarball: https://npm.pkg.github.com/download/@emrecolak-23/jobber-share/0.0.2/99252b756625774e550cdee7cb3673763fc08a19}
+  '@emrecolak-23/jobber-share@0.0.7':
+    resolution: {integrity: sha512-TdJ3KXaqGmCXUUR2MfXfyl0Xt6w3co/ugifTuY+smSsT21Qm83tbZ2tPPIPFBKBS1p5n5ZD/GgGm/OAWrFN6tw==, tarball: https://npm.pkg.github.com/download/@emrecolak-23/jobber-share/0.0.7/4b21a159beff9781bfc358d3c3187f99db0a82c6}
     engines: {node: '>=18'}
 
   '@eslint-community/eslint-utils@4.9.1':
@@ -3684,7 +3684,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@emrecolak-23/jobber-share@0.0.2':
+  '@emrecolak-23/jobber-share@0.0.7':
     dependencies:
       '@elastic/elasticsearch': 9.2.0
       cloudinary: 2.9.0
