@@ -1,8 +1,9 @@
 import { Logger } from 'winston';
-import { winstonLogger } from '@emrecolak-23/jobber-share';
+import { IEmailLocals, winstonLogger } from '@emrecolak-23/jobber-share';
 import { config } from '@notifications/config';
 import { Channel, ConsumeMessage } from 'amqplib';
 import createConnection from './connection';
+import { sendEmail } from './mail.transport';
 
 const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'emailConsumer', 'debug');
 
@@ -36,7 +37,17 @@ async function setupEmailConsumer(
 export async function consumeAuthEmailMessages(channel: Channel): Promise<void> {
   await setupEmailConsumer(channel, 'jobber-email-notification', 'auth-email', 'auth-email-queue', async (msg) => {
     const data = JSON.parse(msg.content.toString());
-    console.log(JSON.parse(msg.content.toString()));
+    const { receiverEmail, username, verifyLink, resetLink, template } = data;
+    const locals: IEmailLocals = {
+      appLink: `${config.CLIENT_URL}`,
+      appIcon: 'https://i.ibb.co/rR9tGcrZ/jobber3057-logowik-com.webp',
+      username,
+      verifyLink,
+      resetLink
+    };
+
+    await sendEmail(template, receiverEmail, locals);
+
     log.info('info ', `Auth Email Data: ${JSON.stringify(data)}`);
   });
 }
@@ -44,7 +55,67 @@ export async function consumeAuthEmailMessages(channel: Channel): Promise<void> 
 export async function consumeOrderEmailMessages(channel: Channel): Promise<void> {
   await setupEmailConsumer(channel, 'jobber-order-notification', 'order-email', 'order-email-queue', async (msg) => {
     const data = JSON.parse(msg.content.toString());
-    console.log(JSON.parse(msg.content.toString()));
+    const {
+      receiverEmail,
+      username,
+      template,
+      sender,
+      offerLink,
+      amount,
+      buyerUsername,
+      sellerUsername,
+      title,
+      description,
+      deliveryDays,
+      orderId,
+      orderDue,
+      requirements,
+      orderUrl,
+      originalDate,
+      newDate,
+      reason,
+      subject,
+      header,
+      type,
+      message,
+      serviceFee,
+      total
+    } = data;
+
+    const locals: IEmailLocals = {
+      appLink: `${config.CLIENT_URL}`,
+      appIcon: 'https://i.ibb.co/Kyp2m0t/cover.png',
+      username,
+      sender,
+      offerLink,
+      amount,
+      buyerUsername,
+      sellerUsername,
+      title,
+      description,
+      deliveryDays,
+      orderId,
+      orderDue,
+      requirements,
+      orderUrl,
+      originalDate,
+      newDate,
+      reason,
+      subject,
+      header,
+      type,
+      message,
+      serviceFee,
+      total
+    };
+
+    if (template === 'orderPlaced') {
+      await sendEmail('orderPlaced', receiverEmail, locals);
+      await sendEmail('orderReceipt', receiverEmail, locals);
+    } else {
+      await sendEmail(template, receiverEmail, locals);
+    }
+
     log.log('info', `Order Email Data: ${JSON.stringify(data)}`);
   });
 }

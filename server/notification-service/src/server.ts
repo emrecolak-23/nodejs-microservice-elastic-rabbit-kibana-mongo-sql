@@ -1,4 +1,4 @@
-import { winstonLogger } from '@emrecolak-23/jobber-share';
+import { IEmailMessageDetails, winstonLogger } from '@emrecolak-23/jobber-share';
 import { Logger } from 'winston';
 import { config } from '@notifications/config';
 import { Application } from 'express';
@@ -25,7 +25,13 @@ async function startsQueues(): Promise<void> {
   await consumeAuthEmailMessages(emailChannel);
   await consumeOrderEmailMessages(emailChannel);
   await emailChannel.assertExchange('jobber-email-notification', 'direct');
-  const message = JSON.stringify({ name: 'jobber', service: 'auth notification service' });
+  const verificationLink = `${config.CLIENT_URL}/confirm-email?token=121242q34214wqs232`;
+  const messageDetails: IEmailMessageDetails = {
+    receiverEmail: `${config.SENDER_EMAIL}`,
+    verifyLink: verificationLink,
+    template: 'verifyEmail'
+  };
+  const message = JSON.stringify(messageDetails);
   emailChannel.publish('jobber-email-notification', 'auth-email', Buffer.from(message));
   await emailChannel.assertExchange('jobber-order-notification', 'direct');
   const message2 = JSON.stringify({ name: 'jobber', service: 'order notification service' });
