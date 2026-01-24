@@ -9,9 +9,10 @@ import compression from 'compression';
 import StatusCodes from 'http-status-codes';
 import http from 'http';
 import { CustomError, IErrorResponse } from '@emrecolak-23/jobber-share';
+import { config } from '@gateway/config';
 
-const SERVER_PORT = process.env.SERVER_PORT || 4000;
-const log: Logger = winstonLogger('http://localhost:9200', 'apiGatewayServer', 'debug');
+const SERVER_PORT = 4000;
+const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'apiGatewayServer', 'debug');
 
 export class GatewayServer {
   constructor(private readonly app: Application) {}
@@ -30,9 +31,9 @@ export class GatewayServer {
     app.use(
       cookieSession({
         name: 'session',
-        keys: [],
+        keys: [`${config.SECRET_KEY_ONE}`, `${config.SECRET_KEY_TWO}`],
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        secure: false // Set to true if using HTTPS update with value from config
+        secure: config.NODE_ENV !== 'development' // Set to true if using HTTPS update with value from config
         // sameSite: 'none'
       })
     );
@@ -40,7 +41,7 @@ export class GatewayServer {
     app.use(helmet());
     app.use(
       cors({
-        origin: '',
+        origin: `${config.CLIENT_URL}`,
         credentials: true,
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
       })
