@@ -1,10 +1,13 @@
 import { winstonLogger } from '@emrecolak-23/jobber-share';
-import { Application } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 import { Logger } from 'winston';
 import cookieSession from 'cookie-session';
 import hpp from 'hpp';
 import helmet from 'helmet';
 import cors from 'cors';
+import compression from 'compression';
+import StatusCodes from 'http-status-codes';
+import { CustomError, IErrorResponse } from '@emrecolak-23/jobber-share/src/error-handler';
 
 const SERVER_PORT = process.env.SERVER_PORT || 4000;
 const log: Logger = winstonLogger('', 'apiGatewayServer', 'debug');
@@ -12,7 +15,13 @@ const log: Logger = winstonLogger('', 'apiGatewayServer', 'debug');
 export class GatewayServer {
   constructor(private readonly app: Application) {}
 
-  public start(): void {}
+  public start(): void {
+    this.securityMiddleware(this.app);
+    this.standartMiddleware(this.app);
+    this.routesMiddleware(this.app);
+    this.startsElasticSearch();
+    this.errorHandler();
+  }
 
   private securityMiddleware(app: Application): void {
     app.set('trust proxy', 1);
@@ -34,5 +43,35 @@ export class GatewayServer {
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
       })
     );
+  }
+
+  private standartMiddleware(app: Application): void {
+    app.use(compression());
+    app.use(express.json({ limit: '200mb' }));
+    app.use(express.urlencoded({ extended: true, limit: '200mb' }));
+  }
+
+  private routesMiddleware(_app: Application): void {}
+
+  private startsElasticSearch(): void {}
+
+  private errorHandler(): void {
+    this.app.use('*', (req: Request, res: Response, next: NextFunction) => {
+      const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+      log.log('error', `${fullUrl} endpoint does not exists`, '');
+      res.status(StatusCodes.NOT_FOUND).json({ message: `The endpoint called does not exist` });
+      next();
+    });
+
+    this.app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
+      log.log('error', `GatewayService ${err.comingFrom}: `, err);
+
+      if (err instanceof CustomError) {
+        return res.status(err.statusCode).json({ message: err.serializeError().message });
+      }
+
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: `The endpoint called does not exist` });
+      next();
+    });
   }
 }
