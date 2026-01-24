@@ -58,7 +58,7 @@ export class GatewayServer {
   private startsElasticSearch(): void {}
 
   private errorHandler(): void {
-    this.app.use('*', (req: Request, res: Response, next: NextFunction) => {
+    this.app.all(/(.*)/, (req: Request, res: Response, next: NextFunction) => {
       const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
       log.log('error', `${fullUrl} endpoint does not exists`, '');
       res.status(StatusCodes.NOT_FOUND).json({ message: `The endpoint called does not exist` });
