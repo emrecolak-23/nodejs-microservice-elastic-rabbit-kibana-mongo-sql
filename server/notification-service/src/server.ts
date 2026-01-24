@@ -5,7 +5,7 @@ import { Application } from 'express';
 import http from 'http';
 import { healthRoutes } from '@notifications/route';
 import { checkConnection } from '@notifications/elasticsearch';
-import createConnection from '@notifications/queues/connection';
+import { createConnection } from '@notifications/queues/connection';
 import { consumeAuthEmailMessages, consumeOrderEmailMessages } from '@notifications/queues/email.consumer';
 import { Channel } from 'amqplib';
 

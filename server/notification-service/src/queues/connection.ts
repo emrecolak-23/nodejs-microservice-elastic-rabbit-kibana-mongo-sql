@@ -25,4 +25,4 @@ function closeConnection(channel: Channel, connection: ChannelModel): void {
   });
 }
 
-export default createConnection;
+export { createConnection };
