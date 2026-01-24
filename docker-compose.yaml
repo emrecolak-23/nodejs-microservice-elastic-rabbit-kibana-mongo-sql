@@ -8,6 +8,8 @@ services:
     command: redis-server --loglevel warning
     volumes:
       - redis_data:/data
+    networks:
+      - jobber
 
   mongodb:
     container_name: mongodb_container
@@ -17,6 +19,8 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    networks:
+      - jobber
 
   mysql:
     container_name: mysql_container
@@ -32,6 +36,8 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - jobber
 
   postgres:
     container_name: postgres_container
@@ -45,6 +51,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
+    networks:
+      - jobber
 
   rabbitmq:
     container_name: rabbitmq_container
@@ -56,6 +64,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - jobber
 
   elasticsearch:
     container_name: elasticsearch_container
@@ -65,29 +75,62 @@ services:
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - xpack.security.enabled=false
+    healthcheck:
+      test:
+        ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     ports:
       - "9200:9200"
     volumes:
       - es_data:/usr/share/elasticsearch/data
     networks:
-      - elastic
+      - jobber
 
   kibana:
     container_name: kibana_container
     image: kibana:8.17.0
     restart: always
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsearch_container:9200
     ports:
       - "5601:5601"
     networks:
-      - elastic
+      - jobber
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
+
+  notifications:
+    container_name: notification_container
+    build:
+      context: ./server/notification-service
+      dockerfile: Dockerfile.dev
+    restart: always
+    ports:
+      - "4001:4001"
+    env_file: ./server/notification-service/.env
+    environment:
+      - ENABLE_APM=0
+      - NODE_ENV=development
+      - CLIENT_URL=http://localhost:3000
+      - RABBITMQ_ENDPOINT=amqp://jobber:api@rabbitmq_container:5672
+      - SENDER_EMAIL=eudora.kemmer@ethereal.email
+      - SENDER_EMAIL_PASSWORD=GC5xgQhYrfU16489fU
+      - ELASTIC_SEARCH_URL=http://elasticsearch_container:9200
+      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SECRET_TOKEN=
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - jobber
 
 networks:
-  elastic:
-    name: elastic
+  jobber:
+    driver: bridge
 
 volumes:
   redis_data:
