@@ -1,8 +1,11 @@
 import dotenv from 'dotenv';
+import { singleton, injectable } from 'tsyringe';
 
 dotenv.config({});
 
-class Config {
+@singleton()
+@injectable()
+export class EnvConfig {
   public ENABLE_APM: string;
   public GATEWAY_JWT_TOKEN: string;
   public JWT_TOKEN: string;
@@ -41,5 +44,3 @@ class Config {
     this.ELASTIC_APM_SECRET_TOKEN = process.env.ELASTIC_APM_SECRET_TOKEN || '';
   }
 }
-
-export const config: Config = new Config();

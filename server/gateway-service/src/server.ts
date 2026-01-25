@@ -9,21 +9,28 @@ import compression from 'compression';
 import StatusCodes from 'http-status-codes';
 import http from 'http';
 import { CustomError, IErrorResponse } from '@emrecolak-23/jobber-share';
-import { config } from '@gateway/config';
+import { EnvConfig } from '@gateway/configs';
+import { injectable, singleton } from 'tsyringe';
+import { ElasticSearch } from '@gateway/loaders';
 
 const SERVER_PORT = 4000;
-const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'apiGatewayServer', 'debug');
 
+@singleton()
+@injectable()
 export class GatewayServer {
-  constructor(private readonly app: Application) {}
+  private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'apiGatewayServer', 'debug');
+  constructor(
+    private readonly config: EnvConfig,
+    private readonly elasticSearch: ElasticSearch
+  ) {}
 
-  public start(): void {
-    this.securityMiddleware(this.app);
-    this.standartMiddleware(this.app);
-    this.routesMiddleware(this.app);
+  public start(app: Application): void {
+    this.securityMiddleware(app);
+    this.standartMiddleware(app);
+    this.routesMiddleware(app);
     this.startsElasticSearch();
-    this.errorHandler();
-    this.startServer(this.app);
+    this.errorHandler(app);
+    this.startServer(app);
   }
 
   private securityMiddleware(app: Application): void {
@@ -31,9 +38,9 @@ export class GatewayServer {
     app.use(
       cookieSession({
         name: 'session',
-        keys: [`${config.SECRET_KEY_ONE}`, `${config.SECRET_KEY_TWO}`],
+        keys: [`${this.config.SECRET_KEY_ONE}`, `${this.config.SECRET_KEY_TWO}`],
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        secure: config.NODE_ENV !== 'development' // Set to true if using HTTPS update with value from config
+        secure: this.config.NODE_ENV !== 'development' // Set to true if using HTTPS update with value from config
         // sameSite: 'none'
       })
     );
@@ -41,7 +48,7 @@ export class GatewayServer {
     app.use(helmet());
     app.use(
       cors({
-        origin: `${config.CLIENT_URL}`,
+        origin: `${this.config.CLIENT_URL}`,
         credentials: true,
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
       })
@@ -56,18 +63,20 @@ export class GatewayServer {
 
   private routesMiddleware(_app: Application): void {}
 
-  private startsElasticSearch(): void {}
+  private startsElasticSearch(): void {
+    this.elasticSearch.checkConnection();
+  }
 
-  private errorHandler(): void {
-    this.app.all(/(.*)/, (req: Request, res: Response, next: NextFunction) => {
+  private errorHandler(app: Application): void {
+    app.all(/(.*)/, (req: Request, res: Response, next: NextFunction) => {
       const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-      log.log('error', `${fullUrl} endpoint does not exists`, '');
+      this.log.log('error', `${fullUrl} endpoint does not exists`, '');
       res.status(StatusCodes.NOT_FOUND).json({ message: `The endpoint called does not exist` });
       next();
     });
 
-    this.app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-      log.log('error', `GatewayService ${err.comingFrom}: `, err);
+    app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
+      this.log.log('error', `GatewayService ${err.comingFrom}: `, err);
 
       if (err instanceof CustomError) {
         return res.status(err.statusCode).json({ message: err.serializeError().message });
@@ -83,18 +92,18 @@ export class GatewayServer {
       const httpServer: http.Server = new http.Server(app);
       await this.startHttpServer(httpServer);
     } catch (err) {
-      log.log('error', 'GatewayService startServer() error method: ', err);
+      this.log.log('error', 'GatewayService startServer() error method: ', err);
     }
   }
 
   private async startHttpServer(httpServer: http.Server): Promise<void> {
     try {
-      log.info(`Geteay server has started with process id of ${process.pid} on. gateway server has started`);
+      this.log.info(`Geteay server has started with process id of ${process.pid} on. gateway server has started`);
       httpServer.listen(SERVER_PORT, () => {
-        log.info(`Gateway server running on port ${SERVER_PORT}`);
+        this.log.info(`Gateway server running on port ${SERVER_PORT}`);
       });
     } catch (err) {
-      log.log('error', 'GatewayService startHttpServer() error method: ', err);
+      this.log.log('error', 'GatewayService startHttpServer() error method: ', err);
     }
   }
 }
