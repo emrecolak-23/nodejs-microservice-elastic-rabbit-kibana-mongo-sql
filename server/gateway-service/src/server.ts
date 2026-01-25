@@ -12,6 +12,7 @@ import { CustomError, IErrorResponse } from '@emrecolak-23/jobber-share';
 import { EnvConfig } from '@gateway/configs';
 import { injectable, singleton } from 'tsyringe';
 import { ElasticSearch } from '@gateway/loaders';
+import { appRoutes } from './routes';
 
 const SERVER_PORT = 4000;
 
@@ -61,7 +62,9 @@ export class GatewayServer {
     app.use(express.urlencoded({ extended: true, limit: '200mb' }));
   }
 
-  private routesMiddleware(_app: Application): void {}
+  private routesMiddleware(app: Application): void {
+    appRoutes(app);
+  }
 
   private startsElasticSearch(): void {
     this.elasticSearch.checkConnection();
