@@ -12,6 +12,7 @@ import { EnvConfig } from '@auth/config';
 import { injectable, singleton } from 'tsyringe';
 import { ElasticSearch } from '@auth/loaders';
 import { verify } from 'jsonwebtoken';
+import { appRoutes } from '@auth/routes';
 
 const SERVER_PORT = 4002;
 
@@ -62,7 +63,9 @@ export class AuthServer {
     app.use(express.urlencoded({ extended: true, limit: '200mb' }));
   }
 
-  private routesMiddleware(_app: Application): void {}
+  private routesMiddleware(app: Application): void {
+    appRoutes(app);
+  }
 
   private startQueues(): void {
     console.log('Starting Auth Service Queues...');
