@@ -12,6 +12,8 @@ interface AuthModelInstanceMethods extends Model {
   };
 }
 
+export type SafeAuthDocument = Omit<IAuthDocument, 'password'>;
+
 type AuthUserCreationAttributes = Optional<IAuthDocument, 'id' | 'createdAt' | 'passwordResetToken' | 'passwordResetExpires'>;
 
 const AuthModel: ModelDefined<IAuthDocument, AuthUserCreationAttributes> & AuthModelInstanceMethods = sequelize.define(
@@ -79,6 +81,10 @@ const AuthModel: ModelDefined<IAuthDocument, AuthUserCreationAttributes> & AuthM
       {
         unique: true,
         fields: ['username']
+      },
+      {
+        unique: true,
+        fields: ['emailVerificationToken']
       }
     ]
   }
