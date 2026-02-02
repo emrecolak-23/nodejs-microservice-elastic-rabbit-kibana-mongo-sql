@@ -13,8 +13,12 @@ import { injectable, singleton } from 'tsyringe';
 import { ElasticSearch } from '@auth/loaders';
 import { verify } from 'jsonwebtoken';
 import { appRoutes } from '@auth/routes';
+import { QueueConnection } from './queues/connection';
+import { Channel } from 'amqplib';
 
 const SERVER_PORT = 4002;
+
+export let authChannel: Channel;
 
 @singleton()
 @injectable()
@@ -23,6 +27,7 @@ export class AuthServer {
   constructor(
     private readonly config: EnvConfig,
     private readonly elasticSearch: ElasticSearch,
+    private readonly queueConnection: QueueConnection
   ) {}
 
   public start(app: Application): void {
@@ -57,7 +62,6 @@ export class AuthServer {
     });
   }
 
-
   private standartMiddleware(app: Application): void {
     app.use(compression());
     app.use(express.json({ limit: '200mb' }));
@@ -68,8 +72,8 @@ export class AuthServer {
     appRoutes(app);
   }
 
-  private startQueues(): void {
-    console.log('Starting Auth Service Queues...');
+  private async startQueues(): Promise<void> {
+    authChannel = (await this.queueConnection.connect()) as Channel;
   }
 
   private startsElasticSearch(): void {
