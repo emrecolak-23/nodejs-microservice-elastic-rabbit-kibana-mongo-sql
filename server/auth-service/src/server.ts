@@ -22,7 +22,7 @@ export class AuthServer {
   private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'apiAuthServer', 'debug');
   constructor(
     private readonly config: EnvConfig,
-    private readonly elasticSearch: ElasticSearch
+    private readonly elasticSearch: ElasticSearch,
   ) {}
 
   public start(app: Application): void {
@@ -30,7 +30,7 @@ export class AuthServer {
     this.standartMiddleware(app);
     this.routesMiddleware(app);
     this.startQueues();
-    this.startsElasticSearch;
+    this.startsElasticSearch();
     this.errorHandler(app);
     this.startServer(app);
   }
@@ -56,6 +56,7 @@ export class AuthServer {
       next();
     });
   }
+
 
   private standartMiddleware(app: Application): void {
     app.use(compression());

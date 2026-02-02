@@ -14,6 +14,10 @@ export class EnvConfig {
   public API_GATEWAY_URL: string;
   public RABBITMQ_ENDPOINT: string;
   public MYSQL_DB: string;
+  public MYSQL_HOST: string;
+  public MYSQL_USER: string;
+  public MYSQL_PASSWORD: string;
+  public MYSQL_PORT: string;
   public CLOUD_NAME: string;
   public CLOUD_API_KEY: string;
   public CLOUD_API_SECRET: string;
@@ -30,6 +34,10 @@ export class EnvConfig {
     this.API_GATEWAY_URL = process.env.API_GATEWAY_URL || '';
     this.RABBITMQ_ENDPOINT = process.env.RABBITMQ_ENDPOINT || '';
     this.MYSQL_DB = process.env.MYSQL_DB || '';
+    this.MYSQL_HOST = process.env.MYSQL_HOST || 'localhost';
+    this.MYSQL_USER = process.env.MYSQL_USER || '';
+    this.MYSQL_PASSWORD = process.env.MYSQL_PASSWORD || '';
+    this.MYSQL_PORT = process.env.MYSQL_PORT || '3306';
     this.CLOUD_NAME = process.env.CLOUD_NAME || '';
     this.CLOUD_API_KEY = process.env.CLOUD_API_KEY || '';
     this.CLOUD_API_SECRET = process.env.CLOUD_API_SECRET || '';
