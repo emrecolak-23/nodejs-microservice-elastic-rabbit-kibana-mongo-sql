@@ -21,7 +21,7 @@
   "packageManager": "pnpm@10.22.0",
   "dependencies": {
     "@elastic/elasticsearch": "^9.2.0",
-    "@emrecolak-23/jobber-share": "^0.0.9",
+    "@emrecolak-23/jobber-share": "^0.0.14",
     "amqplib": "^0.10.9",
     "bcryptjs": "^3.0.3",
     "class-transformer": "^0.5.1",

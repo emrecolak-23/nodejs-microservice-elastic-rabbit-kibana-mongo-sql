@@ -80,23 +80,46 @@ export class GatewayServer {
   }
 
   private errorHandler(app: Application): void {
+
     app.all(/(.*)/, (req: Request, res: Response, next: NextFunction) => {
       const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
       this.log.log('error', `${fullUrl} endpoint does not exists`, '');
-      res.status(StatusCodes.NOT_FOUND).json({ message: `The endpoint called does not exist` });
+      res.status(StatusCodes.NOT_FOUND).json({ 
+        message: `The endpoint called does not exist`,
+        statusCode: StatusCodes.NOT_FOUND,
+        status: 'error',
+        comingFrom: 'GatewayService route handler'
+      });
       next();
     });
-
-    app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-      this.log.log('error', `GatewayService ${err.comingFrom}: `, err);
-
-      if (err instanceof CustomError) {
-        return res.status(err.statusCode).json({ message: err.serializeError().message });
+    
+    app.use((err: IErrorResponse | Error, _req: Request, res: Response, next: NextFunction) => {
+      if (err instanceof SyntaxError && 'body' in err) {
+        this.log.log('error', `GatewayService JSON parse error: ${err.message}`, err);
+        return res.status(StatusCodes.BAD_REQUEST).json({ 
+          message: 'Invalid JSON format',
+          statusCode: StatusCodes.BAD_REQUEST,
+          status: 'error',
+          comingFrom: 'GatewayService JSON parser'
+        });
       }
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: `The endpoint called does not exist` });
+      if (err instanceof CustomError) {
+        this.log.log('error', `GatewayService ${err.comingFrom}: `, err);
+        return res.status(err.statusCode).json(err.serializeError());
+      }
+
+      this.log.log('error', `GatewayService ${(err as IErrorResponse).comingFrom || 'Unknown error'}: `, err);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+        message: err.message,
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+        status: 'error',
+        comingFrom: 'GatewayService errorHandler'
+      });
       next();
     });
+
+    
   }
 
   private async startServer(app: Application): Promise<void> {

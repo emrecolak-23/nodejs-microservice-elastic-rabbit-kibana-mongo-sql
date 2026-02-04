@@ -23,9 +23,15 @@ export class AxiosService {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        gatewayToken: requestGatewayToken
+        'x-gateway-token': requestGatewayToken 
       },
       withCredentials: true
+    });
+
+    instance.interceptors.request.use((config) => {
+      console.log('Axios request headers:', config.headers);
+      console.log('Gateway token being sent:', config.headers?.['x-gateway-token'] ? 'YES' : 'NO');
+      return config;
     });
 
     return instance;

@@ -9,6 +9,6 @@ export const appRoutes = (app: Application) => {
   const healthRoute = container.resolve(HealthRoute);
   const authRoute = container.resolve(AuthRoute);
   app.use('', healthRoute.routes());
-  app.use(`${BASE_PATH}`, authRoute.routes());
+  app.use(`${BASE_PATH}/auth`, authRoute.routes());
   
 };

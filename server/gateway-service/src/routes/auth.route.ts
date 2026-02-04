@@ -12,7 +12,7 @@ export class AuthRoute {
   }
 
   public routes(): Router {
-    this.router.post('/auth/signup', this.signUpController.create.bind(this.signUpController));
+    this.router.post('/signup', this.signUpController.create.bind(this.signUpController));
 
     return this.router;
   }

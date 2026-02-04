@@ -22,7 +22,7 @@ export class AuthRepository {
       attributes: { exclude: ['password'] }
     })) as Model;
 
-    return user.dataValues;
+    return user?.dataValues;
   }
 
   async getUserByUsernameOrEmail(username: string, email: string): Promise<IAuthDocument | null> {
@@ -32,7 +32,7 @@ export class AuthRepository {
       }
     })) as Model;
 
-    return user.dataValues;
+    return user?.dataValues;
   }
 
   async getUserByUsername(username: string): Promise<IAuthDocument | null> {
@@ -40,7 +40,7 @@ export class AuthRepository {
       where: { username: firstLetterUppercase(username) }
     })) as Model;
 
-    return user.dataValues;
+    return user?.dataValues;
   }
 
   async getUserByEmail(email: string): Promise<IAuthDocument | null> {
@@ -48,7 +48,7 @@ export class AuthRepository {
       where: { email: lowerCase(email) }
     })) as Model;
 
-    return user.dataValues;
+    return user?.dataValues;
   }
 
   async getAuthUserByVerificationToken(token: string): Promise<IAuthDocument | null> {
@@ -57,7 +57,7 @@ export class AuthRepository {
       attributes: { exclude: ['password'] }
     })) as Model;
 
-    return user.dataValues;
+    return user?.dataValues;
   }
 
   async getAuthUserByPasswordToken(token: string): Promise<IAuthDocument | null> {
@@ -67,7 +67,7 @@ export class AuthRepository {
       }
     })) as Model;
 
-    return user.dataValues;
+    return user?.dataValues;
   }
 
   async updateVerifyEmailField(authId: number, emailVerified: number, emailVerificationToken: string): Promise<void> {
