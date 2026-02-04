@@ -1,16 +1,12 @@
 import { AuthModel, SafeAuthDocument } from '@auth/models/auth.schema';
 import { firstLetterUppercase, IAuthDocument, lowerCase } from '@emrecolak-23/jobber-share';
 import { Model, Op } from 'sequelize';
-import { EnvConfig } from '@auth/config';
 import { injectable, singleton } from 'tsyringe';
 
 @injectable()
 @singleton()
 export class AuthRepository {
-  constructor(
-    private readonly config: EnvConfig
-  ) {}
-
+  
   async createAuthUser(data: IAuthDocument): Promise<IAuthDocument> {
     const result: Model = await AuthModel.create(data);
     
