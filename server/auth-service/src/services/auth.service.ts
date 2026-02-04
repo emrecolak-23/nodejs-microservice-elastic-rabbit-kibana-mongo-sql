@@ -172,6 +172,35 @@ export class AuthService {
     );
   }
 
+  async resetPassword(token: string, password: string, confirmPassword: string): Promise<void> {
+    if (password !== confirmPassword) {
+      throw new BadRequestError('Passwords do not match', 'AuthService resetPassword() method error');
+    }
+
+    const existingUser: IAuthDocument | null = await this.authRepository.getAuthUserByPasswordToken(token);
+
+    if (!existingUser) {
+      throw new BadRequestError('Reset password token is either invalid or already used.', 'AuthService resetPassword() method error');
+    }
+
+    const hashedPassword: string = await this.authRepository.hashPassword(password);
+
+    await this.authRepository.updatePassword(existingUser.id!, hashedPassword);
+
+    const messageDetails: IEmailMessageDetails = {
+      username: existingUser.username,
+      template: 'resetPasswordSuccess'
+    } as IEmailMessageDetails;
+
+    await this.authProducer.publishDirectMessage(
+      authChannel,
+      'jobber-email-notification',
+      'auth-email',
+      JSON.stringify(messageDetails),
+      'Reset password success message has been sent to notification service'
+    );
+  }
+
   signToken(id: number, email: string, username: string): string {
     return sign({ id, email, username }, this.config.JWT_TOKEN!);
   }

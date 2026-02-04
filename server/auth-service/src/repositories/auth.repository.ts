@@ -6,10 +6,8 @@ import { injectable, singleton } from 'tsyringe';
 @injectable()
 @singleton()
 export class AuthRepository {
-  
   async createAuthUser(data: IAuthDocument): Promise<IAuthDocument> {
     const result: Model = await AuthModel.create(data);
-    
 
     const { password, ...userData }: IAuthDocument = result.dataValues;
 
@@ -111,4 +109,7 @@ export class AuthRepository {
     return await AuthModel.prototype.comparePassword(password, hashedPassword);
   }
 
+  async hashPassword(password: string): Promise<string> {
+    return await AuthModel.prototype.hashPassword(password);
+  }
 }

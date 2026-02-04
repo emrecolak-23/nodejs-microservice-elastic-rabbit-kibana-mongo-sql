@@ -5,7 +5,7 @@ import { ValidateMiddleware } from '@auth/middlewares';
 import { signupSchema } from '@auth/schemas/signup';
 import { signinSchema } from '@auth/schemas/signin';
 import { verifyEmailSchema } from '@auth/schemas/email';
-import { emailSchema } from '@auth/schemas/password';
+import { emailSchema, passwordSchema } from '@auth/schemas/password';
 
 @singleton()
 @injectable()
@@ -34,6 +34,12 @@ export class AuthRoutes {
       '/forgot-password',
       this.validateMiddleware.validate(emailSchema),
       this.authController.forgotPassword.bind(this.authController)
+    );
+
+    this.router.patch(
+      '/reset-password/:token',
+      this.validateMiddleware.validate(passwordSchema),
+      this.authController.resetPassword.bind(this.authController)
     );
 
     return this.router;

@@ -50,4 +50,15 @@ export class AuthController {
       message: 'Password reset email sent successfully'
     });
   }
+
+  async resetPassword(req: Request, res: Response): Promise<void> {
+    const { password, confirmPassword } = req.body;
+    const { token } = req.params;
+
+    await this.authService.resetPassword(token as string, password, confirmPassword);
+
+    res.status(StatusCodes.OK).json({
+      message: 'Password reset successfully'
+    });
+  }
 }
