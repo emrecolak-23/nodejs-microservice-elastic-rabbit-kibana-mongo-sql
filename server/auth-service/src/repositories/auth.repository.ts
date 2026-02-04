@@ -107,4 +107,8 @@ export class AuthRepository {
     );
   }
 
+  async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
+    return await AuthModel.prototype.comparePassword(password, hashedPassword);
+  }
+
 }

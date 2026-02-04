@@ -1,6 +1,6 @@
 import { injectable, singleton } from 'tsyringe';
 import { AuthProducer } from '@auth/queues/auth.producer';
-import { BadRequestError, firstLetterUppercase, IAuthBuyerMessageDetails, IAuthDocument, IEmailMessageDetails, lowerCase, uploads } from '@emrecolak-23/jobber-share';
+import { BadRequestError, firstLetterUppercase, IAuthBuyerMessageDetails, IAuthDocument, IEmailMessageDetails, isEmail, ISignInPayload, lowerCase, uploads } from '@emrecolak-23/jobber-share';
 import { EnvConfig } from '@auth/config';
 import { AuthRepository } from '@auth/repositories/auth.repository';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,7 +8,7 @@ import { UploadApiResponse } from 'cloudinary';
 import crypto from 'crypto';
 import { authChannel } from '@auth/server';
 import { sign } from 'jsonwebtoken';
-import { ICreateAuthUserResponse } from '@auth/interfaces';
+import { IAuthUserResponse } from '@auth/interfaces';
 @injectable()
 @singleton()
 export class AuthService {
@@ -18,7 +18,7 @@ export class AuthService {
     private readonly config: EnvConfig
   ) {}
 
-  async createAuthUser(data: IAuthDocument): Promise<ICreateAuthUserResponse> {
+  async createAuthUser(data: IAuthDocument): Promise<IAuthUserResponse> {
      const { username, email, password, country, profilePicture } = data
      const checkIfUserExists: IAuthDocument | null = await this.authRepository.getUserByUsernameOrEmail(username!,email!)
     
@@ -88,6 +88,50 @@ export class AuthService {
   }
 
 
+  async signIn(data: ISignInPayload): Promise<IAuthUserResponse> {
+
+    const { username, password } = data
+
+    const isValidEmail: boolean = isEmail(username)
+  
+    const existingUser: IAuthDocument | null = isValidEmail ? await this.authRepository.getUserByEmail(username) : await this.authRepository.getUserByUsername(username)
+
+    if (!existingUser) {
+      throw new BadRequestError('Invalid credentials. User not found', 'AuthService signIn() method error')
+    }
+
+    const passwordsMatch: boolean = await this.authRepository.comparePassword(password, existingUser.password!)
+
+    if (!passwordsMatch) {
+      throw new BadRequestError('Invalid credentials. Password is incorrect', 'AuthService signIn() method error')
+    }
+
+    const userJwt: string = this.signToken(existingUser.id!, existingUser.email!, existingUser.username!)
+
+    const { password: _, ...userWithoutPassword } = existingUser
+
+    return {
+      user: userWithoutPassword,
+      token: userJwt
+    }
+
+  }
+
+  async verifyEmail(token: string): Promise<IAuthDocument> {
+    const checkIfUserExists: IAuthDocument | null = await this.authRepository.getAuthUserByVerificationToken(token)
+
+    if (!checkIfUserExists) {
+      throw new BadRequestError('Verification token is either invalid or already used.', 'AuthService verifyEmail() method error')
+    }
+
+
+    await this.authRepository.updateVerifyEmailField(checkIfUserExists.id!, 1, '')
+
+    const updatedUser: IAuthDocument = await this.authRepository.getAuthUserById(checkIfUserExists.id!)
+
+    return updatedUser
+  }
+  
   signToken(id: number, email: string, username: string): string {
     return sign({ id, email, username }, this.config.JWT_TOKEN!);
   }

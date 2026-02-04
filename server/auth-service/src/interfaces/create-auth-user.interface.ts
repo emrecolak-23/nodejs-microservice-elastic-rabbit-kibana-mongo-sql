@@ -1,6 +1,6 @@
 import { IAuthDocument } from '@emrecolak-23/jobber-share';
 
-export interface ICreateAuthUserResponse {
+export interface IAuthUserResponse {
   user: IAuthDocument;
   token: string;
 }
