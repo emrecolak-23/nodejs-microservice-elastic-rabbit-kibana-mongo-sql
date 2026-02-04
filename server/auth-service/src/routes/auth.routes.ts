@@ -4,7 +4,7 @@ import { injectable, singleton } from 'tsyringe';
 import { ValidateMiddleware } from '@auth/middlewares';
 import { signupSchema } from '@auth/schemas/signup';
 import { signinSchema } from '@auth/schemas/signin';
-import { verifyEmailSchema } from '@auth/schemas/email';
+import { verifyEmailSchema, resentEmailVerificationSchema } from '@auth/schemas/email';
 import { emailSchema, passwordSchema, changePasswordSchema } from '@auth/schemas/password';
 
 @singleton()
@@ -46,6 +46,14 @@ export class AuthRoutes {
       '/change-password',
       this.validateMiddleware.validate(changePasswordSchema),
       this.authController.changePassword.bind(this.authController)
+    );
+
+    this.router.get('/current-user', this.authController.currentUser.bind(this.authController));
+
+    this.router.post(
+      '/resent-email-verification',
+      this.validateMiddleware.validate(verifyEmailSchema),
+      this.authController.resentEmailVerification.bind(this.authController)
     );
 
     return this.router;

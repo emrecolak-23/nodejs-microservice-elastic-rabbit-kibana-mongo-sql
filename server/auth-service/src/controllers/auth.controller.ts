@@ -66,5 +66,28 @@ export class AuthController {
     const { currentPassword, newPassword } = req.body;
 
     await this.authService.changePassword(req.currentUser?.username!, currentPassword, newPassword);
+
+    res.status(StatusCodes.OK).json({
+      message: 'Password changed successfully'
+    });
+  }
+
+  async currentUser(req: Request, res: Response): Promise<void> {
+    const user: IAuthDocument | null = await this.authService.currentUser(req.currentUser?.id!);
+
+    res.status(StatusCodes.OK).json({
+      message: 'User fetched successfully',
+      user
+    });
+  }
+
+  async resentEmailVerification(req: Request, res: Response): Promise<void> {
+    const { email, userId } = req.body;
+    const updatedUser: IAuthDocument = await this.authService.resentEmailVerification(email, userId);
+
+    res.status(StatusCodes.OK).json({
+      message: 'Email verification resent successfully',
+      user: updatedUser
+    });
   }
 }

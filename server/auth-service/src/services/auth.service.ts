@@ -236,6 +236,52 @@ export class AuthService {
     );
   }
 
+  async currentUser(id: number): Promise<IAuthDocument | null> {
+    const existingUser: IAuthDocument | null = await this.authRepository.getAuthUserById(id);
+
+    if (Object.keys(existingUser!).length === 0) {
+      return null;
+    }
+
+    const { password: _, ...userWithoutPassword } = existingUser;
+
+    return userWithoutPassword;
+  }
+
+  async resentEmailVerification(email: string, userId: number): Promise<IAuthDocument> {
+    const checkIfUserExists: IAuthDocument | null = await this.authRepository.getUserByEmail(email);
+
+    if (!checkIfUserExists) {
+      throw new BadRequestError('Invalid credentials', 'AuthService resentEmailVerification() method error');
+    }
+
+    const randomBytes: Buffer = await Promise.resolve(crypto.randomBytes(20));
+    const randomCharacters = randomBytes.toString('hex');
+    const verificationLink: string = `${this.config.CLIENT_URL}/confirm-email?token=${randomCharacters}`;
+
+    await this.authRepository.updateVerifyEmailField(userId, 0, randomCharacters);
+
+    const emailMessageDetails: IEmailMessageDetails = {
+      receiverEmail: lowerCase(email),
+      verifyLink: verificationLink,
+      template: 'verifyEmail'
+    } as IEmailMessageDetails;
+
+    await this.authProducer.publishDirectMessage(
+      authChannel,
+      'jobber-email-notification',
+      'auth-email',
+      JSON.stringify(emailMessageDetails),
+      'Verify email message has been sent to notification service'
+    );
+
+    const updatedUser: IAuthDocument = await this.authRepository.getAuthUserById(userId);
+
+    const { password: _, ...userWithoutPassword } = updatedUser;
+
+    return userWithoutPassword;
+  }
+
   signToken(id: number, email: string, username: string): string {
     return sign({ id, email, username }, this.config.JWT_TOKEN!);
   }
