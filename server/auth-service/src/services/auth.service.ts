@@ -1,25 +1,57 @@
-import { AuthModel, SafeAuthDocument } from '@auth/models/auth.schema';
+import { injectable, singleton } from 'tsyringe';
 import { AuthProducer } from '@auth/queues/auth.producer';
-import { firstLetterUppercase, IAuthBuyerMessageDetails, IAuthDocument, lowerCase } from '@emrecolak-23/jobber-share';
-import { Model, Op } from 'sequelize';
+import { BadRequestError, firstLetterUppercase, IAuthBuyerMessageDetails, IAuthDocument, IEmailMessageDetails, lowerCase, uploads } from '@emrecolak-23/jobber-share';
+import { EnvConfig } from '@auth/config';
+import { AuthRepository } from '@auth/repositories/auth.repository';
+import { v4 as uuidv4 } from 'uuid';
+import { UploadApiResponse } from 'cloudinary';
+import crypto from 'crypto';
 import { authChannel } from '@auth/server';
 import { sign } from 'jsonwebtoken';
-import { EnvConfig } from '@auth/config';
-
+import { ICreateAuthUserResponse } from '@auth/interfaces';
+@injectable()
+@singleton()
 export class AuthService {
   constructor(
     private readonly authProducer: AuthProducer,
+    private readonly authRepository: AuthRepository,
     private readonly config: EnvConfig
   ) {}
 
-  async createAuthUser(data: IAuthDocument): Promise<IAuthDocument> {
-    const result: Model = await AuthModel.create(data);
-    const messageDetails: IAuthBuyerMessageDetails = {
-      username: result.dataValues.username,
-      email: result.dataValues.email,
-      profilePicture: result.dataValues.profilePicture,
-      country: result.dataValues.country,
-      createdAt: result.dataValues.createdAt,
+  async createAuthUser(data: IAuthDocument): Promise<ICreateAuthUserResponse> {
+     const { username, email, password, country, profilePicture } = data
+     const checkIfUserExists: IAuthDocument | null = await this.authRepository.getUserByUsernameOrEmail(username!,email!)
+    
+     if (checkIfUserExists) {
+      throw new BadRequestError('Invalid credentials. Email or Username already in use', 'AuthService createAuthUser() method error');
+     }
+  
+     const profilePublicId = uuidv4()
+     const uploadResult: UploadApiResponse = await uploads(profilePicture!, profilePublicId, true, true) as UploadApiResponse
+     if (!uploadResult.public_id) {
+      throw new BadRequestError('Profile picture upload failed. Please try again.', 'AuthService createAuthUser() method error');
+     }
+     const randomBytes: Buffer = await Promise.resolve(crypto.randomBytes(20))
+     const randomCharacters: string = randomBytes.toString('hex')
+     const authData: IAuthDocument = {
+      username: firstLetterUppercase(username!),
+      email: lowerCase(email!),
+      country,
+      password,
+      profilePicture: uploadResult?.secure_url,
+      profilePublicId,
+      emailVerificationToken: randomCharacters,
+      emailVerified: 0,
+     } as IAuthDocument
+
+     const newAuthUser: IAuthDocument = await this.authRepository.createAuthUser(authData)
+
+     const buyerMessageDetails: IAuthBuyerMessageDetails = {
+      username: authData.username,
+      email: authData.email,
+      profilePicture: authData.profilePicture,
+      country: authData.country,
+      createdAt: newAuthUser.createdAt,
       type: 'auth'
     };
 
@@ -27,107 +59,37 @@ export class AuthService {
       authChannel,
       'jobber-buyer-update',
       'user-buyer',
-      JSON.stringify(messageDetails),
+      JSON.stringify(buyerMessageDetails),
       'buyer details sent to buyer service'
     );
 
-    const { password, ...userData }: IAuthDocument = result.dataValues;
+    const verificationLink: string = `${this.config.CLIENT_URL}/confirm-email?token=${authData.emailVerificationToken}`
 
-    return userData as SafeAuthDocument;
-  }
+    const emailMessageDetails: IEmailMessageDetails = {
+      receiverEmail: email,
+      verifyLink: verificationLink,
+      template: 'verifyEmail'
+    } as IEmailMessageDetails
 
-  async getAuthUserById(authId: number): Promise<IAuthDocument> {
-    const user: Model = (await AuthModel.findOne({
-      where: { id: authId },
-      attributes: { exclude: ['password'] }
-    })) as Model;
-
-    return user.dataValues;
-  }
-
-  async getUserByUsernameOrEmail(username: string, email: string): Promise<IAuthDocument | null> {
-    const user: Model = (await AuthModel.findOne({
-      where: {
-        [Op.or]: [{ username: firstLetterUppercase(username) }, { email: lowerCase(email) }]
-      }
-    })) as Model;
-
-    return user.dataValues;
-  }
-
-  async getUserByUsername(username: string): Promise<IAuthDocument | null> {
-    const user: Model = (await AuthModel.findOne({
-      where: { username: firstLetterUppercase(username) }
-    })) as Model;
-
-    return user.dataValues;
-  }
-
-  async getUserByEmail(email: string): Promise<IAuthDocument | null> {
-    const user: Model = (await AuthModel.findOne({
-      where: { email: lowerCase(email) }
-    })) as Model;
-
-    return user.dataValues;
-  }
-
-  async getAuthUserByVerificationToken(token: string): Promise<IAuthDocument | null> {
-    const user: Model = (await AuthModel.findOne({
-      where: { emailVerificationToken: token },
-      attributes: { exclude: ['password'] }
-    })) as Model;
-
-    return user.dataValues;
-  }
-
-  async getAuthUserByPasswordToken(token: string): Promise<IAuthDocument | null> {
-    const user: Model = (await AuthModel.findOne({
-      where: {
-        [Op.and]: [{ passwordResetToken: token }, { passwordResetExpires: { [Op.gt]: new Date() } }]
-      }
-    })) as Model;
-
-    return user.dataValues;
-  }
-
-  async updateVerifyEmailField(authId: number, emailVerified: number, emailVerificationToken: string): Promise<void> {
-    await AuthModel.update(
-      {
-        emailVerified,
-        emailVerificationToken
-      },
-      {
-        where: { id: authId }
-      }
+    await this.authProducer.publishDirectMessage(
+      authChannel,
+      'jobber-email-notification',
+      'auth-email',
+      JSON.stringify(emailMessageDetails),
+      'verify email message has been sent to notification service'
     );
+
+    const userJwt: string = this.signToken(newAuthUser.id!, newAuthUser.email!, newAuthUser.username!)
+
+    return {
+      user: newAuthUser,
+      token: userJwt
+    }
   }
 
-  async updatePasswordToken(authId: number, token: string, tokenExpiration: Date) {
-    await AuthModel.update(
-      {
-        passwordResetToken: token,
-        passwordResetExpires: tokenExpiration
-      },
-      {
-        where: { id: authId }
-      }
-    );
-  }
-
-  async updatePassword(authId: number, password: string) {
-    await AuthModel.update(
-      {
-        password,
-        passwordResetToken: '',
-        passwordResetExpires: new Date()
-      },
-      {
-        where: { id: authId }
-      }
-    );
-  }
 
   signToken(id: number, email: string, username: string): string {
     return sign({ id, email, username }, this.config.JWT_TOKEN!);
   }
+
 }
