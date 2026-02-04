@@ -1,10 +1,11 @@
 import express, { Router } from 'express';
-import { SigninController, SignupController } from '@auth/controllers';
+import { AuthController } from '@auth/controllers';
 import { injectable, singleton } from 'tsyringe';
 import { ValidateMiddleware } from '@auth/middlewares';
 import { signupSchema } from '@auth/schemas/signup';
 import { signinSchema } from '@auth/schemas/signin';
-import { VerifyEmailController } from '@auth/controllers/verify-email.controller';
+import { verifyEmailSchema } from '@auth/schemas/email';
+import { emailSchema } from '@auth/schemas/password';
 
 @singleton()
 @injectable()
@@ -12,24 +13,29 @@ export class AuthRoutes {
   private router: Router;
 
   constructor(
-    private readonly signupController: SignupController, 
-    private readonly signinController: SigninController,
-    private readonly verifyEmailController: VerifyEmailController,
-    private readonly validateMiddleware: ValidateMiddleware) {
+    private readonly authController: AuthController,
+    private readonly validateMiddleware: ValidateMiddleware
+  ) {
     this.router = express.Router();
   }
 
   public routes(): Router {
+    this.router.post('/signup', this.validateMiddleware.validate(signupSchema), this.authController.signUp.bind(this.authController));
+
+    this.router.post('/signin', this.validateMiddleware.validate(signinSchema), this.authController.signIn.bind(this.authController));
+
     this.router.post(
-      '/signup',
-      this.validateMiddleware.validate(signupSchema),
-      this.signupController.create.bind(this.signupController),
+      '/verify-email',
+      this.validateMiddleware.validate(verifyEmailSchema),
+      this.authController.verifyEmail.bind(this.authController)
     );
 
-    this.router.post("/signin", this.validateMiddleware.validate(signinSchema), this.signinController.read.bind(this.signinController));
+    this.router.post(
+      '/forgot-password',
+      this.validateMiddleware.validate(emailSchema),
+      this.authController.forgotPassword.bind(this.authController)
+    );
 
-
-    this.router.post("/verify-email", this.verifyEmailController.verifyEmail.bind(this.verifyEmailController));
     return this.router;
   }
 }
