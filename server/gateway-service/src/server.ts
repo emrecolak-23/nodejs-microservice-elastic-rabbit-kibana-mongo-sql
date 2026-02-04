@@ -12,7 +12,8 @@ import { CustomError, IErrorResponse } from '@emrecolak-23/jobber-share';
 import { EnvConfig } from '@gateway/configs';
 import { injectable, singleton } from 'tsyringe';
 import { ElasticSearch } from '@gateway/loaders';
-import { appRoutes } from './routes';
+import { appRoutes } from '@gateway/routes';
+import { axiosAuthInstance } from '@gateway/services/api/auth.service';
 
 const SERVER_PORT = 4000;
 
@@ -54,6 +55,14 @@ export class GatewayServer {
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
       })
     );
+
+    app.use((req: Request, _res: Response, next: NextFunction) => {
+      if (req.session?.jwt) {
+        axiosAuthInstance.defaults.headers['Authorization'] = `Bearer ${req.session.jwt}`;
+      }
+
+      next();
+    })
   }
 
   private standartMiddleware(app: Application): void {
