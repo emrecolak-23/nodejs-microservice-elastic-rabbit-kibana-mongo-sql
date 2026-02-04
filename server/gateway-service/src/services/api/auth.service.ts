@@ -2,10 +2,12 @@ import axios, { AxiosResponse } from "axios";
 import { AxiosService } from "@gateway/services/axios.service";
 import { EnvConfig } from "@gateway/configs";
 import { IAuth } from "@emrecolak-23/jobber-share";
+import { injectable, singleton } from "tsyringe";
 
 export let axiosAuthInstance: ReturnType<typeof axios.create>
 
-
+@singleton()
+@injectable()
 export class AuthService {
     axiosService: AxiosService;
 
