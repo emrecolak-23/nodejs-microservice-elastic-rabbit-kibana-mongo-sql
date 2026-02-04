@@ -28,7 +28,7 @@ export class AuthService {
     private readonly config: EnvConfig
   ) {}
 
-  async createAuthUser(data: IAuthDocument): Promise<IAuthUserResponse> {
+  async signUp(data: IAuthDocument): Promise<IAuthUserResponse> {
     const { username, email, password, country, profilePicture } = data;
     const checkIfUserExists: IAuthDocument | null = await this.authRepository.getUserByUsernameOrEmail(username!, email!);
 
@@ -198,6 +198,41 @@ export class AuthService {
       'auth-email',
       JSON.stringify(messageDetails),
       'Reset password success message has been sent to notification service'
+    );
+  }
+
+  async changePassword(username: string, currentPassword: string, newPassword: string): Promise<void> {
+    if (currentPassword === newPassword) {
+      throw new BadRequestError('New password cannot be the same as the current password', 'AuthService changePassword() method error');
+    }
+
+    const existingUser: IAuthDocument | null = await this.authRepository.getUserByUsername(username);
+
+    if (!existingUser) {
+      throw new BadRequestError('Invalid credentials', 'AuthService changePassword() method error');
+    }
+
+    const passwordsMatch: boolean = await this.authRepository.comparePassword(currentPassword, existingUser.password!);
+
+    if (!passwordsMatch) {
+      throw new BadRequestError('Invalid credentials. Password is incorrect', 'AuthService changePassword() method error');
+    }
+
+    const hashedPassword: string = await this.authRepository.hashPassword(newPassword);
+
+    await this.authRepository.updatePassword(existingUser.id!, hashedPassword);
+
+    const messageDetails: IEmailMessageDetails = {
+      username: existingUser.username,
+      template: 'changePasswordSuccess'
+    } as IEmailMessageDetails;
+
+    await this.authProducer.publishDirectMessage(
+      authChannel,
+      'jobber-email-notification',
+      'auth-email',
+      JSON.stringify(messageDetails),
+      'Change password success message has been sent to notification service'
     );
   }
 

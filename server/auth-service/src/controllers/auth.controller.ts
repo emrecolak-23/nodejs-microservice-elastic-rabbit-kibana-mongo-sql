@@ -11,7 +11,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   async signUp(req: Request, res: Response): Promise<void> {
-    const { user, token }: IAuthUserResponse = await this.authService.createAuthUser(req.body);
+    const { user, token }: IAuthUserResponse = await this.authService.signUp(req.body);
 
     res.status(StatusCodes.CREATED).json({
       message: 'User created successfully',
@@ -60,5 +60,11 @@ export class AuthController {
     res.status(StatusCodes.OK).json({
       message: 'Password reset successfully'
     });
+  }
+
+  async changePassword(req: Request, res: Response): Promise<void> {
+    const { currentPassword, newPassword } = req.body;
+
+    await this.authService.changePassword(req.currentUser?.username!, currentPassword, newPassword);
   }
 }

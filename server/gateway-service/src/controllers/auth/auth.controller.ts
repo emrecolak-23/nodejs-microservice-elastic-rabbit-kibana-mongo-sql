@@ -30,7 +30,8 @@ export class AuthController {
   }
 
   async verifyEmail(req: Request, res: Response): Promise<void> {
-    const response: AxiosResponse = await this.authService.verifyEmail(req.body.token);
+    const { token } = req.body;
+    const response: AxiosResponse = await this.authService.verifyEmail(token);
 
     req.session = {
       jwt: response.data.token
@@ -40,7 +41,23 @@ export class AuthController {
   }
 
   async forgotPassword(req: Request, res: Response): Promise<void> {
-    const response: AxiosResponse = await this.authService.forgotPassword(req.body.email);
+    const { email } = req.body;
+    const response: AxiosResponse = await this.authService.forgotPassword(email);
+
+    res.status(StatusCodes.OK).json({ message: response.data.message });
+  }
+
+  async resetPassword(req: Request, res: Response): Promise<void> {
+    const { token } = req.params;
+    const { password, confirmPassword } = req.body;
+    const response: AxiosResponse = await this.authService.resetPassword(token as string, password, confirmPassword);
+
+    res.status(StatusCodes.OK).json({ message: response.data.message });
+  }
+
+  async changePassword(req: Request, res: Response): Promise<void> {
+    const { currentPassword, newPassword } = req.body;
+    const response: AxiosResponse = await this.authService.changePassword(currentPassword, newPassword);
 
     res.status(StatusCodes.OK).json({ message: response.data.message });
   }
