@@ -92,10 +92,15 @@ export class AuthServer {
       this.log.log('error', `AuthService ${err.comingFrom}: `, err);
 
       if (err instanceof CustomError) {
-        return res.status(err.statusCode).json({ message: err.serializeError().message });
+        return res.status(err.statusCode).json(err.serializeError());
       }
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: `The endpoint called does not exist` });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+        message: 'An unexpected error occurred',
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+        status: 'error',
+        comingFrom: 'AuthService errorHandler'
+      });
       next();
     });
   }

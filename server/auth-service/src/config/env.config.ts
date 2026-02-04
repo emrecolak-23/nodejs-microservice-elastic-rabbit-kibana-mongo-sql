@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { singleton, injectable } from 'tsyringe';
+import cloudinary from 'cloudinary';
 
 dotenv.config({});
 
@@ -44,5 +45,13 @@ export class EnvConfig {
     this.ELASTIC_SEARCH_URL = process.env.ELASTIC_SEARCH_URL || '';
     this.ELASTIC_APM_SERVER_URL = process.env.ELASTIC_APM_SERVER_URL || '';
     this.ELASTIC_APM_SECRET_TOKEN = process.env.ELASTIC_APM_SECRET_TOKEN || '';
+  }
+
+  public cloudinaryConfig(): void {
+    cloudinary.v2.config({
+      cloud_name: this.CLOUD_NAME,
+      api_key: this.CLOUD_API_KEY,
+      api_secret: this.CLOUD_API_SECRET,
+    });
   }
 }
