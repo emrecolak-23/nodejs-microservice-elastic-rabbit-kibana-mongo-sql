@@ -2,7 +2,7 @@ import { winstonLogger } from '@emrecolak-23/jobber-share';
 import { Logger } from 'winston';
 import { EnvConfig } from '@auth/config';
 import { Client } from '@elastic/elasticsearch';
-import { ClusterHealthResponse } from '@elastic/elasticsearch/lib/api/types';
+import { ClusterHealthResponse, GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { injectable, singleton } from 'tsyringe';
 
 @singleton()
@@ -46,6 +46,19 @@ export class ElasticSearch {
     } catch (error) {
       this.log.error(`An error occured while creating index: ${indexName}`);
       this.log.log('error', 'AuthService createIndex() method error:', error);
+    }
+  }
+
+  async getDocumentById(indexName: string, docId: string) {
+    try {
+      const document: GetResponse = await this.elasticSearchClient.get({
+        index: indexName,
+        id: docId
+      });
+      return document?._source;
+    } catch (error) {
+      this.log.log('error', 'AuthService elasticSearch getDocumentById() method error:', error);
+      return {};
     }
   }
 }
