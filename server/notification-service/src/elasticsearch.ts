@@ -6,7 +6,12 @@ import { ClusterHealthHealthResponseBody } from '@elastic/elasticsearch/lib/api/
 
 const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'notificationElasticSearchServer', 'debug');
 
-const elasticSearchClient = new Client({ node: `${config.ELASTIC_SEARCH_URL}` });
+const elasticSearchClient = new Client({
+  node: `${config.ELASTIC_SEARCH_URL}`,
+  // Elasticsearch 8.x compatibility
+  requestTimeout: 60000,
+  pingTimeout: 3000
+});
 
 export async function checkConnection(): Promise<void> {
   let isConnected = false;

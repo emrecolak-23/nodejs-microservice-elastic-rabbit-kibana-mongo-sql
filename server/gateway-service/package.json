@@ -20,7 +20,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.22.0",
   "dependencies": {
-    "@elastic/elasticsearch": "^9.2.0",
+    "@elastic/elasticsearch": "^8.17.0",
     "@emrecolak-23/jobber-share": "^0.0.14",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",

@@ -12,8 +12,8 @@ export class SearchRoute {
   }
 
   public routes(): Router {
-    this.router.get('/search/gigs/:from/:size/:type', this.searchController.searchGigs.bind(this.searchController));
-    this.router.get('/search/gigs/:gigId', this.searchController.singleGigById.bind(this.searchController));
+    this.router.get('/search/gig/:gigId', this.searchController.singleGigById.bind(this.searchController));
+    this.router.get('/search/gig/:from/:size/:type', this.searchController.searchGigs.bind(this.searchController));
     return this.router;
   }
 }

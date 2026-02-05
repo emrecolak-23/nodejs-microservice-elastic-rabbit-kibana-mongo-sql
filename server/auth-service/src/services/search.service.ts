@@ -25,7 +25,7 @@ export class SearchService {
 
     try {
       const gigs = await this.searchRepository.gigsSearch(searchQuery, paginate, deliveryTime, min, max);
-
+      this.log.info(`Gigs in auth service: ${JSON.stringify(gigs)}`);
       for (const item of gigs.hits) {
         resultHits.push(item._source as Record<string, unknown>);
       }

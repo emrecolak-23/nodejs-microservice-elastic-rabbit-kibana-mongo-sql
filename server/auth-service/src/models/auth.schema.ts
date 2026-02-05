@@ -90,15 +90,11 @@ const AuthModel: ModelDefined<IAuthDocument, AuthUserCreationAttributes> & AuthM
   }
 ) as ModelDefined<IAuthDocument, AuthUserCreationAttributes> & AuthModelInstanceMethods;
 
-AuthModel.addHook('beforeCreate', async (auth: any) => {
-  if (auth.dataValues.password) {
-    auth.dataValues.password = await hash(auth.dataValues.password as string, SALT_ROUND);
-  }
-});
-
 AuthModel.addHook('beforeCreate', async (auth: Model) => {
-  const hashedPassword: string = await hash(auth.dataValues.password as string, SALT_ROUND);
-  auth.dataValues.password = hashedPassword;
+  if (auth.dataValues.password) {
+    const hashedPassword: string = await hash(auth.dataValues.password as string, SALT_ROUND);
+    auth.dataValues.password = hashedPassword;
+  }
 });
 
 AuthModel.prototype.comparePassword = async function (password: string, hashedPassword: string): Promise<boolean> {

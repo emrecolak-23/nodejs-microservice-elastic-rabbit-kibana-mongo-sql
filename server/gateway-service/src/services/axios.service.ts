@@ -23,7 +23,7 @@ export class AxiosService {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        'x-gateway-token': requestGatewayToken 
+        'x-gateway-token': requestGatewayToken
       },
       withCredentials: true
     });
@@ -33,6 +33,29 @@ export class AxiosService {
       console.log('Gateway token being sent:', config.headers?.['x-gateway-token'] ? 'YES' : 'NO');
       return config;
     });
+
+    instance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response) {
+          return Promise.reject(error.response.data || error.response);
+        } else if (error.request) {
+          return Promise.reject({
+            message: 'No response received from server',
+            statusCode: 503,
+            status: 'error',
+            comingFrom: 'GatewayService AxiosService'
+          });
+        } else {
+          return Promise.reject({
+            message: error.message || 'Request setup error',
+            statusCode: 500,
+            status: 'error',
+            comingFrom: 'GatewayService AxiosService'
+          });
+        }
+      }
+    );
 
     return instance;
   }

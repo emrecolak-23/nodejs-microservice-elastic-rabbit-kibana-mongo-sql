@@ -90,7 +90,20 @@ export class AuthServer {
     });
 
     app.use((err: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {
-      this.log.log('error', `AuthService ${err.comingFrom}: `, err);
+      const errorLog: Record<string, unknown> =
+        err instanceof CustomError
+          ? {
+              message: err.message,
+              statusCode: err.statusCode,
+              comingFrom: err.comingFrom
+            }
+          : {
+              message: err.message,
+              statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+              comingFrom: 'AuthService errorHandler'
+            };
+
+      this.log.log('error', `AuthService ${err.comingFrom}: `, errorLog);
 
       if (err instanceof CustomError) {
         return res.status(err.statusCode).json(err.serializeError());

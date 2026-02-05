@@ -13,7 +13,9 @@ export class ElasticSearch {
 
   constructor(private readonly config: EnvConfig) {
     this.elasticSearchClient = new Client({
-      node: `${config.ELASTIC_SEARCH_URL}`
+      node: `${config.ELASTIC_SEARCH_URL}`,
+      requestTimeout: 60000,
+      pingTimeout: 3000
     });
   }
 
