@@ -78,6 +78,7 @@ export class AuthServer {
 
   private startsElasticSearch(): void {
     this.elasticSearch.checkConnection();
+    this.elasticSearch.createIndex('gigs');
   }
 
   private errorHandler(app: Application): void {
@@ -95,7 +96,7 @@ export class AuthServer {
         return res.status(err.statusCode).json(err.serializeError());
       }
 
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: 'An unexpected error occurred',
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
         status: 'error',

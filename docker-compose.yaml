@@ -156,8 +156,18 @@ services:
       - ELASTIC_APM_SERVER_URL=http://localhost:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
-      - auth
-      - elasticsearch
+      redis:
+        condition: service_started
+      mysql:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      auth:
+        condition: service_started
+      notifications:
+        condition: service_started
     networks:
       - jobber
   notifications:

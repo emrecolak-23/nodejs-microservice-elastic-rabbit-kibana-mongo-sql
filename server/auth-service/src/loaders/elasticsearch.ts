@@ -32,4 +32,20 @@ export class ElasticSearch {
       }
     }
   }
+
+  async createIndex(indexName: string): Promise<void> {
+    try {
+      const indexExist: boolean = await this.elasticSearchClient.indices.exists({ index: indexName });
+      if (indexExist) {
+        this.log.info(`Index ${indexName} already exists`);
+        return;
+      }
+      await this.elasticSearchClient.indices.create({ index: indexName });
+      await this.elasticSearchClient.indices.refresh({ index: indexName });
+      this.log.info(`Created index ${indexName}`);
+    } catch (error) {
+      this.log.error(`An error occured while creating index: ${indexName}`);
+      this.log.log('error', 'AuthService createIndex() method error:', error);
+    }
+  }
 }
