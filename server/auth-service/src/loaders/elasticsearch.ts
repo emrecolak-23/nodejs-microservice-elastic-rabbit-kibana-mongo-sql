@@ -1,4 +1,4 @@
-import { winstonLogger } from '@emrecolak-23/jobber-share';
+import { ISellerGig, winstonLogger } from '@emrecolak-23/jobber-share';
 import { Logger } from 'winston';
 import { EnvConfig } from '@auth/config';
 import { Client } from '@elastic/elasticsearch';
@@ -9,7 +9,7 @@ import { injectable, singleton } from 'tsyringe';
 @injectable()
 export class ElasticSearch {
   log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'authServiceElasticConnection', 'debug');
-  private elasticSearchClient: Client;
+  elasticSearchClient: Client;
 
   constructor(private readonly config: EnvConfig) {
     this.elasticSearchClient = new Client({
@@ -49,16 +49,16 @@ export class ElasticSearch {
     }
   }
 
-  async getDocumentById(indexName: string, docId: string) {
+  async getDocumentById(indexName: string, docId: string): Promise<ISellerGig> {
     try {
       const document: GetResponse = await this.elasticSearchClient.get({
         index: indexName,
         id: docId
       });
-      return document?._source;
+      return document?._source as ISellerGig;
     } catch (error) {
       this.log.log('error', 'AuthService elasticSearch getDocumentById() method error:', error);
-      return {};
+      return {} as ISellerGig;
     }
   }
 }
