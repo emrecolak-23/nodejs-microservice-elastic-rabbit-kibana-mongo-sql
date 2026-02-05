@@ -72,7 +72,7 @@ export class AuthService {
   }
 
   async seed(count: string): Promise<AxiosResponse> {
-    const response: AxiosResponse = await axiosAuthInstance.get(`/seed/${count}`);
+    const response: AxiosResponse = await axiosAuthInstance.put(`/seeds/${count}`);
     return response;
   }
 }

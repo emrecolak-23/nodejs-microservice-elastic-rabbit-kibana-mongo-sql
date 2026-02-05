@@ -31,3 +31,6 @@ Accept: application/json
 GET {{baseUrl}}/{{urlPath}}/search/gig/0/5/forward?query=beauty&delivery_time=3&minPrice=5&maxPrice=20
 Content-Type: application/json
 Accept: application/json
+
+
+
