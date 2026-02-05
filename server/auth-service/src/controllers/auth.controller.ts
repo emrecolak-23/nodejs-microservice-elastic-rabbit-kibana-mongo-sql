@@ -90,4 +90,16 @@ export class AuthController {
       user: updatedUser
     });
   }
+
+  async refreshToken(req: Request, res: Response): Promise<void> {
+    const { username } = req.params;
+
+    const { token, user }: IAuthUserResponse = await this.authService.refreshToken(username as string);
+
+    res.status(StatusCodes.OK).json({
+      message: 'Refresh token generated successfully',
+      token,
+      user
+    });
+  }
 }

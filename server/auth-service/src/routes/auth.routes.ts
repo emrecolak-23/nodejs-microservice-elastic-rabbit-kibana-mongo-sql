@@ -6,6 +6,7 @@ import { signupSchema } from '@auth/schemas/signup';
 import { signinSchema } from '@auth/schemas/signin';
 import { verifyEmailSchema, resentEmailVerificationSchema } from '@auth/schemas/email';
 import { emailSchema, passwordSchema, changePasswordSchema } from '@auth/schemas/password';
+import { usernameSchema } from '@auth/schemas/username';
 
 @singleton()
 @injectable()
@@ -54,6 +55,12 @@ export class AuthRoutes {
       '/resent-email-verification',
       this.validateMiddleware.validate(verifyEmailSchema),
       this.authController.resentEmailVerification.bind(this.authController)
+    );
+
+    this.router.post(
+      '/refresh-token/:username',
+      this.validateMiddleware.validateParams(usernameSchema),
+      this.authController.refreshToken.bind(this.authController)
     );
 
     return this.router;

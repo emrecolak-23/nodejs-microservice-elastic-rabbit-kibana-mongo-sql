@@ -33,9 +33,16 @@ export class AuthRoute {
       '/current-user',
       this.authMiddleware.verifyUser,
       this.authMiddleware.checkAuthentication,
-      this.authMiddleware.checkAuthentication,
       this.authController.currentUser.bind(this.authController)
     );
+
+    this.router.post(
+      '/refresh-token/:username',
+      this.authMiddleware.verifyUser,
+      this.authMiddleware.checkAuthentication,
+      this.authController.refreshToken.bind(this.authController)
+    );
+
     return this.router;
   }
 }

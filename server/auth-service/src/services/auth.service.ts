@@ -282,6 +282,18 @@ export class AuthService {
     return userWithoutPassword;
   }
 
+  async refreshToken(username: string): Promise<IAuthUserResponse> {
+    const existingUser: IAuthDocument | null = await this.authRepository.getUserByUsername(username);
+
+    if (!existingUser) {
+      throw new BadRequestError('Invalid credentials', 'AuthService refreshToken() method error');
+    }
+
+    const userJwt: string = this.signToken(existingUser.id!, existingUser.email!, existingUser.username!);
+
+    return { token: userJwt, user: existingUser };
+  }
+
   signToken(id: number, email: string, username: string): string {
     return sign({ id, email, username }, this.config.JWT_TOKEN!);
   }
