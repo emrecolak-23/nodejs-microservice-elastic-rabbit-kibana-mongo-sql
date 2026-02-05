@@ -1,6 +1,6 @@
 import { injectable, singleton } from 'tsyringe';
 import { SearchRepository } from '@auth/repositories/search.repository';
-import { IPaginateProps, ISearchResult, ISellerGig } from '@emrecolak-23/jobber-share';
+import { IPaginateProps, ISellerGig } from '@emrecolak-23/jobber-share';
 import { winstonLogger } from '@emrecolak-23/jobber-share';
 import { Logger } from 'winston';
 import { EnvConfig } from '@auth/config';

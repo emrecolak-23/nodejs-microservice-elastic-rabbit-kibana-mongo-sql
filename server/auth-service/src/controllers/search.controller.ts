@@ -24,7 +24,7 @@ export class SearchController {
     res.status(StatusCodes.OK).json({
       message: 'Gigs search result',
       total: gigs.total,
-      hits: gigs.hits
+      gigs: gigs.hits
     });
   }
 
