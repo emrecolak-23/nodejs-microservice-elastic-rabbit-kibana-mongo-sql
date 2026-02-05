@@ -7,8 +7,16 @@ const config: Config.InitialOptions = {
   coverageDirectory: 'coverage',
   collectCoverage: true,
   testPathIgnorePatterns: ['/node_modules/'],
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   transform: {
     '^.+\\.ts?$': 'ts-jest'
+  },
+  transformIgnorePatterns: ['/node_modules/(?!(uuid)/)'],
+  extensionsToTreatAsEsm: ['.ts'],
+  globals: {
+    'ts-jest': {
+      useESM: true
+    }
   },
   testMatch: ['<rootDir>/src/**/test/*.ts'],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/test/*.ts?(x)', '!**/node_modules/**'],

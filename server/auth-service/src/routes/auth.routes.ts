@@ -4,7 +4,7 @@ import { injectable, singleton } from 'tsyringe';
 import { ValidateMiddleware } from '@auth/middlewares';
 import { signupSchema } from '@auth/schemas/signup';
 import { signinSchema } from '@auth/schemas/signin';
-import { verifyEmailSchema, resentEmailVerificationSchema } from '@auth/schemas/email';
+import { verifyEmailSchema } from '@auth/schemas/email';
 import { emailSchema, passwordSchema, changePasswordSchema } from '@auth/schemas/password';
 import { usernameSchema } from '@auth/schemas/username';
 
