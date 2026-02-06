@@ -14,6 +14,8 @@ import { injectable, singleton } from 'tsyringe';
 import { ElasticSearch } from '@gateway/loaders';
 import { appRoutes } from '@gateway/routes';
 import { axiosAuthInstance } from '@gateway/services/api/auth.service';
+import { axiosBuyerInstance } from '@gateway/services/api/buyer.service';
+import { axiosSellerInstance } from '@gateway/services/api/seller.service';
 
 const SERVER_PORT = 4000;
 
@@ -59,10 +61,12 @@ export class GatewayServer {
     app.use((req: Request, _res: Response, next: NextFunction) => {
       if (req.session?.jwt) {
         axiosAuthInstance.defaults.headers['Authorization'] = `Bearer ${req.session.jwt}`;
+        axiosBuyerInstance.defaults.headers['Authorization'] = `Bearer ${req.session.jwt}`;
+        axiosSellerInstance.defaults.headers['Authorization'] = `Bearer ${req.session.jwt}`;
       }
 
       next();
-    })
+    });
   }
 
   private standartMiddleware(app: Application): void {
@@ -80,11 +84,10 @@ export class GatewayServer {
   }
 
   private errorHandler(app: Application): void {
-
     app.all(/(.*)/, (req: Request, res: Response, next: NextFunction) => {
       const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
       this.log.log('error', `${fullUrl} endpoint does not exists`, '');
-      res.status(StatusCodes.NOT_FOUND).json({ 
+      res.status(StatusCodes.NOT_FOUND).json({
         message: `The endpoint called does not exist`,
         statusCode: StatusCodes.NOT_FOUND,
         status: 'error',
@@ -92,11 +95,11 @@ export class GatewayServer {
       });
       next();
     });
-    
+
     app.use((err: IErrorResponse | Error, _req: Request, res: Response, next: NextFunction) => {
       if (err instanceof SyntaxError && 'body' in err) {
         this.log.log('error', `GatewayService JSON parse error: ${err.message}`, err);
-        return res.status(StatusCodes.BAD_REQUEST).json({ 
+        return res.status(StatusCodes.BAD_REQUEST).json({
           message: 'Invalid JSON format',
           statusCode: StatusCodes.BAD_REQUEST,
           status: 'error',
@@ -110,7 +113,7 @@ export class GatewayServer {
       }
 
       this.log.log('error', `GatewayService ${(err as IErrorResponse).comingFrom || 'Unknown error'}: `, err);
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: err.message,
         statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
         status: 'error',
@@ -118,8 +121,6 @@ export class GatewayServer {
       });
       next();
     });
-
-    
   }
 
   private async startServer(app: Application): Promise<void> {
