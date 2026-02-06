@@ -9,9 +9,11 @@ export interface IBuyerAttributes {
   purchasedGigs: string[];
 }
 
-interface IBuyerModel extends Model<IBuyerAttributes> {}
+export interface IBuyerModel extends Model<IBuyerDocument> {
+  build(attrs: IBuyerAttributes): IBuyerDocument;
+}
 
-interface IBuyerDocument extends Document, IBuyerAttributes {
+export interface IBuyerDocument extends Document, IBuyerAttributes {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -49,7 +51,7 @@ const buyerSchema = new Schema<IBuyerDocument, IBuyerModel>(
   }
 );
 
-buyerSchema.statics.build = (attrs: IBuyerAttributes) => {
+buyerSchema.statics.build = (attrs: IBuyerAttributes): IBuyerDocument => {
   return new BuyerModel(attrs);
 };
 

@@ -1,11 +1,11 @@
 import { injectable, singleton } from 'tsyringe';
-import { Model, model } from 'mongoose';
-import { IBuyerDocument } from '@emrecolak-23/jobber-share';
+import { ClientSession } from 'mongoose';
+import { IBuyerAttributes, IBuyerModel, IBuyerDocument } from '@users/models/buyer.schema';
 
 @injectable()
 @singleton()
 export class BuyerRepository {
-  constructor(private readonly buyerModel: Model<IBuyerDocument>) {}
+  constructor(private readonly buyerModel: IBuyerModel) {}
 
   async getBuyerByEmail(email: string): Promise<IBuyerDocument | null> {
     return this.buyerModel.findOne({ email });
@@ -19,21 +19,24 @@ export class BuyerRepository {
     return this.buyerModel.aggregate([{ $sample: { size: count } }]);
   }
 
-  async createBuyer(buyer: IBuyerDocument): Promise<void> {
-    const newBuyer = (this.buyerModel as any).build(buyer);
-    await newBuyer.save();
+  async createBuyer(buyer: IBuyerAttributes, session?: ClientSession): Promise<IBuyerDocument> {
+    const newBuyer = this.buyerModel.build(buyer);
+    await newBuyer.save({ session });
     return newBuyer;
   }
 
-  async updateBuyerIsSellerProp(email: string): Promise<void> {
-    await this.buyerModel.updateOne({ email }, { $set: { isSeller: true } }).exec();
+  async updateBuyerIsSellerProp(email: string, session?: ClientSession): Promise<void> {
+    const options = session ? { session } : {};
+    await this.buyerModel.updateOne({ email }, { $set: { isSeller: true } }, options).exec();
   }
 
-  async addPurchasedGig(buyerId: string, gigId: string): Promise<void> {
-    await this.buyerModel.updateOne({ _id: buyerId }, { $push: { purchasedGigs: gigId } }).exec();
+  async addPurchasedGig(buyerId: string, gigId: string, session?: ClientSession): Promise<void> {
+    const options = session ? { session } : {};
+    await this.buyerModel.updateOne({ _id: buyerId }, { $push: { purchasedGigs: gigId } }, options).exec();
   }
 
-  async removePurchasedGig(buyerId: string, gigId: string): Promise<void> {
-    await this.buyerModel.updateOne({ _id: buyerId }, { $pull: { purchasedGigs: gigId } }).exec();
+  async removePurchasedGig(buyerId: string, gigId: string, session?: ClientSession): Promise<void> {
+    const options = session ? { session } : {};
+    await this.buyerModel.updateOne({ _id: buyerId }, { $pull: { purchasedGigs: gigId } }, options).exec();
   }
 }

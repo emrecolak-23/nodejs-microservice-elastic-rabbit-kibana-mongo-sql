@@ -68,9 +68,11 @@ export interface ISellerAttributes {
   totalGigs?: number;
 }
 
-interface ISellerModel extends Model<ISellerAttributes> {}
+export interface ISellerModel extends Model<ISellerDocument> {
+  build(attrs: ISellerAttributes): ISellerDocument;
+}
 
-interface ISellerDocument extends Document, ISellerAttributes {
+export interface ISellerDocument extends Document, ISellerAttributes {
   _id: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -299,7 +301,7 @@ const sellerSchema = new Schema<ISellerDocument, ISellerModel>(
   }
 );
 
-sellerSchema.statics.build = (attrs: ISellerAttributes) => {
+sellerSchema.statics.build = (attrs: ISellerAttributes): ISellerDocument => {
   return new SellerModel(attrs);
 };
 

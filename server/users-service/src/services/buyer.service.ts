@@ -1,7 +1,7 @@
 import { injectable, singleton } from 'tsyringe';
 import { BuyerRepository } from '../repositories/buyer.repository';
-import { BadRequestError, IBuyerDocument } from '@emrecolak-23/jobber-share';
-import { IBuyerAttributes } from '@users/models/buyer.schema';
+import { BadRequestError } from '@emrecolak-23/jobber-share';
+import { IBuyerAttributes, IBuyerDocument } from '@users/models/buyer.schema';
 
 @injectable()
 @singleton()
