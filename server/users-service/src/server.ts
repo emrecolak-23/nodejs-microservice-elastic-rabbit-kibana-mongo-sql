@@ -76,6 +76,7 @@ export class UsersServer {
   private async startsQueues(): Promise<void> {
     userChannel = (await this.queueConnection.connect()) as Channel;
     await this.userConsumer.consumeBuyerDirectMessage(userChannel);
+    await this.userConsumer.consumeSellerDirectMessage(userChannel);
   }
 
   private routesMiddleware(app: Application): void {

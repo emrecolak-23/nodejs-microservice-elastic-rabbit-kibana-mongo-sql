@@ -4,6 +4,11 @@ import { container } from 'tsyringe';
 import { EnvConfig } from '@users/config';
 import { Database } from '@users/loaders';
 import { UsersServer } from './server';
+import { BuyerModel } from '@users/models/buyer.schema';
+import { SellerModel } from '@users/models/seller.schema';
+
+container.register('BuyerModel', { useValue: BuyerModel });
+container.register('SellerModel', { useValue: SellerModel });
 
 const envConfig = container.resolve(EnvConfig);
 const database = container.resolve(Database);

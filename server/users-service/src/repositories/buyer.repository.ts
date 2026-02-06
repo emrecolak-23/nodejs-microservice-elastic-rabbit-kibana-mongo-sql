@@ -1,11 +1,11 @@
-import { injectable, singleton } from 'tsyringe';
+import { injectable, singleton, inject } from 'tsyringe';
 import { ClientSession } from 'mongoose';
 import { IBuyerAttributes, IBuyerModel, IBuyerDocument } from '@users/models/buyer.schema';
 
 @injectable()
 @singleton()
 export class BuyerRepository {
-  constructor(private readonly buyerModel: IBuyerModel) {}
+  constructor(@inject('BuyerModel') private readonly buyerModel: IBuyerModel) {}
 
   async getBuyerByEmail(email: string): Promise<IBuyerDocument | null> {
     return this.buyerModel.findOne({ email });

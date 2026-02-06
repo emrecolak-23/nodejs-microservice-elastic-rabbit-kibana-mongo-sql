@@ -1,4 +1,4 @@
-import { injectable, singleton } from 'tsyringe';
+import { injectable, singleton, inject } from 'tsyringe';
 import { Types, ClientSession } from 'mongoose';
 import { ISellerAttributes, ISellerDocument, ISellerModel } from '@users/models/seller.schema';
 import { IOrderMessage, IRatingTypes, IReviewMessageDetails } from '@emrecolak-23/jobber-share';
@@ -6,7 +6,7 @@ import { IOrderMessage, IRatingTypes, IReviewMessageDetails } from '@emrecolak-2
 @injectable()
 @singleton()
 export class SellerRepository {
-  constructor(private readonly sellerModel: ISellerModel) {}
+  constructor(@inject('SellerModel') private readonly sellerModel: ISellerModel) {}
 
   async getSellerById(sellerId: string): Promise<ISellerDocument | null> {
     return this.sellerModel.findById(new Types.ObjectId(sellerId)).exec() as Promise<ISellerDocument | null>;
@@ -58,12 +58,19 @@ export class SellerRepository {
 
   async incrementSellerNumericField(
     sellerId: string,
-    field: 'totalGigs' | 'ongoingJobs',
+    field: 'totalGigs' | 'ongoingJobs' | 'cancelledJobs',
     value: number,
     session?: ClientSession
   ): Promise<ISellerDocument> {
     const options = session ? { new: true, session } : { new: true };
     return this.sellerModel.findByIdAndUpdate(sellerId, { $inc: { [field]: value } }, options).exec() as Promise<ISellerDocument>;
+  }
+
+  async updateSellerCancelledJobsCount(sellerId: string, session?: ClientSession): Promise<ISellerDocument> {
+    const options = session ? { new: true, session } : { new: true };
+    return this.sellerModel
+      .findByIdAndUpdate(sellerId, { $inc: { cancelledJobs: 1, ongoingJobs: -1 } }, options)
+      .exec() as Promise<ISellerDocument>;
   }
 
   async updateSellerCompletedJobsCount(data: IOrderMessage, session?: ClientSession): Promise<ISellerDocument> {
