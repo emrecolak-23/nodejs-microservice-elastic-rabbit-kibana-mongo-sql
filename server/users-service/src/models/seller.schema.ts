@@ -51,7 +51,7 @@ export interface ISellerAttributes {
   country: string;
   languages: ILanguage[];
   skills: string[];
-  oneline?: string;
+  oneliner?: string;
   ratingsCount?: number;
   ratingSum?: number;
   ratingCategories?: IRatingCategories;
@@ -106,7 +106,7 @@ const sellerSchema = new Schema<ISellerDocument, ISellerModel>(
       type: String,
       required: true
     },
-    oneline: {
+    oneliner: {
       type: String,
       default: ''
     },

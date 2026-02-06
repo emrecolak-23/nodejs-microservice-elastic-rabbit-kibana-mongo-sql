@@ -42,7 +42,7 @@ export class SellerRepository {
             profilePicture: sellerData.profilePicture,
             description: sellerData.description,
             country: sellerData.country,
-            oneline: sellerData.oneline,
+            oneliner: sellerData.oneliner,
             skills: sellerData.skills,
             languages: sellerData.languages,
             responseTime: sellerData.responseTime,

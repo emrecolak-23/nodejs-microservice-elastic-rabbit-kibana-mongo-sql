@@ -16,17 +16,25 @@ import {
   BUYER_QUEUE_CONFIG,
   SELLER_QUEUE_CONFIG,
   REVIEW_QUEUE_CONFIG,
+  SEED_GIG_QUEUE_CONFIG,
   MESSAGE_TYPES,
   BuyerMessage,
   SellerMessage,
-  ReviewMessage
+  ReviewMessage,
+  GigMessage,
+  ISeedGigMessage
 } from '@users/queues/types/consumer.types';
 import { UserProducer } from './user.producer';
+import { ISellerDocument } from '@users/models/seller.schema';
 
 @injectable()
 @singleton()
 export class UserConsumer {
   private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'usersServiceConsumer', 'debug');
+  private readonly buyerHandlers: Map<string, (message: BuyerMessage) => Promise<void>>;
+  private readonly sellerHandlers: Map<string, (message: SellerMessage) => Promise<void>>;
+  private readonly reviewHandlers: Map<string, (message: ReviewMessage, channel: Channel) => Promise<void>>;
+  private readonly seedGigHandlers: Map<string, (message: GigMessage, channel: Channel) => Promise<void>>;
 
   constructor(
     private readonly config: EnvConfig,
@@ -34,7 +42,90 @@ export class UserConsumer {
     private readonly buyerRepository: BuyerRepository,
     private readonly sellerRepository: SellerRepository,
     private readonly userProducer: UserProducer
-  ) {}
+  ) {
+    this.buyerHandlers = new Map([
+      [MESSAGE_TYPES.BUYER.AUTH, this.handleBuyerAuth.bind(this)],
+      [MESSAGE_TYPES.BUYER.UPDATE_PURCHASED_GIGS, this.handleBuyerUpdate.bind(this)]
+    ]);
+
+    this.sellerHandlers = new Map([
+      [MESSAGE_TYPES.SELLER.CREATE_ORDER, this.handleSellerCreateOrder.bind(this)],
+      [MESSAGE_TYPES.SELLER.APPROVE_ORDER, this.handleSellerApproveOrder.bind(this)],
+      [MESSAGE_TYPES.SELLER.UPDATE_GIG_COUNT, this.handleSellerUpdateGigCount.bind(this)],
+      [MESSAGE_TYPES.SELLER.CANCEL_ORDER, this.handleSellerCancelOrder.bind(this)]
+    ]);
+
+    this.reviewHandlers = new Map([[MESSAGE_TYPES.REVIEW.CREATE_REVIEW, this.handleReviewCreate.bind(this)]]);
+
+    this.seedGigHandlers = new Map([[MESSAGE_TYPES.SEED_GIG.GET_SELLERS, this.handleGetSellers.bind(this)]]);
+  }
+
+  private async handleBuyerAuth(message: BuyerMessage): Promise<void> {
+    const msg = message as IBuyerAuthMessage;
+    const buyer: IBuyerAttributes = {
+      username: msg.username,
+      email: msg.email,
+      profilePicture: msg.profilePicture,
+      country: msg.country,
+      isSeller: false,
+      purchasedGigs: []
+    };
+    await this.buyerRepository.createBuyer(buyer);
+  }
+
+  private async handleBuyerUpdate(message: BuyerMessage): Promise<void> {
+    const msg = message as IBuyerUpdateMessage;
+    await this.buyerRepository.updateBuyerPurchasedGigsProp(msg.buyerId, msg.purchasedGigId, msg.type);
+  }
+
+  private async handleSellerCreateOrder(message: SellerMessage): Promise<void> {
+    const msg = message as ISellerCreateOrderMessage;
+    await this.sellerRepository.incrementSellerNumericField(msg.sellerId, 'ongoingJobs', msg.ongoingJobs);
+  }
+
+  private async handleSellerApproveOrder(message: SellerMessage): Promise<void> {
+    await this.sellerRepository.updateSellerCompletedJobsCount(message as IOrderMessage);
+  }
+
+  private async handleSellerUpdateGigCount(message: SellerMessage): Promise<void> {
+    const msg = message as ISellerUpdateGigCountMessage;
+    await this.sellerRepository.incrementSellerNumericField(msg.gigSellerId, 'totalGigs', msg.count);
+  }
+
+  private async handleSellerCancelOrder(message: SellerMessage): Promise<void> {
+    const msg = message as ISellerCancelOrderMessage;
+    await this.sellerRepository.updateSellerCancelledJobsCount(msg.sellerId);
+  }
+
+  private async handleReviewCreate(message: ReviewMessage, channel: Channel): Promise<void> {
+    await this.sellerRepository.updateSellerReview(message);
+    await this.userProducer.publishDirectMessage(
+      channel,
+      'jobber-update-gig',
+      'update-gig',
+      JSON.stringify({
+        type: 'update-gig',
+        gigReview: message
+      }),
+      'Message sent to gig service'
+    );
+  }
+
+  private async handleGetSellers(message: GigMessage, channel: Channel): Promise<void> {
+    const msg = message as ISeedGigMessage;
+    const sellers: ISellerDocument[] = await this.sellerRepository.getRandomSellers(parseInt(`${msg.count}`, 10));
+    await this.userProducer.publishDirectMessage(
+      channel,
+      'jobber-seed-gig',
+      'receive-sellers',
+      JSON.stringify({
+        type: 'receiveSellers',
+        sellers: sellers,
+        count: msg.count
+      }),
+      'Message sent to gig service'
+    );
+  }
 
   async consumeBuyerDirectMessage(channel: Channel): Promise<void> {
     try {
@@ -102,6 +193,27 @@ export class UserConsumer {
     }
   }
 
+  async consumeSeedGigDirectMessage(channel: Channel): Promise<void> {
+    try {
+      channel = await this.ensureChannel(channel);
+      await this.setupQueue(channel, SEED_GIG_QUEUE_CONFIG);
+      channel.consume(SEED_GIG_QUEUE_CONFIG.queueName, async (msg: ConsumeMessage | null) => {
+        if (!msg) return;
+
+        try {
+          const message = this.parseMessage<GigMessage>(msg);
+          await this.handleGigMessage(message, channel);
+          channel.ack(msg);
+        } catch (error) {
+          this.log.log('error', 'UserConsumer handleSeedGigMessage() error: ', error);
+          channel.nack(msg, false, false);
+        }
+      });
+    } catch (error) {
+      this.log.log('error', 'UserConsumer consumeSeedGigDirectMessage() method error: ', error);
+    }
+  }
+
   private async ensureChannel(channel: Channel | null): Promise<Channel> {
     if (!channel) {
       return (await this.queueConnection.connect()) as Channel;
@@ -138,65 +250,43 @@ export class UserConsumer {
   }
 
   private async handleBuyerMessage(message: BuyerMessage): Promise<void> {
-    if (message.type === MESSAGE_TYPES.BUYER.AUTH) {
-      const buyer: IBuyerAttributes = {
-        username: message.username,
-        email: message.email,
-        profilePicture: message.profilePicture,
-        country: message.country,
-        isSeller: false,
-        purchasedGigs: []
-      };
-      await this.buyerRepository.createBuyer(buyer);
-    } else {
-      await this.buyerRepository.updateBuyerPurchasedGigsProp(
-        message.buyerId,
-        message.purchasedGigId,
-        message.type
-      );
+    const handler = this.buyerHandlers.get(message.type);
+    if (!handler) {
+      this.log.log('warn', `Unknown buyer message type: ${message.type}`);
+      return;
     }
+    await handler(message);
   }
 
   private async handleReviewMessage(message: ReviewMessage, channel: Channel): Promise<void> {
-    if (message.type === MESSAGE_TYPES.REVIEW.CREATE_REVIEW) {
-      await this.sellerRepository.updateSellerReview(message);
-      await this.userProducer.publishDirectMessage(
-        channel,
-        'jobber-update-gig',
-        'update-gig',
-        JSON.stringify({
-          type: 'update-gig',
-          gigReview: message
-        }),
-        'Message sent to gig service'
-      );
+    const handler = this.reviewHandlers.get(message.type);
+    if (!handler) {
+      this.log.log('warn', `Unknown review message type: ${message.type}`);
+      return;
     }
+    await handler(message, channel);
+  }
+
+  private async handleGigMessage(message: GigMessage, channel: Channel): Promise<void> {
+    const handler = this.seedGigHandlers.get(message.type);
+    if (!handler) {
+      this.log.log('warn', `Unknown gig message type: ${message.type}`);
+      return;
+    }
+    await handler(message, channel);
   }
 
   private async handleSellerMessage(message: SellerMessage): Promise<void> {
-    switch (message.type) {
-      case MESSAGE_TYPES.SELLER.CREATE_ORDER:
-        await this.sellerRepository.incrementSellerNumericField(
-          (message as ISellerCreateOrderMessage).sellerId,
-          'ongoingJobs',
-          (message as ISellerCreateOrderMessage).ongoingJobs
-        );
-        break;
-      case MESSAGE_TYPES.SELLER.APPROVE_ORDER:
-        await this.sellerRepository.updateSellerCompletedJobsCount(message as IOrderMessage);
-        break;
-      case MESSAGE_TYPES.SELLER.UPDATE_GIG_COUNT:
-        await this.sellerRepository.incrementSellerNumericField(
-          (message as ISellerUpdateGigCountMessage).gigSellerId,
-          'totalGigs',
-          (message as ISellerUpdateGigCountMessage).count
-        );
-        break;
-      case MESSAGE_TYPES.SELLER.CANCEL_ORDER:
-        await this.sellerRepository.updateSellerCancelledJobsCount((message as ISellerCancelOrderMessage).sellerId);
-        break;
-      default:
-        this.log.log('warn', `Unknown seller message type: ${(message as any).type}`);
+    const messageType = message.type;
+    if (!messageType) {
+      this.log.log('warn', 'Received seller message without a type');
+      return;
     }
+    const handler = this.sellerHandlers.get(messageType);
+    if (!handler) {
+      this.log.log('warn', `Unknown seller message type: ${messageType}`);
+      return;
+    }
+    await handler(message);
   }
 }

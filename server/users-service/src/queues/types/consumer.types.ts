@@ -17,6 +17,12 @@ export const SELLER_QUEUE_CONFIG = {
   queueName: 'user-seller-queue'
 };
 
+export const SEED_GIG_QUEUE_CONFIG = {
+  exchangeName: 'jobber-gig',
+  routingKey: 'get-sellers',
+  queueName: 'user-gig-queue'
+};
+
 export const MESSAGE_TYPES = {
   BUYER: {
     AUTH: 'auth',
@@ -30,6 +36,9 @@ export const MESSAGE_TYPES = {
   },
   REVIEW: {
     CREATE_REVIEW: 'buyer-review'
+  },
+  SEED_GIG: {
+    GET_SELLERS: 'getSellers'
   }
 } as const;
 
@@ -73,6 +82,12 @@ export interface IReviewMessageDetails {
   reviewerId: string;
 }
 
+export interface ISeedGigMessage {
+  type: typeof MESSAGE_TYPES.SEED_GIG.GET_SELLERS;
+  count: number;
+}
+
 export type BuyerMessage = IBuyerAuthMessage | IBuyerUpdateMessage;
 export type SellerMessage = ISellerCreateOrderMessage | IOrderMessage | ISellerUpdateGigCountMessage | ISellerCancelOrderMessage;
 export type ReviewMessage = IReviewMessageDetails;
+export type GigMessage = ISeedGigMessage;

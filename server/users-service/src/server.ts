@@ -77,6 +77,8 @@ export class UsersServer {
     userChannel = (await this.queueConnection.connect()) as Channel;
     await this.userConsumer.consumeBuyerDirectMessage(userChannel);
     await this.userConsumer.consumeSellerDirectMessage(userChannel);
+    await this.userConsumer.consumeReviewFanoutMessage(userChannel);
+    await this.userConsumer.consumeSeedGigDirectMessage(userChannel);
   }
 
   private routesMiddleware(app: Application): void {
