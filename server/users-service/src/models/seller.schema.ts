@@ -53,6 +53,7 @@ interface ISellerAttributes {
   skills: string[];
   oneline?: string;
   ratingsCount?: number;
+  ratingSum?: number;
   ratingCategories?: IRatingCategories;
   responseTime?: number;
   recentDelivery?: Date;
@@ -130,6 +131,10 @@ const sellerSchema = new Schema<ISellerDocument, ISellerModel>(
       }
     ],
     ratingsCount: {
+      type: Number,
+      default: 0
+    },
+    ratingSum: {
       type: Number,
       default: 0
     },
