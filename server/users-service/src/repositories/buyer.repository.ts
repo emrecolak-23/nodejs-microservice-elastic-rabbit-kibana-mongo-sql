@@ -30,13 +30,22 @@ export class BuyerRepository {
     await this.buyerModel.updateOne({ email }, { $set: { isSeller: true } }, options).exec();
   }
 
-  async addPurchasedGig(buyerId: string, gigId: string, session?: ClientSession): Promise<void> {
-    const options = session ? { session } : {};
-    await this.buyerModel.updateOne({ _id: buyerId }, { $push: { purchasedGigs: gigId } }, options).exec();
-  }
-
-  async removePurchasedGig(buyerId: string, gigId: string, session?: ClientSession): Promise<void> {
-    const options = session ? { session } : {};
-    await this.buyerModel.updateOne({ _id: buyerId }, { $pull: { purchasedGigs: gigId } }, options).exec();
-  }
+  updateBuyerPurchasedGigsProp = async (buyerId: string, purchasedGigId: string, type: string): Promise<void> => {
+    await this.buyerModel
+      .updateOne(
+        { _id: buyerId },
+        type === 'purchased-gigs'
+          ? {
+              $push: {
+                purchasedGigs: purchasedGigId
+              }
+            }
+          : {
+              $pull: {
+                purchasedGigs: purchasedGigId
+              }
+            }
+      )
+      .exec();
+  };
 }

@@ -15,6 +15,7 @@ import { verify } from 'jsonwebtoken';
 import { appRoutes } from '@users/routes';
 import { QueueConnection } from '@users/queues/connection';
 import { Channel } from 'amqplib';
+import { UserConsumer } from './queues/user.consumer';
 
 const SERVER_PORT = 4003;
 
@@ -27,6 +28,7 @@ export class UsersServer {
   constructor(
     private readonly config: EnvConfig,
     private readonly elasticSearch: ElasticSearch,
+    private readonly userConsumer: UserConsumer,
     private readonly queueConnection: QueueConnection
   ) {}
 
@@ -73,6 +75,7 @@ export class UsersServer {
 
   private async startsQueues(): Promise<void> {
     userChannel = (await this.queueConnection.connect()) as Channel;
+    await this.userConsumer.consumeBuyerDirectMessage(userChannel);
   }
 
   private routesMiddleware(app: Application): void {

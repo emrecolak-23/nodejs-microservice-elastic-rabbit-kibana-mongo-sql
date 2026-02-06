@@ -5,8 +5,8 @@ export interface IBuyerAttributes {
   email: string;
   profilePicture: string;
   country: string;
-  isSeller: boolean;
   purchasedGigs: string[];
+  isSeller?: boolean;
 }
 
 export interface IBuyerModel extends Model<IBuyerDocument> {
