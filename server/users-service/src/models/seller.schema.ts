@@ -41,7 +41,7 @@ interface ICertificate {
   year?: number;
 }
 
-interface ISellerAttributes {
+export interface ISellerAttributes {
   fullName: string;
   username: string;
   email: string;

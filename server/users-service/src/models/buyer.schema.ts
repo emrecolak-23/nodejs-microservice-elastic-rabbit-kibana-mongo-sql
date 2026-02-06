@@ -1,6 +1,6 @@
 import { Schema, Model, model, Types, Document } from 'mongoose';
 
-interface IBuyerAttributes {
+export interface IBuyerAttributes {
   username: string;
   email: string;
   profilePicture: string;
