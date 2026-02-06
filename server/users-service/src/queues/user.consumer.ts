@@ -15,10 +15,13 @@ import {
   ISellerCancelOrderMessage,
   BUYER_QUEUE_CONFIG,
   SELLER_QUEUE_CONFIG,
+  REVIEW_QUEUE_CONFIG,
   MESSAGE_TYPES,
   BuyerMessage,
-  SellerMessage
+  SellerMessage,
+  ReviewMessage
 } from '@users/queues/types/consumer.types';
+import { UserProducer } from './user.producer';
 
 @injectable()
 @singleton()
@@ -29,7 +32,8 @@ export class UserConsumer {
     private readonly config: EnvConfig,
     private readonly queueConnection: QueueConnection,
     private readonly buyerRepository: BuyerRepository,
-    private readonly sellerRepository: SellerRepository
+    private readonly sellerRepository: SellerRepository,
+    private readonly userProducer: UserProducer
   ) {}
 
   async consumeBuyerDirectMessage(channel: Channel): Promise<void> {
@@ -76,6 +80,28 @@ export class UserConsumer {
     }
   }
 
+  async consumeReviewFanoutMessage(channel: Channel): Promise<void> {
+    try {
+      channel = await this.ensureChannel(channel);
+      await this.setupFanoutQueue(channel, REVIEW_QUEUE_CONFIG);
+
+      channel.consume(REVIEW_QUEUE_CONFIG.queueName, async (msg: ConsumeMessage | null) => {
+        if (!msg) return;
+
+        try {
+          const message = this.parseMessage<ReviewMessage>(msg);
+          await this.handleReviewMessage(message, channel);
+          channel.ack(msg);
+        } catch (error) {
+          this.log.log('error', 'UserConsumer handleReviewMessage() error: ', error);
+          channel.nack(msg, false, false);
+        }
+      });
+    } catch (error) {
+      this.log.log('error', 'UserConsumer consumeReviewFanoutMessage() method error: ', error);
+    }
+  }
+
   private async ensureChannel(channel: Channel | null): Promise<Channel> {
     if (!channel) {
       return (await this.queueConnection.connect()) as Channel;
@@ -92,6 +118,15 @@ export class UserConsumer {
     await channel.bindQueue(queue.queue, config.exchangeName, config.routingKey);
   }
 
+  private async setupFanoutQueue(channel: Channel, config: { exchangeName: string; queueName: string }): Promise<void> {
+    await channel.assertExchange(config.exchangeName, 'fanout', { durable: true });
+    const queue: Replies.AssertQueue = await channel.assertQueue(config.queueName, {
+      durable: true,
+      autoDelete: false
+    });
+    await channel.bindQueue(queue.queue, config.exchangeName, '');
+  }
+
   private parseMessage<T>(msg: ConsumeMessage): T {
     try {
       const content = msg.content.toString();
@@ -104,61 +139,64 @@ export class UserConsumer {
 
   private async handleBuyerMessage(message: BuyerMessage): Promise<void> {
     if (message.type === MESSAGE_TYPES.BUYER.AUTH) {
-      await this.handleBuyerAuth(message);
+      const buyer: IBuyerAttributes = {
+        username: message.username,
+        email: message.email,
+        profilePicture: message.profilePicture,
+        country: message.country,
+        isSeller: false,
+        purchasedGigs: []
+      };
+      await this.buyerRepository.createBuyer(buyer);
     } else {
-      await this.handleBuyerUpdate(message);
+      await this.buyerRepository.updateBuyerPurchasedGigsProp(
+        message.buyerId,
+        message.purchasedGigId,
+        message.type
+      );
     }
   }
 
-  private async handleBuyerAuth(message: IBuyerAuthMessage): Promise<void> {
-    const buyer: IBuyerAttributes = {
-      username: message.username,
-      email: message.email,
-      profilePicture: message.profilePicture,
-      country: message.country,
-      isSeller: false,
-      purchasedGigs: []
-    };
-
-    await this.buyerRepository.createBuyer(buyer);
-  }
-
-  private async handleBuyerUpdate(message: IBuyerUpdateMessage): Promise<void> {
-    await this.buyerRepository.updateBuyerPurchasedGigsProp(message.buyerId, message.purchasedGigId, message.type);
+  private async handleReviewMessage(message: ReviewMessage, channel: Channel): Promise<void> {
+    if (message.type === MESSAGE_TYPES.REVIEW.CREATE_REVIEW) {
+      await this.sellerRepository.updateSellerReview(message);
+      await this.userProducer.publishDirectMessage(
+        channel,
+        'jobber-update-gig',
+        'update-gig',
+        JSON.stringify({
+          type: 'update-gig',
+          gigReview: message
+        }),
+        'Message sent to gig service'
+      );
+    }
   }
 
   private async handleSellerMessage(message: SellerMessage): Promise<void> {
     switch (message.type) {
       case MESSAGE_TYPES.SELLER.CREATE_ORDER:
-        await this.handleSellerCreateOrder(message as ISellerCreateOrderMessage);
+        await this.sellerRepository.incrementSellerNumericField(
+          (message as ISellerCreateOrderMessage).sellerId,
+          'ongoingJobs',
+          (message as ISellerCreateOrderMessage).ongoingJobs
+        );
         break;
       case MESSAGE_TYPES.SELLER.APPROVE_ORDER:
-        await this.handleSellerApproveOrder(message as IOrderMessage);
+        await this.sellerRepository.updateSellerCompletedJobsCount(message as IOrderMessage);
         break;
       case MESSAGE_TYPES.SELLER.UPDATE_GIG_COUNT:
-        await this.handleSellerUpdateGigCount(message as ISellerUpdateGigCountMessage);
+        await this.sellerRepository.incrementSellerNumericField(
+          (message as ISellerUpdateGigCountMessage).gigSellerId,
+          'totalGigs',
+          (message as ISellerUpdateGigCountMessage).count
+        );
         break;
       case MESSAGE_TYPES.SELLER.CANCEL_ORDER:
-        await this.handleSellerCancelOrder(message as ISellerCancelOrderMessage);
+        await this.sellerRepository.updateSellerCancelledJobsCount((message as ISellerCancelOrderMessage).sellerId);
         break;
       default:
         this.log.log('warn', `Unknown seller message type: ${(message as any).type}`);
     }
-  }
-
-  private async handleSellerCreateOrder(message: ISellerCreateOrderMessage): Promise<void> {
-    await this.sellerRepository.incrementSellerNumericField(message.sellerId, 'ongoingJobs', message.ongoingJobs);
-  }
-
-  private async handleSellerApproveOrder(message: IOrderMessage): Promise<void> {
-    await this.sellerRepository.updateSellerCompletedJobsCount(message);
-  }
-
-  private async handleSellerUpdateGigCount(message: ISellerUpdateGigCountMessage): Promise<void> {
-    await this.sellerRepository.incrementSellerNumericField(message.gigSellerId, 'totalGigs', message.count);
-  }
-
-  private async handleSellerCancelOrder(message: ISellerCancelOrderMessage): Promise<void> {
-    await this.sellerRepository.updateSellerCancelledJobsCount(message.sellerId);
   }
 }

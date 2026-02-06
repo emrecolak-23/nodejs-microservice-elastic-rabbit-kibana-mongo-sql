@@ -6,6 +6,11 @@ export const BUYER_QUEUE_CONFIG = {
   queueName: 'user-buyer-queue'
 };
 
+export const REVIEW_QUEUE_CONFIG = {
+  exchangeName: 'jobber-review',
+  queueName: 'seller-review-queue'
+};
+
 export const SELLER_QUEUE_CONFIG = {
   exchangeName: 'jobber-seller-update',
   routingKey: 'user-seller',
@@ -22,6 +27,9 @@ export const MESSAGE_TYPES = {
     APPROVE_ORDER: 'approve-order',
     UPDATE_GIG_COUNT: 'update-gig-count',
     CANCEL_ORDER: 'cancel-order'
+  },
+  REVIEW: {
+    CREATE_REVIEW: 'buyer-review'
   }
 } as const;
 
@@ -56,5 +64,15 @@ export interface ISellerCancelOrderMessage {
   sellerId: string;
 }
 
+export interface IReviewMessageDetails {
+  type: typeof MESSAGE_TYPES.REVIEW.CREATE_REVIEW;
+  review: string;
+  rating: number;
+  sellerId: string;
+  gigId: string;
+  reviewerId: string;
+}
+
 export type BuyerMessage = IBuyerAuthMessage | IBuyerUpdateMessage;
 export type SellerMessage = ISellerCreateOrderMessage | IOrderMessage | ISellerUpdateGigCountMessage | ISellerCancelOrderMessage;
+export type ReviewMessage = IReviewMessageDetails;
