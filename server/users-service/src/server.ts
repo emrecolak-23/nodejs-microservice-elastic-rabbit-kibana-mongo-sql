@@ -13,8 +13,12 @@ import { injectable, singleton } from 'tsyringe';
 import { ElasticSearch } from '@users/loaders';
 import { verify } from 'jsonwebtoken';
 import { appRoutes } from '@users/routes';
+import { QueueConnection } from '@users/queues/connection';
+import { Channel } from 'amqplib';
 
 const SERVER_PORT = 4003;
+
+export let userChannel: Channel;
 
 @singleton()
 @injectable()
@@ -22,13 +26,15 @@ export class UsersServer {
   private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'apiUsersServer', 'debug');
   constructor(
     private readonly config: EnvConfig,
-    private readonly elasticSearch: ElasticSearch
+    private readonly elasticSearch: ElasticSearch,
+    private readonly queueConnection: QueueConnection
   ) {}
 
   public start(app: Application): void {
     this.securityMiddleware(app);
     this.standartMiddleware(app);
     this.routesMiddleware(app);
+    this.startsQueues();
     this.startsElasticSearch();
     this.errorHandler(app);
     this.startServer(app);
@@ -63,6 +69,10 @@ export class UsersServer {
 
   private startsElasticSearch(): void {
     this.elasticSearch.checkConnection();
+  }
+
+  private async startsQueues(): Promise<void> {
+    userChannel = (await this.queueConnection.connect()) as Channel;
   }
 
   private routesMiddleware(app: Application): void {
