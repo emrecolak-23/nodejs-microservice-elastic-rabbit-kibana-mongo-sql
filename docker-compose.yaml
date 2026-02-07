@@ -4,7 +4,7 @@ services:
     image: redis:8-alpine
     restart: always
     ports:
-      - "6379:6379"
+      - '6379:6379'
     command: redis-server --loglevel warning
     volumes:
       - redis_data:/data
@@ -16,7 +16,7 @@ services:
     image: mongo:latest
     restart: always
     ports:
-      - "27017:27017"
+      - '27017:27017'
     volumes:
       - mongo_data:/data/db
     networks:
@@ -33,7 +33,7 @@ services:
       - MYSQL_ROOT_PASSWORD=api
       - MYSQL_PASSWORD=api
     ports:
-      - "3306:3306"
+      - '3306:3306'
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -48,7 +48,7 @@ services:
       - POSTGRES_DB=jobber_reviews
       - POSTGRES_PASSWORD=api
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql
     networks:
@@ -62,8 +62,8 @@ services:
       - RABBITMQ_DEFAULT_USER=jobber
       - RABBITMQ_DEFAULT_PASS=api
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - '5672:5672'
+      - '15672:15672'
     networks:
       - jobber
 
@@ -73,17 +73,16 @@ services:
     restart: always
     environment:
       - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
       - xpack.security.enabled=false
     healthcheck:
-      test:
-        ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      test: ['CMD-SHELL', 'curl -f http://localhost:9200/_cluster/health || exit 1']
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
     ports:
-      - "9200:9200"
+      - '9200:9200'
     volumes:
       - es_data:/usr/share/elasticsearch/data
     networks:
@@ -96,7 +95,7 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch_container:9200
     ports:
-      - "5601:5601"
+      - '5601:5601'
     networks:
       - jobber
     depends_on:
@@ -109,7 +108,7 @@ services:
       dockerfile: Dockerfile.dev
     restart: always
     ports:
-      - "4002:4002"
+      - '4002:4002'
     env_file: ./server/auth-service/.env
     environment:
       - ENABLE_APM=0
@@ -135,7 +134,7 @@ services:
       dockerfile: Dockerfile.dev
     restart: always
     ports:
-      - "4000:4000"
+      - '4000:4000'
     env_file: ./server/gateway-service/.env
     environment:
       - ENABLE_APM=0
@@ -177,7 +176,7 @@ services:
       dockerfile: Dockerfile.dev
     restart: always
     ports:
-      - "4001:4001"
+      - '4001:4001'
     env_file: ./server/notification-service/.env
     environment:
       - ENABLE_APM=0
@@ -195,6 +194,35 @@ services:
     networks:
       - jobber
 
+  users:
+    container_name: users_container
+    build:
+      context: ./server/users-service
+      dockerfile: Dockerfile.dev
+    restart: always
+    ports:
+      - '4003:4003'
+    env_file: ./server/users-service/.env
+    environment:
+      - ENABLE_APM=0
+      - NODE_ENV=development
+      - API_GATEWAY_URL=http://gateway_container:4000
+      - GATEWAY_JWT_TOKEN=942421d626948ab10f6809824d95020d
+      - JWT_TOKEN=7cca66193669be5de88f6faa69c4ff57
+      - RABBITMQ_ENDPOINT=amqp://jobber:api@rabbitmq_container:5672
+      - REDIS_HOST=redis://redis_container:6379
+      - DATABASE_URL=mongodb://mongodb_container:27017/jobber_users
+      - CLOUDINARY_NAME=jobber
+      - CLOUDINARY_API_KEY=1234567890
+      - CLOUDINARY_API_SECRET=1234567890
+      - ELASTIC_SEARCH_URL=http://elasticsearch_container:9200
+      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SECRET_TOKEN=
+    depends_on:
+      - mongodb
+      - elasticsearch
+    networks:
+      - jobber
 networks:
   jobber:
     driver: bridge
