@@ -28,6 +28,6 @@ export const appRoutes = (app: Application) => {
   app.use(`${BASE_PATH}/auth`, seedRoute.routes());
 
   app.use(`${BASE_PATH}/auth`, authMiddleware.verifyUser, authMiddleware.checkAuthentication, currentUserRoute.routes());
-  app.use(`${BASE_PATH}/users`, authMiddleware.verifyUser, authMiddleware.checkAuthentication, buyerRoute.routes());
-  app.use(`${BASE_PATH}/users`, authMiddleware.verifyUser, authMiddleware.checkAuthentication, sellerRoute.routes());
+  app.use(`${BASE_PATH}/buyer`, authMiddleware.verifyUser, authMiddleware.checkAuthentication, buyerRoute.routes());
+  app.use(`${BASE_PATH}/seller`, authMiddleware.verifyUser, authMiddleware.checkAuthentication, sellerRoute.routes());
 };
