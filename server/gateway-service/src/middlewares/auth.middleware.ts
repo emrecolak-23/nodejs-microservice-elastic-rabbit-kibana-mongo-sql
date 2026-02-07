@@ -1,14 +1,22 @@
-import { BadRequestError, IAuthPayload, NotAuthorizedError } from '@emrecolak-23/jobber-share';
+import { BadRequestError, IAuthPayload, NotAuthorizedError, winstonLogger } from '@emrecolak-23/jobber-share';
 import { NextFunction, Request, Response } from 'express';
 import { singleton, injectable } from 'tsyringe';
 import JWT from 'jsonwebtoken';
 import { EnvConfig } from '@gateway/configs';
+import { Logger } from 'winston';
 
 @singleton()
 @injectable()
 export class AuthMiddleware {
+  private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'AuthMiddleware', 'debug');
   constructor(private readonly config: EnvConfig) {}
   public verifyUser(req: Request, _res: Response, next: NextFunction) {
+    this.log.log('info', 'Auth Middleware Debug');
+    this.log.log('info', `Cookies: ${req.headers.cookie}`);
+    this.log.log('info', `Session: ${req.session}`);
+    this.log.log('info', `Session JWT: ${req.session?.jwt}`);
+    this.log.log('info', '===========================');
+
     if (!req.session?.jwt) {
       throw new NotAuthorizedError('Token is not available. Please log in.', 'GatewayService verifyUser() method error');
     }

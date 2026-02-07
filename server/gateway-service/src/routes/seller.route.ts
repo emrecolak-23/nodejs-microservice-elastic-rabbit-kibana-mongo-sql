@@ -12,12 +12,12 @@ export class SellerRoute {
   }
 
   public routes(): Router {
-    this.router.post('/seller/create', this.sellerController.createSeller.bind(this.sellerController));
-    this.router.post('/seller/:sellerId', this.sellerController.updateSeller.bind(this.sellerController));
-    this.router.get('/seller/id/:sellerId', this.sellerController.getSellerById.bind(this.sellerController));
-    this.router.get('/seller/username/:username', this.sellerController.getSellerByUsername.bind(this.sellerController));
-    this.router.get('/seller/random/:count', this.sellerController.getRandomSellers.bind(this.sellerController));
-    this.router.put('/seller/seed/:count', this.sellerController.createRandomSellers.bind(this.sellerController));
+    this.router.post('/create', this.sellerController.createSeller.bind(this.sellerController));
+    this.router.post('/:sellerId', this.sellerController.updateSeller.bind(this.sellerController));
+    this.router.get('/id/:sellerId', this.sellerController.getSellerById.bind(this.sellerController));
+    this.router.get('/username/:username', this.sellerController.getSellerByUsername.bind(this.sellerController));
+    this.router.get('/random/:count', this.sellerController.getRandomSellers.bind(this.sellerController));
+    this.router.put('/seed/:count', this.sellerController.createRandomSellers.bind(this.sellerController));
 
     return this.router;
   }

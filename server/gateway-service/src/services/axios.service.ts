@@ -25,7 +25,8 @@ export class AxiosService {
         Accept: 'application/json',
         'x-gateway-token': requestGatewayToken
       },
-      withCredentials: true
+      withCredentials: true,
+      timeout: 60000
     });
 
     instance.interceptors.request.use((config) => {
@@ -37,11 +38,23 @@ export class AxiosService {
     instance.interceptors.response.use(
       (response) => response,
       (error) => {
+        console.error('Axios Error:', {
+          message: error.message,
+          code: error.code,
+          response: error.response?.data,
+          request: error.request ? 'Request made but no response' : 'No request made',
+          config: {
+            url: error.config?.url,
+            method: error.config?.method,
+            baseURL: error.config?.baseURL
+          }
+        });
+
         if (error.response) {
           return Promise.reject(error.response.data || error.response);
         } else if (error.request) {
           return Promise.reject({
-            message: 'No response received from server',
+            message: `No response received from server: ${error.config?.baseURL}${error.config?.url}`,
             statusCode: 503,
             status: 'error',
             comingFrom: 'GatewayService AxiosService'

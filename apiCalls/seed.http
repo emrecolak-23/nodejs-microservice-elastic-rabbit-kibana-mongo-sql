@@ -12,3 +12,6 @@ Accept: application/json
 PUT {{baseUrl}}/{{urlPath}}/seller/seed/10
 Content-Type: application/json
 Accept: application/json
+withCredentials: true
+
+{}

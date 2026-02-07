@@ -20,6 +20,7 @@ Accept: application/json
 POST {{baseUrl}}/{{urlPath}}/signin
 Content-Type: application/json
 Accept: application/json
+withCredentials: true
 
 {
     "username": "mjoe003",

@@ -12,9 +12,9 @@ export class BuyerRoute {
   }
 
   public routes(): Router {
-    this.router.get('/buyer/email', this.buyerController.getBuyerByEmail.bind(this.buyerController));
-    this.router.get('/buyer/username', this.buyerController.getCurrentBuyerByUsername.bind(this.buyerController));
-    this.router.get('/buyer/:username', this.buyerController.getBuyerByUsername.bind(this.buyerController));
+    this.router.get('/email', this.buyerController.getBuyerByEmail.bind(this.buyerController));
+    this.router.get('/username', this.buyerController.getCurrentBuyerByUsername.bind(this.buyerController));
+    this.router.get('/:username', this.buyerController.getBuyerByUsername.bind(this.buyerController));
     return this.router;
   }
 }
