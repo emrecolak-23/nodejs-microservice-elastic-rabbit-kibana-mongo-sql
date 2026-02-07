@@ -1,17 +1,13 @@
 import express, { Router } from 'express';
 import { injectable, singleton } from 'tsyringe';
 import { AuthController } from '@gateway/controllers/auth/auth.controller';
-import { AuthMiddleware } from '@gateway/middlewares';
 
 @singleton()
 @injectable()
 export class AuthRoute {
   private router: Router;
 
-  constructor(
-    private readonly authController: AuthController,
-    private readonly authMiddleware: AuthMiddleware
-  ) {
+  constructor(private readonly authController: AuthController) {
     this.router = express.Router();
   }
 
@@ -21,27 +17,7 @@ export class AuthRoute {
     this.router.patch('/verify-email', this.authController.verifyEmail.bind(this.authController));
     this.router.post('/forgot-password', this.authController.forgotPassword.bind(this.authController));
     this.router.patch('/reset-password/:token', this.authController.resetPassword.bind(this.authController));
-
     this.router.patch('/change-password', this.authController.changePassword.bind(this.authController));
-    this.router.post(
-      '/resend-email',
-      this.authMiddleware.verifyUser,
-      this.authMiddleware.checkAuthentication,
-      this.authController.resentEmailVerification.bind(this.authController)
-    );
-    this.router.get(
-      '/current-user',
-      this.authMiddleware.verifyUser,
-      this.authMiddleware.checkAuthentication,
-      this.authController.currentUser.bind(this.authController)
-    );
-
-    this.router.post(
-      '/refresh-token/:username',
-      this.authMiddleware.verifyUser,
-      this.authMiddleware.checkAuthentication,
-      this.authController.refreshToken.bind(this.authController)
-    );
 
     return this.router;
   }

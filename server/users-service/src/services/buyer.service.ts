@@ -21,4 +21,12 @@ export class BuyerService {
 
     await this.buyerRepository.createBuyer(buyerData);
   }
+
+  async getBuyerByEmail(email: string): Promise<IBuyerDocument | null> {
+    return this.buyerRepository.getBuyerByEmail(email);
+  }
+
+  async getBuyerByUsername(username: string): Promise<IBuyerDocument | null> {
+    return this.buyerRepository.getBuyerByUsername(username);
+  }
 }
