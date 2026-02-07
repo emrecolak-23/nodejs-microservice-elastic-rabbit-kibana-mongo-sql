@@ -7,6 +7,7 @@ import { SeedRoute } from './seed.route';
 import { BuyerRoute } from './buyer.route';
 import { AuthMiddleware } from '@gateway/middlewares';
 import { CurrentUserRoute } from './current-user.route';
+import { SellerRoute } from './seller.route';
 
 const BASE_PATH = '/api/gateway/v1';
 
@@ -18,6 +19,7 @@ export const appRoutes = (app: Application) => {
   const buyerRoute = container.resolve(BuyerRoute);
   const currentUserRoute = container.resolve(CurrentUserRoute);
   const authMiddleware = container.resolve(AuthMiddleware);
+  const sellerRoute = container.resolve(SellerRoute);
 
   app.use('', healthRoute.routes());
 
@@ -27,4 +29,5 @@ export const appRoutes = (app: Application) => {
 
   app.use(`${BASE_PATH}/auth`, authMiddleware.verifyUser, authMiddleware.checkAuthentication, currentUserRoute.routes());
   app.use(`${BASE_PATH}/users`, authMiddleware.verifyUser, authMiddleware.checkAuthentication, buyerRoute.routes());
+  app.use(`${BASE_PATH}/users`, authMiddleware.verifyUser, authMiddleware.checkAuthentication, sellerRoute.routes());
 };
