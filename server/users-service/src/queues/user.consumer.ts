@@ -1,130 +1,70 @@
 import { Channel, ConsumeMessage, Replies } from 'amqplib';
 import { injectable, singleton } from 'tsyringe';
 import { Logger } from 'winston';
-import { winstonLogger, IOrderMessage } from '@emrecolak-23/jobber-share';
+import { winstonLogger } from '@emrecolak-23/jobber-share';
 import { EnvConfig } from '@users/config';
 import { QueueConnection } from '@users/queues/connection';
-import { IBuyerAttributes } from '@users/models/buyer.schema';
-import { BuyerRepository } from '@users/repositories';
-import { SellerRepository } from '@users/repositories';
 import {
-  IBuyerAuthMessage,
-  IBuyerUpdateMessage,
-  ISellerCreateOrderMessage,
-  ISellerUpdateGigCountMessage,
-  ISellerCancelOrderMessage,
   BUYER_QUEUE_CONFIG,
   SELLER_QUEUE_CONFIG,
   REVIEW_QUEUE_CONFIG,
   SEED_GIG_QUEUE_CONFIG,
-  MESSAGE_TYPES,
   BuyerMessage,
   SellerMessage,
   ReviewMessage,
-  GigMessage,
-  ISeedGigMessage
+  GigMessage
 } from '@users/queues/types/consumer.types';
-import { UserProducer } from './user.producer';
-import { ISellerDocument } from '@users/models/seller.schema';
+import {
+  IBuyerMessageStrategy,
+  BuyerAuthStrategy,
+  BuyerUpdateStrategy,
+  ISellerMessageStrategy,
+  SellerCreateOrderStrategy,
+  SellerApproveOrderStrategy,
+  SellerUpdateGigCountStrategy,
+  SellerCancelOrderStrategy,
+  IReviewMessageStrategy,
+  ReviewCreateStrategy,
+  IGigMessageStrategy,
+  GigGetSellersStrategy
+} from '@users/queues/strategies';
 
 @injectable()
 @singleton()
 export class UserConsumer {
   private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'usersServiceConsumer', 'debug');
-  private readonly buyerHandlers: Map<string, (message: BuyerMessage) => Promise<void>>;
-  private readonly sellerHandlers: Map<string, (message: SellerMessage) => Promise<void>>;
-  private readonly reviewHandlers: Map<string, (message: ReviewMessage, channel: Channel) => Promise<void>>;
-  private readonly seedGigHandlers: Map<string, (message: GigMessage, channel: Channel) => Promise<void>>;
+  private readonly buyerStrategies: Map<string, IBuyerMessageStrategy>;
+  private readonly sellerStrategies: Map<string, ISellerMessageStrategy>;
+  private readonly reviewStrategies: Map<string, IReviewMessageStrategy>;
+  private readonly gigStrategies: Map<string, IGigMessageStrategy>;
 
   constructor(
     private readonly config: EnvConfig,
     private readonly queueConnection: QueueConnection,
-    private readonly buyerRepository: BuyerRepository,
-    private readonly sellerRepository: SellerRepository,
-    private readonly userProducer: UserProducer
+    private readonly buyerAuthStrategy: BuyerAuthStrategy,
+    private readonly buyerUpdateStrategy: BuyerUpdateStrategy,
+    private readonly sellerCreateOrderStrategy: SellerCreateOrderStrategy,
+    private readonly sellerApproveOrderStrategy: SellerApproveOrderStrategy,
+    private readonly sellerUpdateGigCountStrategy: SellerUpdateGigCountStrategy,
+    private readonly sellerCancelOrderStrategy: SellerCancelOrderStrategy,
+    private readonly reviewCreateStrategy: ReviewCreateStrategy,
+    private readonly gigGetSellersStrategy: GigGetSellersStrategy
   ) {
-    this.buyerHandlers = new Map([
-      [MESSAGE_TYPES.BUYER.AUTH, this.handleBuyerAuth.bind(this)],
-      [MESSAGE_TYPES.BUYER.UPDATE_PURCHASED_GIGS, this.handleBuyerUpdate.bind(this)]
-    ]);
+    this.buyerStrategies = new Map<string, IBuyerMessageStrategy>();
+    this.buyerStrategies.set(this.buyerAuthStrategy.getType(), this.buyerAuthStrategy);
+    this.buyerStrategies.set(this.buyerUpdateStrategy.getType(), this.buyerUpdateStrategy);
 
-    this.sellerHandlers = new Map([
-      [MESSAGE_TYPES.SELLER.CREATE_ORDER, this.handleSellerCreateOrder.bind(this)],
-      [MESSAGE_TYPES.SELLER.APPROVE_ORDER, this.handleSellerApproveOrder.bind(this)],
-      [MESSAGE_TYPES.SELLER.UPDATE_GIG_COUNT, this.handleSellerUpdateGigCount.bind(this)],
-      [MESSAGE_TYPES.SELLER.CANCEL_ORDER, this.handleSellerCancelOrder.bind(this)]
-    ]);
+    this.sellerStrategies = new Map<string, ISellerMessageStrategy>();
+    this.sellerStrategies.set(this.sellerCreateOrderStrategy.getType(), this.sellerCreateOrderStrategy);
+    this.sellerStrategies.set(this.sellerApproveOrderStrategy.getType(), this.sellerApproveOrderStrategy);
+    this.sellerStrategies.set(this.sellerUpdateGigCountStrategy.getType(), this.sellerUpdateGigCountStrategy);
+    this.sellerStrategies.set(this.sellerCancelOrderStrategy.getType(), this.sellerCancelOrderStrategy);
 
-    this.reviewHandlers = new Map([[MESSAGE_TYPES.REVIEW.CREATE_REVIEW, this.handleReviewCreate.bind(this)]]);
+    this.reviewStrategies = new Map<string, IReviewMessageStrategy>();
+    this.reviewStrategies.set(this.reviewCreateStrategy.getType(), this.reviewCreateStrategy);
 
-    this.seedGigHandlers = new Map([[MESSAGE_TYPES.SEED_GIG.GET_SELLERS, this.handleGetSellers.bind(this)]]);
-  }
-
-  private async handleBuyerAuth(message: BuyerMessage): Promise<void> {
-    const msg = message as IBuyerAuthMessage;
-    const buyer: IBuyerAttributes = {
-      username: msg.username,
-      email: msg.email,
-      profilePicture: msg.profilePicture,
-      country: msg.country,
-      isSeller: false,
-      purchasedGigs: []
-    };
-    await this.buyerRepository.createBuyer(buyer);
-  }
-
-  private async handleBuyerUpdate(message: BuyerMessage): Promise<void> {
-    const msg = message as IBuyerUpdateMessage;
-    await this.buyerRepository.updateBuyerPurchasedGigsProp(msg.buyerId, msg.purchasedGigId, msg.type);
-  }
-
-  private async handleSellerCreateOrder(message: SellerMessage): Promise<void> {
-    const msg = message as ISellerCreateOrderMessage;
-    await this.sellerRepository.incrementSellerNumericField(msg.sellerId, 'ongoingJobs', msg.ongoingJobs);
-  }
-
-  private async handleSellerApproveOrder(message: SellerMessage): Promise<void> {
-    await this.sellerRepository.updateSellerCompletedJobsCount(message as IOrderMessage);
-  }
-
-  private async handleSellerUpdateGigCount(message: SellerMessage): Promise<void> {
-    const msg = message as ISellerUpdateGigCountMessage;
-    await this.sellerRepository.incrementSellerNumericField(msg.gigSellerId, 'totalGigs', msg.count);
-  }
-
-  private async handleSellerCancelOrder(message: SellerMessage): Promise<void> {
-    const msg = message as ISellerCancelOrderMessage;
-    await this.sellerRepository.updateSellerCancelledJobsCount(msg.sellerId);
-  }
-
-  private async handleReviewCreate(message: ReviewMessage, channel: Channel): Promise<void> {
-    await this.sellerRepository.updateSellerReview(message);
-    await this.userProducer.publishDirectMessage(
-      channel,
-      'jobber-update-gig',
-      'update-gig',
-      JSON.stringify({
-        type: 'update-gig',
-        gigReview: message
-      }),
-      'Message sent to gig service'
-    );
-  }
-
-  private async handleGetSellers(message: GigMessage, channel: Channel): Promise<void> {
-    const msg = message as ISeedGigMessage;
-    const sellers: ISellerDocument[] = await this.sellerRepository.getRandomSellers(parseInt(`${msg.count}`, 10));
-    await this.userProducer.publishDirectMessage(
-      channel,
-      'jobber-seed-gig',
-      'receive-sellers',
-      JSON.stringify({
-        type: 'receiveSellers',
-        sellers: sellers,
-        count: msg.count
-      }),
-      'Message sent to gig service'
-    );
+    this.gigStrategies = new Map<string, IGigMessageStrategy>();
+    this.gigStrategies.set(this.gigGetSellersStrategy.getType(), this.gigGetSellersStrategy);
   }
 
   async consumeBuyerDirectMessage(channel: Channel): Promise<void> {
@@ -250,30 +190,30 @@ export class UserConsumer {
   }
 
   private async handleBuyerMessage(message: BuyerMessage): Promise<void> {
-    const handler = this.buyerHandlers.get(message.type);
-    if (!handler) {
+    const strategy = this.buyerStrategies.get(message.type);
+    if (!strategy) {
       this.log.log('warn', `Unknown buyer message type: ${message.type}`);
       return;
     }
-    await handler(message);
+    await strategy.handle(message);
   }
 
   private async handleReviewMessage(message: ReviewMessage, channel: Channel): Promise<void> {
-    const handler = this.reviewHandlers.get(message.type);
-    if (!handler) {
+    const strategy = this.reviewStrategies.get(message.type);
+    if (!strategy) {
       this.log.log('warn', `Unknown review message type: ${message.type}`);
       return;
     }
-    await handler(message, channel);
+    await strategy.handle(message, channel);
   }
 
   private async handleGigMessage(message: GigMessage, channel: Channel): Promise<void> {
-    const handler = this.seedGigHandlers.get(message.type);
-    if (!handler) {
+    const strategy = this.gigStrategies.get(message.type);
+    if (!strategy) {
       this.log.log('warn', `Unknown gig message type: ${message.type}`);
       return;
     }
-    await handler(message, channel);
+    await strategy.handle(message, channel);
   }
 
   private async handleSellerMessage(message: SellerMessage): Promise<void> {
@@ -282,11 +222,11 @@ export class UserConsumer {
       this.log.log('warn', 'Received seller message without a type');
       return;
     }
-    const handler = this.sellerHandlers.get(messageType);
-    if (!handler) {
+    const strategy = this.sellerStrategies.get(messageType);
+    if (!strategy) {
       this.log.log('warn', `Unknown seller message type: ${messageType}`);
       return;
     }
-    await handler(message);
+    await strategy.handle(message);
   }
 }
