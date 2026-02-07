@@ -6,11 +6,16 @@ import { AuthRepository } from '@auth/repositories/auth.repository';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { sample } from '@auth/utils/sample.util';
-
+import { AuthProducer } from '@auth/queues/auth.producer';
+import { IAuthBuyerMessageDetails } from '@emrecolak-23/jobber-share';
+import { authChannel } from '@auth/server';
 @injectable()
 @singleton()
 export class SeedsService {
-  constructor(private readonly authRepository: AuthRepository) {}
+  constructor(
+    private readonly authRepository: AuthRepository,
+    private readonly authProducer: AuthProducer
+  ) {}
 
   async createSeeds(count: number): Promise<void> {
     const usernames: string[] = [];
@@ -48,6 +53,23 @@ export class SeedsService {
       } as IAuthDocument;
 
       await this.authRepository.createAuthUser(authData);
+
+      const messageDetails: IAuthBuyerMessageDetails = {
+        username: authData.username!,
+        email: authData.email!,
+        profilePicture: authData.profilePicture!,
+        country: authData.country!,
+        createdAt: authData.createdAt!,
+        type: 'auth'
+      };
+
+      await this.authProducer.publishDirectMessage(
+        authChannel,
+        'jobber-buyer-update',
+        'user-buyer',
+        JSON.stringify(messageDetails),
+        'Buyer details sent to buyer service.'
+      );
     }
   }
 }

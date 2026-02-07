@@ -1,5 +1,5 @@
 import { AuthModel, SafeAuthDocument } from '@auth/models/auth.schema';
-import { firstLetterUppercase, IAuthDocument, lowerCase } from '@emrecolak-23/jobber-share';
+import { firstLetterUppercase, IAuthBuyerMessageDetails, IAuthDocument, lowerCase } from '@emrecolak-23/jobber-share';
 import { Model, Op } from 'sequelize';
 import { injectable, singleton } from 'tsyringe';
 
