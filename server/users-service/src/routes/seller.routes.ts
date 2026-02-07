@@ -14,6 +14,10 @@ export class SellerRoute {
   public routes(): Router {
     this.router.post('/create', this.sellerController.createSeller.bind(this.sellerController));
     this.router.post('/:sellerId', this.sellerController.updateSeller.bind(this.sellerController));
+
+    this.router.get('/id/:sellerId', this.sellerController.getSellerById.bind(this.sellerController));
+    this.router.get('/username/:username', this.sellerController.getSellerByUsername.bind(this.sellerController));
+    this.router.get('/random/:count', this.sellerController.getRandomSellers.bind(this.sellerController));
     return this.router;
   }
 }

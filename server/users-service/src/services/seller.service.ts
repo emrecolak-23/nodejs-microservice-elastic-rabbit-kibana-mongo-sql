@@ -29,4 +29,16 @@ export class SellerService {
 
     return updatedSeller;
   }
+
+  async getSellerById(sellerId: string): Promise<ISellerDocument | null> {
+    return this.sellerRepository.getSellerById(sellerId);
+  }
+
+  async getSellerByUsername(username: string): Promise<ISellerDocument | null> {
+    return this.sellerRepository.getSellerByUsername(username);
+  }
+
+  async getRandomSellers(count: number): Promise<ISellerDocument[]> {
+    return this.sellerRepository.getRandomSellers(count);
+  }
 }

@@ -66,4 +66,31 @@ export class SellerController {
       seller: updatedSeller
     });
   }
+
+  async getSellerById(req: Request, res: Response): Promise<void> {
+    const { sellerId } = req.params;
+    const seller: ISellerDocument | null = await this.sellerService.getSellerById(sellerId as string);
+    res.status(StatusCodes.OK).json({
+      message: 'Seller profile retrieved successfully',
+      seller: seller
+    });
+  }
+
+  async getSellerByUsername(req: Request, res: Response): Promise<void> {
+    const { username } = req.params;
+    const seller: ISellerDocument | null = await this.sellerService.getSellerByUsername(username as string);
+    res.status(StatusCodes.OK).json({
+      message: 'Seller profile retrieved successfully',
+      seller: seller
+    });
+  }
+
+  async getRandomSellers(req: Request, res: Response): Promise<void> {
+    const { count } = req.params;
+    const sellers: ISellerDocument[] = await this.sellerService.getRandomSellers(parseInt(count as string, 10));
+    res.status(StatusCodes.OK).json({
+      message: 'Random sellers retrieved successfully',
+      sellers: sellers
+    });
+  }
 }

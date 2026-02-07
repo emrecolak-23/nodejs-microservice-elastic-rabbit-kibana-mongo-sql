@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { injectable, singleton } from 'tsyringe';
-import { StatusCodes } from 'http-status-codes';
 import { BuyerService } from '@gateway/services/api/buyer.service';
 import { AxiosResponse } from 'axios';
 
