@@ -42,15 +42,15 @@ interface ICertificate {
 }
 
 export interface ISellerAttributes {
-  fullName: string;
-  username: string;
-  email: string;
-  profilePicture: string;
-  description: string;
-  profilePublicId: string;
-  country: string;
-  languages: ILanguage[];
-  skills: string[];
+  fullName?: string;
+  username?: string;
+  email?: string;
+  profilePicture?: string;
+  description?: string;
+  profilePublicId?: string;
+  country?: string;
+  languages?: ILanguage[];
+  skills?: string[];
   oneliner?: string;
   ratingsCount?: number;
   ratingSum?: number;

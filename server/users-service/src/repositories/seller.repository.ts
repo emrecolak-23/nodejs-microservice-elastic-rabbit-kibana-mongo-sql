@@ -30,7 +30,7 @@ export class SellerRepository {
     return newSeller;
   }
 
-  async updateSeller(sellerId: string, sellerData: ISellerDocument): Promise<ISellerDocument> {
+  async updateSeller(sellerId: string, sellerData: ISellerAttributes): Promise<ISellerDocument> {
     return this.sellerModel
       .findByIdAndUpdate(
         sellerId,
