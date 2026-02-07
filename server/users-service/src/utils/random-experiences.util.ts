@@ -1,5 +1,5 @@
 import { IExperience } from '@emrecolak-23/jobber-share';
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 
 export function randomExperiences(count: number): IExperience[] {
   const result: IExperience[] = [];

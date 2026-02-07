@@ -21,8 +21,8 @@ interface IRatingCategories {
 interface IExperience {
   company?: string;
   title?: string;
-  startDate?: Date;
-  endDate?: Date;
+  startDate?: string;
+  endDate?: string;
   description?: string;
   currentlyWorkingHere?: boolean;
 }

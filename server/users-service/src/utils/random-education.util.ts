@@ -1,5 +1,5 @@
 import { IEducation } from '@emrecolak-23/jobber-share';
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 
 export function randomEducation(count: number): IEducation[] {
   const result: IEducation[] = [];

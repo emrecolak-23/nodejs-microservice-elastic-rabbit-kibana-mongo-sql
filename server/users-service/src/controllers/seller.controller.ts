@@ -1,14 +1,18 @@
 import { Request, Response } from 'express';
 import { injectable, singleton } from 'tsyringe';
 import { StatusCodes } from 'http-status-codes';
-import { SellerService } from '@users/services';
+import { BuyerService, SellerService } from '@users/services';
 import { ISellerAttributes, ISellerDocument } from '@users/models/seller.schema';
 import { BadRequestError } from '@emrecolak-23/jobber-share';
+import { IBuyerDocument } from '@users/models/buyer.schema';
 
 @injectable()
 @singleton()
 export class SellerController {
-  constructor(private readonly sellerService: SellerService) {}
+  constructor(
+    private readonly sellerService: SellerService,
+    private readonly buyerService: BuyerService
+  ) {}
 
   async createSeller(req: Request, res: Response): Promise<void> {
     const checkIfSellerExists: ISellerDocument | null = await this.sellerService.getSellerByEmail(req.body.email);
@@ -91,6 +95,16 @@ export class SellerController {
     res.status(StatusCodes.OK).json({
       message: 'Random sellers retrieved successfully',
       sellers: sellers
+    });
+  }
+
+  async createRandomSellers(req: Request, res: Response): Promise<void> {
+    const { count } = req.params;
+    const buyers: IBuyerDocument[] = await this.buyerService.getRandomBuyers(parseInt(count as string, 10));
+
+    await this.sellerService.createRandomSellers(buyers);
+    res.status(StatusCodes.OK).json({
+      message: 'Sellers created successfully'
     });
   }
 }

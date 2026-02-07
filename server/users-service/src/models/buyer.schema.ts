@@ -1,4 +1,4 @@
-import { Schema, Model, model, Types, Document } from 'mongoose';
+import { Schema, Model, model, Document, Types } from 'mongoose';
 
 export interface IBuyerAttributes {
   username: string;
