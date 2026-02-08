@@ -5,17 +5,20 @@ import { EnvConfig } from '@gig/config';
 import { Database } from '@gig/loaders';
 import { GigServer } from '@gig/server';
 import { GigModel } from './models/gig.schema';
+import { Redis } from '@gig/loaders/redis';
 
 const envConfig = container.resolve(EnvConfig);
 const database = container.resolve(Database);
+const redis = container.resolve(Redis);
 
 container.register('GigModel', { useValue: GigModel });
 
 class Application {
   constructor(private readonly gigServer: GigServer) {}
-  public initialize(): void {
+  public async initialize(): Promise<void> {
     envConfig.cloudinaryConfig();
     database.databaseConnection();
+    await redis.connect();
     const app: Express = express();
     this.gigServer.start(app);
   }
