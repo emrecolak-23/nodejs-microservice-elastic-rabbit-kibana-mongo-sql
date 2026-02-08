@@ -14,10 +14,11 @@ import { ElasticSearch } from '@gig/loaders';
 import { verify } from 'jsonwebtoken';
 import { appRoutes } from '@gig/routes';
 import { Channel } from 'amqplib';
+import { QueueConnection } from '@gig/queues';
 
 const SERVER_PORT = 4004;
 
-export let userChannel: Channel;
+export let gigChannel: Channel;
 
 @singleton()
 @injectable()
@@ -25,7 +26,8 @@ export class GigServer {
   private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'apiGigServer', 'debug');
   constructor(
     private readonly config: EnvConfig,
-    private readonly elasticSearch: ElasticSearch
+    private readonly elasticSearch: ElasticSearch,
+    private readonly queueConnection: QueueConnection
   ) {}
 
   public start(app: Application): void {
@@ -33,6 +35,7 @@ export class GigServer {
     this.standartMiddleware(app);
     this.routesMiddleware(app);
     this.startsElasticSearch();
+    this.startQueues();
     this.errorHandler(app);
     this.startServer(app);
   }
@@ -69,7 +72,9 @@ export class GigServer {
     this.elasticSearch.createIndex('gigs');
   }
 
-  //   private async startsQueues(): Promise<void> {}
+  private async startQueues(): Promise<void> {
+    gigChannel = (await this.queueConnection.connect()) as Channel;
+  }
 
   private routesMiddleware(app: Application): void {
     appRoutes(app);
