@@ -181,12 +181,19 @@ const gigSchema: Schema<IGigDocument, IGigModel> = new Schema(
   },
   {
     timestamps: true,
-    versionKey: false
+    versionKey: false,
+    toJSON: {
+      transform: (_doc: IGigDocument, rec: any) => {
+        rec.id = rec._id;
+        delete rec._id;
+        return rec;
+      }
+    }
   }
 );
 
-gigSchema.statics.build = (attrs: IGigAttributes) => {
-  return new GigModel(attrs);
-};
+gigSchema.virtual('id').get(function () {
+  return this._id;
+});
 
 export const GigModel: Model<IGigDocument> = model<IGigDocument>('Gig', gigSchema);
