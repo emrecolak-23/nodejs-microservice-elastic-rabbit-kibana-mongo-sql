@@ -65,4 +65,23 @@ export class GigRepository {
       { new: true }
     );
   }
+
+  async updateGigReviewProps(gigId: string, ratingKey: string, rating: number): Promise<IGigDocument | null> {
+    const updatedGig = await this.gigModel.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(gigId)
+      },
+      {
+        $inc: {
+          [`ratingCategories.${ratingKey}.value`]: rating,
+          [`ratingCategories.${ratingKey}.count`]: 1,
+          ratingSum: rating,
+          ratingsCount: 1
+        }
+      },
+      { new: true, upsert: true }
+    );
+
+    return updatedGig;
+  }
 }

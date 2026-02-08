@@ -1,6 +1,6 @@
 import { injectable, singleton } from 'tsyringe';
 import { GigRepository } from '@gig/repositories/gig.repository';
-import { ICreateGig, ISellerGig } from '@emrecolak-23/jobber-share';
+import { ICreateGig, IRatingTypes, IReviewMessageDetails, ISellerGig } from '@emrecolak-23/jobber-share';
 import { ElasticSearch } from '@gig/loaders';
 import { SearchRepository } from '@gig/repositories/search.repository';
 import { GigProducer } from '@gig/queues/gig.producer';
@@ -85,6 +85,25 @@ export class GigService {
     const pausedOrUnpausedGig = await this.gigRepository.pauseOrUnpauseGig(gigId, gigActive);
     if (pausedOrUnpausedGig && pausedOrUnpausedGig.active === gigActive) {
       const sellerGig: ISellerGig = this.gigRepository.toSellerGig(pausedOrUnpausedGig);
+      await this.elasticSearch.updateIndexedData('gigs', `${sellerGig.id}`, sellerGig);
+    }
+  }
+
+  async updateGigReview(data: IReviewMessageDetails): Promise<void> {
+    const ratingTypes: IRatingTypes = {
+      '1': 'one',
+      '2': 'two',
+      '3': 'three',
+      '4': 'four',
+      '5': 'five'
+    };
+
+    const ratingKey: string = ratingTypes[data.rating as keyof typeof ratingTypes];
+
+    const updatedGig = await this.gigRepository.updateGigReviewProps(data.gigId!, ratingKey, data.rating as number);
+
+    if (updatedGig) {
+      const sellerGig: ISellerGig = this.gigRepository.toSellerGig(updatedGig);
       await this.elasticSearch.updateIndexedData('gigs', `${sellerGig.id}`, sellerGig);
     }
   }
