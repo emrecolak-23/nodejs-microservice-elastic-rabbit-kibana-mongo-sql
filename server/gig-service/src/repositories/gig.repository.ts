@@ -26,4 +26,43 @@ export class GigRepository {
 
     return gig;
   }
+
+  async deleteGig(gigId: string): Promise<void> {
+    await this.gigModel.findByIdAndDelete(gigId);
+  }
+
+  async updateGig(gigId: string, gigData: ISellerGig): Promise<IGigDocument | null> {
+    const document: IGigDocument | null = await this.gigModel.findByIdAndUpdate(
+      gigId,
+      {
+        $set: {
+          title: gigData.title,
+          description: gigData.description,
+          categories: gigData.categories,
+          subCategories: gigData.subCategories,
+          tags: gigData.tags,
+          price: gigData.price,
+          coverImage: gigData.coverImage,
+          expectedDelivery: gigData.expectedDelivery,
+          basicTitle: gigData.basicTitle,
+          basicDescription: gigData.basicDescription
+        }
+      },
+      { new: true }
+    );
+
+    return document;
+  }
+
+  async pauseOrUnpauseGig(gigId: string, gigActive: boolean): Promise<IGigDocument | null> {
+    return await this.gigModel.findByIdAndUpdate(
+      gigId,
+      {
+        $set: {
+          active: gigActive
+        }
+      },
+      { new: true }
+    );
+  }
 }

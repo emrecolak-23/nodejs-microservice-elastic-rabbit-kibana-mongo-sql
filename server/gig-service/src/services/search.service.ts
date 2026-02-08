@@ -1,5 +1,5 @@
 import { injectable, singleton } from 'tsyringe';
-import { IPaginateProps, winstonLogger } from '@emrecolak-23/jobber-share';
+import { winstonLogger } from '@emrecolak-23/jobber-share';
 import { SearchRepository } from '@gig/repositories/search.repository';
 import { Logger } from 'winston';
 import { EnvConfig } from '@gig/config';

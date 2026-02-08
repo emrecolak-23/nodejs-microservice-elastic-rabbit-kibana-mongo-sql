@@ -5,7 +5,6 @@ import { ElasticSearch } from '@gig/loaders';
 import { SearchRepository } from '@gig/repositories/search.repository';
 import { GigProducer } from '@gig/queues/gig.producer';
 import { gigChannel } from '@gig/server';
-import { IGigDocument } from '@gig/models/gig.schema';
 @injectable()
 @singleton()
 export class GigService {
@@ -42,20 +41,51 @@ export class GigService {
     return resultHits;
   }
 
-  async createGig(gigData: ICreateGig): Promise<IGigDocument> {
+  async createGig(gigData: ICreateGig): Promise<ISellerGig> {
     const createdGig = await this.gigRepository.createGig(gigData);
-    if (createdGig) {
-      const data: ISellerGig = this.gigRepository.toSellerGig(createdGig);
-      await this.gigProducer.publishDirectMessage(
-        gigChannel,
-        'jobber-seller-update',
-        'user-seller',
-        JSON.stringify({ type: 'update-gig-count', gigSellerId: createdGig.sellerId?.toString(), count: 1 }),
-        'Details sent to users service'
-      );
-      await this.elasticSearch.addDataToIndex('gigs', `${createdGig._id}`, data);
+
+    const sellerGig: ISellerGig = this.gigRepository.toSellerGig(createdGig);
+    await this.gigProducer.publishDirectMessage(
+      gigChannel,
+      'jobber-seller-update',
+      'user-seller',
+      JSON.stringify({ type: 'update-gig-count', gigSellerId: createdGig.sellerId?.toString(), count: 1 }),
+      'Details sent to users service'
+    );
+    await this.elasticSearch.addDataToIndex('gigs', `${sellerGig.id}`, sellerGig);
+
+    return sellerGig;
+  }
+
+  async deleteGig(gigId: string, sellerId: string): Promise<void> {
+    await this.gigRepository.deleteGig(gigId);
+    await this.gigProducer.publishDirectMessage(
+      gigChannel,
+      'jobber-seller-update',
+      'user-seller',
+      JSON.stringify({ type: 'update-gig-count', gigSellerId: sellerId, count: -1 }),
+      'Details sent to users service'
+    );
+    await this.elasticSearch.deleteIndexedData('gigs', `${gigId}`);
+  }
+
+  async updateGig(gigId: string, gigData: ISellerGig): Promise<ISellerGig | null> {
+    const updatedGig = await this.gigRepository.updateGig(gigId, gigData);
+
+    if (updatedGig) {
+      const sellerGig: ISellerGig = this.gigRepository.toSellerGig(updatedGig);
+      await this.elasticSearch.updateIndexedData('gigs', `${sellerGig.id}`, sellerGig);
+      return sellerGig;
     }
 
-    return createdGig;
+    return null;
+  }
+
+  async pauseOrUnpauseGig(gigId: string, gigActive: boolean): Promise<void> {
+    const pausedOrUnpausedGig = await this.gigRepository.pauseOrUnpauseGig(gigId, gigActive);
+    if (pausedOrUnpausedGig && pausedOrUnpausedGig.active === gigActive) {
+      const sellerGig: ISellerGig = this.gigRepository.toSellerGig(pausedOrUnpausedGig);
+      await this.elasticSearch.updateIndexedData('gigs', `${sellerGig.id}`, sellerGig);
+    }
   }
 }
