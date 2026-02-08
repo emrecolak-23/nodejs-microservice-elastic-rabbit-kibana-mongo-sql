@@ -66,6 +66,7 @@ export class GigServer {
 
   private startsElasticSearch(): void {
     this.elasticSearch.checkConnection();
+    this.elasticSearch.createIndex('gigs');
   }
 
   //   private async startsQueues(): Promise<void> {}
