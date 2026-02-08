@@ -15,6 +15,7 @@ import { verify } from 'jsonwebtoken';
 import { appRoutes } from '@gig/routes';
 import { Channel } from 'amqplib';
 import { QueueConnection } from '@gig/queues';
+import { GigConsumer } from '@gig/queues/gig.consumer';
 
 const SERVER_PORT = 4004;
 
@@ -27,7 +28,8 @@ export class GigServer {
   constructor(
     private readonly config: EnvConfig,
     private readonly elasticSearch: ElasticSearch,
-    private readonly queueConnection: QueueConnection
+    private readonly queueConnection: QueueConnection,
+    private readonly gigConsumer: GigConsumer
   ) {}
 
   public start(app: Application): void {
@@ -74,6 +76,8 @@ export class GigServer {
 
   private async startQueues(): Promise<void> {
     gigChannel = (await this.queueConnection.connect()) as Channel;
+    await this.gigConsumer.consumeGigDirectMessage(gigChannel);
+    await this.gigConsumer.consumeSeedDirectMessage(gigChannel);
   }
 
   private routesMiddleware(app: Application): void {
