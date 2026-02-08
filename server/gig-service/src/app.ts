@@ -4,9 +4,12 @@ import { container } from 'tsyringe';
 import { EnvConfig } from '@gig/config';
 import { Database } from '@gig/loaders';
 import { GigServer } from '@gig/server';
+import { GigModel } from './models/gig.schema';
 
 const envConfig = container.resolve(EnvConfig);
 const database = container.resolve(Database);
+
+container.register('GigModel', { useValue: GigModel });
 
 class Application {
   constructor(private readonly gigServer: GigServer) {}

@@ -43,7 +43,7 @@ interface IGigAttributes {
   coverImage: string;
 }
 
-interface IGigDocument extends Document, IGigAttributes {}
+export interface IGigDocument extends Document, IGigAttributes {}
 
 interface IGigModel extends Model<IGigDocument> {
   build(attrs: IGigAttributes): IGigDocument;
