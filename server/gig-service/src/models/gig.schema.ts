@@ -45,7 +45,7 @@ interface IGigAttributes {
 
 export interface IGigDocument extends Document, IGigAttributes {}
 
-interface IGigModel extends Model<IGigDocument> {
+export interface IGigModel extends Model<IGigDocument> {
   build(attrs: IGigAttributes): IGigDocument;
 }
 

@@ -7,7 +7,7 @@ import { injectable, singleton } from 'tsyringe';
 
 @injectable()
 @singleton()
-class UserProducer {
+export class GigProducer {
   private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'gigServiceProducer', 'debug');
 
   constructor(
@@ -35,5 +35,3 @@ class UserProducer {
     }
   }
 }
-
-export { UserProducer };
