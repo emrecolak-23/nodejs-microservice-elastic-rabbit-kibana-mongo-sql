@@ -16,7 +16,7 @@ import { appRoutes } from '@chat/routes';
 import { Channel } from 'amqplib';
 import { Server } from 'socket.io';
 
-const SERVER_PORT = 4004;
+const SERVER_PORT = 4005;
 
 export let chatChannel: Channel;
 export let socketIOChatObject: Server;
