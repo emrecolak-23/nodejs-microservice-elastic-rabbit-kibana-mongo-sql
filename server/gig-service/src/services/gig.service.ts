@@ -1,6 +1,6 @@
 import { injectable, singleton } from 'tsyringe';
 import { GigRepository } from '@gig/repositories/gig.repository';
-import { ICreateGig, IRatingTypes, IReviewMessageDetails, ISellerGig } from '@emrecolak-23/jobber-share';
+import { IRatingTypes, IReviewMessageDetails, ISellerGig } from '@emrecolak-23/jobber-share';
 import { ElasticSearch } from '@gig/loaders';
 import { SearchRepository } from '@gig/repositories/search.repository';
 import { GigProducer } from '@gig/queues/gig.producer';
@@ -41,7 +41,7 @@ export class GigService {
     return resultHits;
   }
 
-  async createGig(gigData: ICreateGig): Promise<ISellerGig> {
+  async createGig(gigData: ISellerGig): Promise<ISellerGig> {
     const createdGig = await this.gigRepository.createGig(gigData);
 
     const sellerGig: ISellerGig = this.gigRepository.toSellerGig(createdGig);
