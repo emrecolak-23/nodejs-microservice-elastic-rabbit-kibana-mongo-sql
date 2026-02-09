@@ -14,10 +14,12 @@ import { ElasticSearch } from '@chat/loaders';
 import { verify } from 'jsonwebtoken';
 import { appRoutes } from '@chat/routes';
 import { Channel } from 'amqplib';
+import { Server } from 'socket.io';
 
 const SERVER_PORT = 4004;
 
 export let chatChannel: Channel;
+export let socketIOChatObject: Server;
 
 @singleton()
 @injectable()
@@ -112,10 +114,22 @@ export class ChatServer {
     });
   }
 
+  async createSocketIO(httpServer: http.Server): Promise<Server> {
+    const io = new Server(httpServer, {
+      cors: {
+        origin: `*`,
+        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
+      }
+    });
+    return io;
+  }
+
   private async startServer(app: Application): Promise<void> {
     try {
       const httpServer: http.Server = new http.Server(app);
+      const socketIO: Server = await this.createSocketIO(httpServer);
       await this.startHttpServer(httpServer);
+      socketIOChatObject = socketIO;
     } catch (err) {
       this.log.log('error', 'ChatService startServer() error method: ', err);
     }
