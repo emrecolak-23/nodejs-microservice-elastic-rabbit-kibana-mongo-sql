@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { GigController, SearchController } from '@gig/controllers';
+import { GigController, SearchController, SeedController } from '@gig/controllers';
 import { injectable, singleton } from 'tsyringe';
 import { ValidateMiddleware } from '@gig/middlewares';
 import { gigCreateSchema, gigUpdateSchema, gigDeleteSchema, gigPauseOrUnpauseSchema } from '@gig/schemes/gig';
@@ -12,6 +12,7 @@ export class GigRoute {
   constructor(
     private readonly gigController: GigController,
     private readonly searchController: SearchController,
+    private readonly seedController: SeedController,
     private readonly validateMiddleware: ValidateMiddleware
   ) {
     this.router = express.Router();
@@ -37,6 +38,7 @@ export class GigRoute {
     this.router.get('/:gigId', this.gigController.getGigById.bind(this.gigController));
     this.router.get('/seller/:sellerId', this.gigController.getSellerGigs.bind(this.gigController));
     this.router.get('/seller/pause/:sellerId', this.gigController.getSellerPausedGigs.bind(this.gigController));
+    this.router.put('/seed/:count', this.seedController.createSeeds.bind(this.seedController));
     return this.router;
   }
 }

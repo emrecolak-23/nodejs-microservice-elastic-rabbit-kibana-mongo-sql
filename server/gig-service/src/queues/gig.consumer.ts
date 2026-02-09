@@ -67,8 +67,8 @@ export class GigConsumer {
       channel.consume(gigUpdateQueue.queue, async (msg: ConsumeMessage | null) => {
         if (!msg) return;
         try {
-          // TODO: use seed data function here
-
+          const { sellers, count } = JSON.parse(msg.content.toString());
+          await this.gigService.seedData(sellers, count);
           channel.ack(msg);
         } catch (error) {
           this.log.log('error', 'GigConsumer consumeSeedDirectMessage() method error: ', error);
