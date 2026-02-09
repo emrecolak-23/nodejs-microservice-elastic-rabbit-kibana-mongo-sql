@@ -29,6 +29,9 @@ export class GigRoute {
       this.validateMiddleware.validate(gigPauseOrUnpauseSchema),
       this.gigController.pauseOrUnpauseGig.bind(this.gigController)
     );
+    this.router.get('/:gigId', this.gigController.getGigById.bind(this.gigController));
+    this.router.get('/seller/:sellerId', this.gigController.getSellerGigs.bind(this.gigController));
+    this.router.get('/seller/pause/:sellerId', this.gigController.getSellerPausedGigs.bind(this.gigController));
     return this.router;
   }
 }

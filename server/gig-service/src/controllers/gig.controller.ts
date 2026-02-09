@@ -99,4 +99,31 @@ export class GigController {
       message: 'Gig paused/unpaused successfully'
     });
   }
+
+  async getGigById(req: Request, res: Response): Promise<void> {
+    const gig: ISellerGig = await this.gigService.getGigById(req.params.gigId as string);
+    if (!gig) {
+      throw new NotFoundError('Gig not found', 'GigController getGigById() method error');
+    }
+    res.status(StatusCodes.OK).json({
+      message: 'Gig retrieved successfully',
+      gig
+    });
+  }
+
+  async getSellerGigs(req: Request, res: Response): Promise<void> {
+    const gigs: ISellerGig[] = await this.gigService.getSellerGigs(req.params.sellerId as string);
+    res.status(StatusCodes.OK).json({
+      message: 'Seller gigs retrieved successfully',
+      gigs
+    });
+  }
+
+  async getSellerPausedGigs(req: Request, res: Response): Promise<void> {
+    const gigs: ISellerGig[] = await this.gigService.getSellerPausedGigs(req.params.sellerId as string);
+    res.status(StatusCodes.OK).json({
+      message: 'Seller paused gigs retrieved successfully',
+      gigs
+    });
+  }
 }
