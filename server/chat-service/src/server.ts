@@ -15,6 +15,7 @@ import { verify } from 'jsonwebtoken';
 import { appRoutes } from '@chat/routes';
 import { Channel } from 'amqplib';
 import { Server } from 'socket.io';
+import { QueueConnection } from './queues/connection';
 
 const SERVER_PORT = 4005;
 
@@ -27,7 +28,8 @@ export class ChatServer {
   private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'apiChatServer', 'debug');
   constructor(
     private readonly config: EnvConfig,
-    private readonly elasticSearch: ElasticSearch
+    private readonly elasticSearch: ElasticSearch,
+    private readonly queueConnection: QueueConnection
   ) {}
 
   public start(app: Application): void {
@@ -35,6 +37,7 @@ export class ChatServer {
     this.standartMiddleware(app);
     this.routesMiddleware(app);
     this.startsElasticSearch();
+    this.startQueues();
     this.errorHandler(app);
     this.startServer(app);
   }
@@ -70,7 +73,9 @@ export class ChatServer {
     this.elasticSearch.checkConnection();
   }
 
-  // private async startQueues(): Promise<void> {}
+  private async startQueues(): Promise<void> {
+    chatChannel = (await this.queueConnection.connect()) as Channel;
+  }
 
   private routesMiddleware(app: Application): void {
     appRoutes(app);
