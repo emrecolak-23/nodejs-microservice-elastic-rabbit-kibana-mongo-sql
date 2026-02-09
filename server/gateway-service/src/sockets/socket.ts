@@ -1,5 +1,5 @@
 import { EnvConfig } from '@gateway/configs';
-import { singleton, injectable, container } from 'tsyringe';
+import { container } from 'tsyringe';
 import { Logger } from 'winston';
 import { winstonLogger } from '@emrecolak-23/jobber-share';
 import { Server, Socket } from 'socket.io';
@@ -13,7 +13,7 @@ export class SocketIOAppHandler {
   private gatewayCache: GatewayCache;
 
   private log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'Socket', 'debug');
-  constructor(private readonly socketIO: Server) {
+  constructor(socketIO: Server) {
     this.io = socketIO;
     this.gatewayCache = gatewayCache;
   }
