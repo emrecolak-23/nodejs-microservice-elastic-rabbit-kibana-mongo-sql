@@ -48,4 +48,8 @@ export class SearchRepository {
       hits: result.hits.hits
     };
   }
+
+  async getGigCount(): Promise<number> {
+    return await this.elasticSearch.getDocumentCount('gigs');
+  }
 }

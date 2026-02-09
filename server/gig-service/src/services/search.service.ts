@@ -6,7 +6,7 @@ import { EnvConfig } from '@gig/config';
 
 @injectable()
 @singleton()
-export class SeachService {
+export class SearchService {
   private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'gigServiceSearchService', 'debug');
   constructor(
     private readonly config: EnvConfig,
@@ -30,6 +30,16 @@ export class SeachService {
     } catch (error) {
       this.log.error('SearchService searchGigs method error: ', error);
       throw error;
+    }
+  }
+
+  async getGigCount(): Promise<number> {
+    try {
+      const count = await this.searchRepository.getGigCount();
+      return count;
+    } catch (error) {
+      this.log.error('SearchService getGigCount method error: ', error);
+      return 0;
     }
   }
 }

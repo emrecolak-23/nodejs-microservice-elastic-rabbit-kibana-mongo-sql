@@ -2,7 +2,7 @@ import { ISellerGig, winstonLogger } from '@emrecolak-23/jobber-share';
 import { Logger } from 'winston';
 import { EnvConfig } from '@gig/config';
 import { Client } from '@elastic/elasticsearch';
-import { ClusterHealthResponse, GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { ClusterHealthResponse, CountResponse, GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { injectable, singleton } from 'tsyringe';
 
 @singleton()
@@ -85,6 +85,16 @@ export class ElasticSearch {
       await this.elasticSearchClient.delete({ index, id: itemId });
     } catch (error) {
       this.log.log('error', 'GigService deleteIndexedData() method error:', error);
+    }
+  }
+
+  async getDocumentCount(index: string): Promise<number> {
+    try {
+      const result: CountResponse = await this.elasticSearchClient.count({ index });
+      return result.count as number;
+    } catch (error) {
+      this.log.log('error', 'GigService getDocumentCount() method error:', error);
+      return 0;
     }
   }
 }
