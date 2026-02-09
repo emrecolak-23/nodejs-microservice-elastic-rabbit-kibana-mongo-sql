@@ -11,7 +11,7 @@ const config: Config.InitialOptions = {
   transform: {
     '^.+\\.ts?$': 'ts-jest'
   },
-  transformIgnorePatterns: ['/node_modules/(?!(uuid)/)'],
+  transformIgnorePatterns: ['/node_modules/(?!(uuid|@faker-js)/)'],
   extensionsToTreatAsEsm: ['.ts'],
   globals: {
     'ts-jest': {
