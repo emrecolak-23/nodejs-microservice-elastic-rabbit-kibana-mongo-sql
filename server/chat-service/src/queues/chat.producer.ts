@@ -18,6 +18,7 @@ export class ChatProducer {
   private log: Logger = winstonLogger(this.config.ELASTIC_SEARCH_URL, 'chatServiceProducer', 'debug');
   private channel: Channel | null = null;
   private initializedExchanges: Set<string> = new Set();
+  private isChannelEventsSetup: boolean = false;
 
   private readonly MAX_RETRIES = 3;
   private readonly RETRY_DELAY = 1000;
@@ -36,18 +37,22 @@ export class ChatProducer {
   }
 
   private setupChannelEvents(): void {
-    if (!this.channel) return;
+    if (!this.channel || this.isChannelEventsSetup) return;
 
     this.channel.on('error', (err) => {
       this.log.error('Channel error:', err);
       this.channel = null;
+      this.isChannelEventsSetup = false;
     });
 
     this.channel.on('close', () => {
       this.log.warn('Channel closed');
       this.channel = null;
       this.initializedExchanges.clear();
+      this.isChannelEventsSetup = false;
     });
+
+    this.isChannelEventsSetup = true;
   }
 
   private async ensureExchange(channel: Channel, exchangeName: string): Promise<void> {

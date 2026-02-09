@@ -11,6 +11,7 @@ export class QueueConnection {
   private connection: ChannelModel | null = null;
   private channel: Channel | null = null;
   private isConnecting: boolean = false;
+  private isSigintHandlerSet: boolean = false;
 
   private readonly RETRY_DELAY = 5000;
   private readonly MAX_RETRIES = 10;
@@ -115,6 +116,8 @@ export class QueueConnection {
   }
 
   private handleCloseOnSigint(): void {
+    if (this.isSigintHandlerSet) return;
+
     process.once('SIGINT', async () => {
       this.log.info('Closing RabbitMQ connection...');
       try {
@@ -125,6 +128,8 @@ export class QueueConnection {
         this.log.error('Error closing RabbitMQ connection:', error);
       }
     });
+
+    this.isSigintHandlerSet = true;
   }
 
   isConnected(): boolean {
