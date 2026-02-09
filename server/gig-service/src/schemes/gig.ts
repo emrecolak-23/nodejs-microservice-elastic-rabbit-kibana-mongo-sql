@@ -130,4 +130,25 @@ const gigUpdateSchema: ObjectSchema = Joi.object().keys({
   })
 });
 
-export { gigCreateSchema, gigUpdateSchema };
+const gigDeleteSchema: ObjectSchema = Joi.object().keys({
+  sellerId: Joi.string().required().messages({
+    'string.base': 'Seller Id must be of type string',
+    'string.empty': 'Seller Id is required',
+    'any.required': 'Seller Id is required'
+  }),
+  gigId: Joi.string().required().messages({
+    'string.base': 'Gig Id must be of type string',
+    'string.empty': 'Gig Id is required',
+    'any.required': 'Gig Id is required'
+  })
+});
+
+const gigPauseOrUnpauseSchema: ObjectSchema = Joi.object().keys({
+  active: Joi.boolean().required().messages({
+    'boolean.base': 'Active must be of type boolean',
+    'boolean.empty': 'Active is required',
+    'any.required': 'Active is required'
+  })
+});
+
+export { gigCreateSchema, gigUpdateSchema, gigDeleteSchema, gigPauseOrUnpauseSchema };

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { GigService } from '@gig/services/gig.service';
 import { injectable, singleton } from 'tsyringe';
 import { StatusCodes } from 'http-status-codes';
-import { BadRequestError, ISellerGig, uploads } from '@emrecolak-23/jobber-share';
+import { BadRequestError, isDataURL, ISellerGig, NotFoundError, uploads } from '@emrecolak-23/jobber-share';
 import { UploadApiResponse } from 'cloudinary';
 import { SearchService } from '@gig/services/search.service';
 
@@ -45,6 +45,58 @@ export class GigController {
     res.status(StatusCodes.CREATED).json({
       message: 'Gig created successfully',
       gig: createdGig
+    });
+  }
+
+  async updateGig(req: Request, res: Response): Promise<void> {
+    const isDataUrl = isDataURL(req.body.coverImage);
+    let coverImage: string;
+    if (isDataUrl) {
+      const result: UploadApiResponse = (await uploads(req.body.coverImage)) as UploadApiResponse;
+      if (!result.public_id) {
+        throw new BadRequestError('Cover image upload failed. Please try again.', 'GigController updateGig() method error');
+      }
+      coverImage = result.secure_url;
+    } else {
+      coverImage = req.body.coverImage;
+    }
+
+    const gigData: ISellerGig = {
+      title: req.body.title,
+      description: req.body.description,
+      categories: req.body.categories,
+      subCategories: req.body.subCategories,
+      tags: req.body.tags,
+      price: req.body.price,
+      expectedDelivery: req.body.expectedDelivery,
+      basicTitle: req.body.basicTitle,
+      basicDescription: req.body.basicDescription,
+      coverImage: coverImage
+    };
+
+    const updatedGig: ISellerGig | null = await this.gigService.updateGig(req.params.gigId as string, gigData);
+
+    if (!updatedGig) {
+      throw new NotFoundError('Gig not found', 'GigController updateGig() method error');
+    }
+
+    res.status(StatusCodes.OK).json({
+      message: 'Gig updated successfully',
+      gig: updatedGig
+    });
+  }
+
+  async deleteGig(req: Request, res: Response): Promise<void> {
+    await this.gigService.deleteGig(req.params.gigId as string, req.params.sellerId as string);
+    res.status(StatusCodes.OK).json({
+      message: 'Gig deleted successfully'
+    });
+  }
+
+  async pauseOrUnpauseGig(req: Request, res: Response): Promise<void> {
+    await this.gigService.pauseOrUnpauseGig(req.params.gigId as string, req.body.active as boolean);
+    res.status(StatusCodes.OK).json({
+      message: 'Gig paused/unpaused successfully'
     });
   }
 }
