@@ -15,7 +15,8 @@ export class CurrentUserRoute {
     this.router.post('/resend-email', this.authController.resentEmailVerification.bind(this.authController));
     this.router.get('/current-user', this.authController.currentUser.bind(this.authController));
     this.router.post('/refresh-token/:username', this.authController.refreshToken.bind(this.authController));
-
+    this.router.get('/logged-in-user', this.authController.getLoggedInUsers.bind(this.authController));
+    this.router.delete('/logged-in-user/:username', this.authController.removeLoggedInUser.bind(this.authController));
     return this.router;
   }
 }

@@ -3,11 +3,16 @@ import { AxiosResponse } from 'axios';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { injectable, singleton } from 'tsyringe';
+import { GatewayCache } from '@gateway/redis/gateway.cache';
+import { socketIO } from '@gateway/server';
 
 @singleton()
 @injectable()
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly gatewayCache: GatewayCache
+  ) {}
 
   async signUp(req: Request, res: Response): Promise<void> {
     const response: AxiosResponse = await this.authService.sigUp(req.body);
@@ -82,5 +87,20 @@ export class AuthController {
       jwt: response.data.token
     };
     res.status(StatusCodes.OK).json({ message: response.data.message, token: response.data.token, user: response.data.user });
+  }
+
+  async getLoggedInUsers(_req: Request, res: Response): Promise<void> {
+    const response = await this.gatewayCache.getLoggedInUsersFromCache('loggedInUsers');
+
+    socketIO.emit('online', response);
+    res.status(StatusCodes.OK).json({ message: 'User is online' });
+  }
+
+  async removeLoggedInUser(req: Request, res: Response): Promise<void> {
+    const { username } = req.params;
+    const response = await this.gatewayCache.removeLoggedInUserFromCache('loggedInUsers', username as string);
+
+    socketIO.emit('online', response);
+    res.status(StatusCodes.OK).json({ message: 'User is offline' });
   }
 }
