@@ -38,6 +38,7 @@ export class GigConsumer {
     await channel.bindQueue(config.dlq.queueName, config.dlq.exchangeName, config.dlq.routingKey);
 
     await channel.assertExchange(config.exchangeName, 'direct', { durable: true });
+
     const queue: Replies.AssertQueue = await channel.assertQueue(config.queueName, {
       durable: true,
       autoDelete: false,
@@ -46,6 +47,7 @@ export class GigConsumer {
         'x-dead-letter-routing-key': config.dlq.routingKey
       }
     });
+
     await channel.bindQueue(queue.queue, config.exchangeName, config.routingKey);
 
     this.log.info(`Queue setup: ${config.queueName} with DLQ: ${config.dlq.queueName}`);
@@ -68,37 +70,17 @@ export class GigConsumer {
 
     await this.delay(delay);
 
-    const published = channel.publish(config.exchangeName, config.routingKey, msg.content, {
+    channel.publish(config.exchangeName, config.routingKey, msg.content, {
       ...msg.properties,
       headers: {
         ...msg.properties.headers,
         'x-retry-count': retryCount + 1
       }
     });
-
-    if (!published) {
-      this.log.error(`Retry publish failed for message ${this.getMessageId(msg)} - channel buffer full`);
-      throw new Error('Retry publish failed: channel write buffer full');
-    }
   }
 
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  private async sendToDLQ(channel: Channel, msg: ConsumeMessage, config: QueueConfig, error: Error): Promise<void> {
-    const dlqPayload = {
-      originalMessage: JSON.parse(msg.content.toString()),
-      error: error.message,
-      stack: error.stack,
-      failedAt: new Date().toISOString(),
-      retryCount: this.getRetryCount(msg),
-      queue: config.queueName
-    };
-
-    channel.publish(config.dlq.exchangeName, config.dlq.routingKey, Buffer.from(JSON.stringify(dlqPayload)), { persistent: true });
-
-    this.log.error(`Message sent to DLQ: ${config.dlq.queueName}`, dlqPayload);
   }
 
   async consumeGigDirectMessage(channel: Channel) {
@@ -130,10 +112,11 @@ export class GigConsumer {
 
           if (retryCount < RETRY_CONFIG.maxRetries) {
             await this.retry(channel, msg, UPDATE_GIG_QUEUE_CONFIG);
+            channel.ack(msg);
           } else {
-            await this.sendToDLQ(channel, msg, UPDATE_GIG_QUEUE_CONFIG, error as Error);
+            channel.nack(msg, false, false);
+            this.log.error(`Message sent to DLQ after ${retryCount} retries: ${messageId}`);
           }
-          channel.ack(msg);
         }
       });
 
@@ -172,10 +155,11 @@ export class GigConsumer {
 
           if (retryCount < RETRY_CONFIG.maxRetries) {
             await this.retry(channel, msg, SEED_GIG_QUEUE_CONFIG);
+            channel.ack(msg);
           } else {
-            await this.sendToDLQ(channel, msg, SEED_GIG_QUEUE_CONFIG, error as Error);
+            channel.nack(msg, false, false);
+            this.log.error(`Seed message sent to DLQ after ${retryCount} retries: ${messageId}`);
           }
-          channel.ack(msg);
         }
       });
 
