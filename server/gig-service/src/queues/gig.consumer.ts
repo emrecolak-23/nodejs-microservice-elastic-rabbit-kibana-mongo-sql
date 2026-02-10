@@ -87,7 +87,7 @@ export class GigConsumer {
     try {
       channel = await this.ensureChannel(channel);
       const queue = await this.setupQueue(channel, UPDATE_GIG_QUEUE_CONFIG);
-
+      channel.prefetch(10);
       channel.consume(queue.queue, async (msg: ConsumeMessage | null) => {
         if (!msg) return;
 
@@ -130,7 +130,7 @@ export class GigConsumer {
     try {
       channel = await this.ensureChannel(channel);
       const queue = await this.setupQueue(channel, SEED_GIG_QUEUE_CONFIG);
-
+      channel.prefetch(10);
       channel.consume(queue.queue, async (msg: ConsumeMessage | null) => {
         if (!msg) return;
 
