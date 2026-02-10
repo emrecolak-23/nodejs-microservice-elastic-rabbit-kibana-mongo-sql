@@ -1,5 +1,5 @@
 import { inject, injectable, singleton } from 'tsyringe';
-import { IConversationModel } from '@chat/models';
+import { IConversationDocument, IConversationModel } from '@chat/models';
 
 @injectable()
 @singleton()
@@ -14,5 +14,22 @@ export class ConversationRepository {
     });
 
     await conversation.save();
+  }
+
+  async getConversation(sender: string, receiver: string): Promise<IConversationDocument[]> {
+    const query = {
+      $or: [
+        { senderUsername: sender, receiverUsername: receiver },
+        { senderUsername: receiver, receiverUsername: sender }
+      ]
+    };
+
+    const conversation: IConversationDocument[] = await this.conversationModel.aggregate([
+      {
+        $match: query
+      }
+    ]);
+
+    return conversation;
   }
 }
