@@ -38,4 +38,14 @@ export class MessageService {
     socketIOChatObject.emit('message received', message);
     return message;
   }
+
+  async markMessageAsRead(messageId: string): Promise<IMessageDocument> {
+    const message: IMessageDocument = await this.messageRepository.markMessageAsRead(messageId);
+
+    if (message) {
+      socketIOChatObject.emit('message update', message);
+    }
+
+    return message;
+  }
 }
