@@ -1,6 +1,6 @@
 import { injectable, singleton } from 'tsyringe';
 import { MessageRepository } from '@chat/repositories';
-import { IMessageAttributes, IMessageDocument } from '@chat/models';
+import { IConversationDocument, IMessageAttributes, IMessageDocument } from '@chat/models';
 import { BadRequestError, IMessageDetails, lowerCase, uploads } from '@emrecolak-23/jobber-share';
 import { ChatProducer } from '@chat/queues/chat.producer';
 import { socketIOChatObject } from '@chat/server';
@@ -75,5 +75,56 @@ export class MessageService {
     }
 
     return message;
+  }
+
+  async updateOffer(messageId: string, type: string): Promise<IMessageDocument> {
+    const message: IMessageDocument | null = await this.messageRepository.updateOffer(messageId, type);
+    if (!message) {
+      throw new BadRequestError('Message not found', 'MessageService updateOffer() method error');
+    }
+
+    return message;
+  }
+
+  async markManyMessageAsRead(receiver: string, sender: string, messageId: string): Promise<IMessageDocument> {
+    await this.messageRepository.markManyMessageAsRead(receiver, sender);
+
+    const message: IMessageDocument | null = await this.messageRepository.getMessageById(messageId);
+    if (!message) {
+      throw new BadRequestError('Message not found', 'MessageService markManyMessageAsRead() method error');
+    }
+
+    return message;
+  }
+
+  async markSingleMessage(messageId: string): Promise<IMessageDocument> {
+    await this.messageRepository.markMessageAsRead(messageId);
+
+    const message: IMessageDocument | null = await this.messageRepository.getMessageById(messageId);
+    if (!message) {
+      throw new BadRequestError('Message not found', 'MessageService markSingleMessage() method error');
+    }
+
+    return message;
+  }
+
+  async getConversation(sender: string, receiver: string): Promise<IConversationDocument[]> {
+    const conversation: IConversationDocument[] = await this.conversationRepository.getConversation(sender, receiver);
+    return conversation;
+  }
+
+  async getMessages(sender: string, receiver: string): Promise<IMessageDocument[]> {
+    const messages: IMessageDocument[] = await this.messageRepository.getMessages(sender, receiver);
+    return messages;
+  }
+
+  async getUserConversationList(username: string): Promise<IMessageDocument[]> {
+    const messages: IMessageDocument[] = await this.messageRepository.getUserConversationList(username);
+    return messages;
+  }
+
+  async getMessagesByConversationId(conversationId: string): Promise<IMessageDocument[]> {
+    const messages: IMessageDocument[] = await this.messageRepository.getUserMessages(conversationId);
+    return messages;
   }
 }

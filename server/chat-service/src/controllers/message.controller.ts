@@ -2,7 +2,7 @@ import { MessageService } from '@chat/services';
 import { Request, Response } from 'express';
 import { injectable, singleton } from 'tsyringe';
 import { StatusCodes } from 'http-status-codes';
-import { IMessageAttributes, IMessageDocument } from '@chat/models';
+import { IConversationDocument, IMessageAttributes, IMessageDocument } from '@chat/models';
 
 @singleton()
 @injectable()
@@ -40,6 +40,77 @@ export class MessageController {
     res.status(StatusCodes.CREATED).json({
       message: 'Message created successfully',
       conversationId: message.conversationId
+    });
+  }
+
+  async updateOffer(req: Request, res: Response): Promise<void> {
+    const { messageId, type } = req.body;
+    const message: IMessageDocument = await this.messageService.updateOffer(messageId, type);
+
+    res.status(StatusCodes.OK).json({
+      message: 'Offer updated successfully',
+      singleMessage: message
+    });
+  }
+
+  async markMultipleMessages(req: Request, res: Response): Promise<void> {
+    const { messageId, receiverUsername, senderUsername } = req.body;
+
+    await this.messageService.markManyMessageAsRead(receiverUsername, senderUsername, messageId);
+
+    res.status(StatusCodes.OK).json({
+      message: 'Messages marked as read successfully'
+    });
+  }
+
+  async markSingleMessage(req: Request, res: Response): Promise<void> {
+    const { messageId } = req.body;
+    const message: IMessageDocument = await this.messageService.markSingleMessage(messageId);
+
+    res.status(StatusCodes.OK).json({
+      message: 'Message marked as read successfully',
+      singleMessage: message
+    });
+  }
+
+  async getConversation(req: Request, res: Response): Promise<void> {
+    const { senderUsername, receiverUsername } = req.params;
+    const conversation: IConversationDocument[] = await this.messageService.getConversation(
+      senderUsername as string,
+      receiverUsername as string
+    );
+
+    res.status(StatusCodes.OK).json({
+      message: 'Chat conversation',
+      conversation
+    });
+  }
+
+  async getMessages(req: Request, res: Response): Promise<void> {
+    const { senderUsername, receiverUsername } = req.params;
+    const messages: IMessageDocument[] = await this.messageService.getMessages(senderUsername as string, receiverUsername as string);
+
+    res.status(StatusCodes.OK).json({
+      message: 'Chat messages',
+      messages
+    });
+  }
+
+  async getUserConversationList(req: Request, res: Response): Promise<void> {
+    const { username } = req.params;
+    const messages: IMessageDocument[] = await this.messageService.getUserConversationList(username as string);
+    res.status(StatusCodes.OK).json({
+      message: 'User conversation list',
+      messages
+    });
+  }
+
+  async getMessagesByConversationId(req: Request, res: Response): Promise<void> {
+    const { conversationId } = req.params;
+    const messages: IMessageDocument[] = await this.messageService.getMessagesByConversationId(conversationId as string);
+    res.status(StatusCodes.OK).json({
+      message: 'Conversation messages',
+      messages
     });
   }
 }

@@ -12,6 +12,7 @@ export class MessageRoute {
   }
 
   public routes(): Router {
+    this.router.post('/create', this.messageController.createMessage.bind(this.messageController));
     return this.router;
   }
 }
