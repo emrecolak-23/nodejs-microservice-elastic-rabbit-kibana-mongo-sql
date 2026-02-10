@@ -11,6 +11,7 @@ const config = container.resolve(EnvConfig);
 const gatewayCache = container.resolve(GatewayCache);
 
 let chatSocketClient: SocketClient | null;
+let orderSocketClient: SocketClient | null;
 
 export class SocketIOAppHandler {
   private io: Server;
@@ -24,6 +25,7 @@ export class SocketIOAppHandler {
 
   public async listen(): Promise<void> {
     this.chatSocketServiceIOConnection();
+    this.orderSocketServiceIOConnection();
     this.setupAuthMiddleware();
 
     this.io.on('connection', async (socket: Socket) => {
@@ -167,6 +169,50 @@ export class SocketIOAppHandler {
       if (data.receiverUsername) {
         this.io.to(`user:${data.receiverUsername}`).emit('message updated', data);
       }
+    });
+  }
+
+  private orderSocketServiceIOConnection(): void {
+    if (orderSocketClient) {
+      return;
+    }
+
+    orderSocketClient = io(`${config.ORDER_BASE_URL}`, {
+      transports: ['websocket', 'polling'],
+      secure: true,
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000
+    });
+
+    orderSocketClient.on('connect', () => {
+      this.log.info('ChatService socket connected');
+    });
+
+    orderSocketClient.on('disconnect', (reason: SocketClient.DisconnectReason) => {
+      this.log.log('warn', `ChatSocket disconnected: ${reason}`);
+    });
+
+    orderSocketClient.on('connect_error', (error: Error) => {
+      this.log.log('error', `ChatService socket connection error: ${error.message}`);
+    });
+
+    orderSocketClient.io.on('reconnect_attempt', (attempt: number) => {
+      this.log.info(`ChatService reconnect attempt: ${attempt}`);
+    });
+
+    orderSocketClient.io.on('reconnect', (attempt: number) => {
+      this.log.info(`ChatService reconnected after ${attempt} attempts`);
+    });
+
+    orderSocketClient.io.on('reconnect_failed', () => {
+      this.log.error('ChatService reconnect failed after all attempts, scheduling manual reconnect...');
+      if (chatSocketClient) {
+        chatSocketClient.disconnect();
+        chatSocketClient = null;
+      }
+      setTimeout(() => this.chatSocketServiceIOConnection(), 10000);
     });
   }
 }
