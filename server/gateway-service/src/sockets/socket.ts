@@ -1,15 +1,16 @@
 import { EnvConfig } from '@gateway/configs';
 import { container } from 'tsyringe';
 import { Logger } from 'winston';
-import { IMessageDocument, winstonLogger } from '@emrecolak-23/jobber-share';
+import { IAuthPayload, IMessageDocument, winstonLogger } from '@emrecolak-23/jobber-share';
 import { Server, Socket } from 'socket.io';
 import { GatewayCache } from '@gateway/redis/gateway.cache';
 import { io, Socket as SocketClient } from 'socket.io-client';
+import JWT from 'jsonwebtoken';
 
 const config = container.resolve(EnvConfig);
 const gatewayCache = container.resolve(GatewayCache);
 
-let chatSocketClient: SocketClient;
+let chatSocketClient: SocketClient | null;
 
 export class SocketIOAppHandler {
   private io: Server;
@@ -23,33 +24,92 @@ export class SocketIOAppHandler {
 
   public async listen(): Promise<void> {
     this.chatSocketServiceIOConnection();
+    this.setupAuthMiddleware();
 
     this.io.on('connection', async (socket: Socket) => {
-      this.log.info(`SocketIO connection established: ${socket.id}`);
+      const currentUser = socket.data.currentUser as IAuthPayload;
+
+      const userRoom = `user:${currentUser.username}`;
+      socket.join(userRoom);
+      this.log.info(`SocketIO connection established: ${socket.id} | user: ${currentUser.username} | room: ${userRoom}`);
 
       socket.on('getLoggedInUsers', async () => {
-        const loggedInUsers = await this.gatewayCache.getLoggedInUsersFromCache('loggedInUsers');
-        this.io.emit('online', loggedInUsers);
+        try {
+          const loggedInUsers = await this.gatewayCache.getLoggedInUsersFromCache('loggedInUsers');
+          this.io.emit('online', loggedInUsers);
+        } catch (error) {
+          this.log.error('getLoggedInUsers error:', error);
+        }
       });
 
       socket.on('loggedInUsers', async (username: string) => {
-        const loggedInUsers = await this.gatewayCache.saveLoggedInUserToCache('loggedInUsers', username);
-        this.io.emit('online', loggedInUsers);
+        try {
+          if (username !== currentUser.username) {
+            this.log.warn(`User ${currentUser.username} tried to set online status for ${username}`);
+            return;
+          }
+          const loggedInUsers = await this.gatewayCache.saveLoggedInUserToCache('loggedInUsers', username);
+          this.io.emit('online', loggedInUsers);
+        } catch (error) {
+          this.log.error('loggedInUsers error:', error);
+        }
       });
 
       socket.on('removeLoggedInUser', async (username: string) => {
-        const loggedInUsers = await this.gatewayCache.removeLoggedInUserFromCache('loggedInUsers', username);
-        this.io.emit('online', loggedInUsers);
+        try {
+          if (username !== currentUser.username) {
+            this.log.warn(`User ${currentUser.username} tried to remove online status for ${username}`);
+            return;
+          }
+          const loggedInUsers = await this.gatewayCache.removeLoggedInUserFromCache('loggedInUsers', username);
+          this.io.emit('online', loggedInUsers);
+        } catch (error) {
+          this.log.error('removeLoggedInUser error:', error);
+        }
       });
 
-      socket.on('category', async (category: string, username: string) => {
-        await this.gatewayCache.saveUserSelectedCategory(`selectedCategories:${username}`, category);
+      socket.on('category', async (category: string) => {
+        try {
+          await this.gatewayCache.saveUserSelectedCategory(`selectedCategories:${currentUser.username}`, category);
+        } catch (error) {
+          this.log.error('category error:', error);
+        }
+      });
+
+      socket.on('disconnect', async (reason: string) => {
+        try {
+          this.log.info(`Socket disconnected: ${socket.id} | user: ${currentUser.username} | reason: ${reason}`);
+          const loggedInUsers = await this.gatewayCache.removeLoggedInUserFromCache('loggedInUsers', currentUser.username);
+          this.io.emit('online', loggedInUsers);
+        } catch (error) {
+          this.log.error('disconnect cleanup error:', error);
+        }
       });
     });
   }
 
+  private setupAuthMiddleware(): void {
+    this.io.use((socket, next) => {
+      const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.split(' ')[1];
+
+      if (!token) {
+        this.log.warn(`Socket connection rejected: no token provided | ip: ${socket.handshake.address}`);
+        return next(new Error('Authentication token is required'));
+      }
+
+      try {
+        const payload = JWT.verify(token, `${config.JWT_TOKEN}`) as IAuthPayload;
+        socket.data.currentUser = payload;
+        next();
+      } catch (error) {
+        this.log.warn(`Socket connection rejected: invalid token | ip: ${socket.handshake.address}`);
+        return next(new Error('Invalid or expired token'));
+      }
+    });
+  }
+
   private chatSocketServiceIOConnection(): void {
-    if (chatSocketClient?.connected) {
+    if (chatSocketClient) {
       return;
     }
 
@@ -83,15 +143,30 @@ export class SocketIOAppHandler {
     });
 
     chatSocketClient.io.on('reconnect_failed', () => {
-      this.log.error('ChatService reconnect failed after all attempts');
+      this.log.error('ChatService reconnect failed after all attempts, scheduling manual reconnect...');
+      if (chatSocketClient) {
+        chatSocketClient.disconnect();
+        chatSocketClient = null;
+      }
+      setTimeout(() => this.chatSocketServiceIOConnection(), 10000);
     });
 
     chatSocketClient.on('message received', (data: IMessageDocument) => {
-      this.io.emit('message received', data);
+      if (data.senderUsername) {
+        this.io.to(`user:${data.senderUsername}`).emit('message received', data);
+      }
+      if (data.receiverUsername) {
+        this.io.to(`user:${data.receiverUsername}`).emit('message received', data);
+      }
     });
 
-    chatSocketClient.on('message updated', (data: IMessageDocument) => {
-      this.io.emit('message updated', data);
+    chatSocketClient.on('message update', (data: IMessageDocument) => {
+      if (data.senderUsername) {
+        this.io.to(`user:${data.senderUsername}`).emit('message updated', data);
+      }
+      if (data.receiverUsername) {
+        this.io.to(`user:${data.receiverUsername}`).emit('message updated', data);
+      }
     });
   }
 }
