@@ -55,4 +55,43 @@ const messageSchema: ObjectSchema = Joi.object().keys({
   createdAt: Joi.string().optional()
 });
 
-export { messageSchema };
+const updateOfferSchema: ObjectSchema = Joi.object().keys({
+  messageId: Joi.string().required().messages({
+    'string.base': 'Message id is required',
+    'string.empty': 'Message id is required',
+    'any.required': 'Message id is required'
+  }),
+  type: Joi.string().required().messages({
+    'string.base': 'Type is required',
+    'string.empty': 'Type is required',
+    'any.required': 'Type is required'
+  })
+});
+
+const markSingleMessageSchema: ObjectSchema = Joi.object().keys({
+  messageId: Joi.string().required().messages({
+    'string.base': 'Message id is required',
+    'string.empty': 'Message id is required',
+    'any.required': 'Message id is required'
+  })
+});
+
+const markMultipleMessagesSchema: ObjectSchema = Joi.object().keys({
+  messageId: Joi.string().required().messages({
+    'string.base': 'Message id is required',
+    'string.empty': 'Message id is required',
+    'any.required': 'Message id is required'
+  }),
+  receiverUsername: Joi.string().required().messages({
+    'string.base': 'Receiver username is required',
+    'string.empty': 'Receiver username is required',
+    'any.required': 'Receiver username is required'
+  }),
+  senderUsername: Joi.string().required().messages({
+    'string.base': 'Sender username is required',
+    'string.empty': 'Sender username is required',
+    'any.required': 'Sender username is required'
+  })
+});
+
+export { messageSchema, updateOfferSchema, markSingleMessageSchema, markMultipleMessagesSchema };

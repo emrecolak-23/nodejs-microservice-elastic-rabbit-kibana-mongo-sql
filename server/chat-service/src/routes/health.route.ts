@@ -12,7 +12,7 @@ export class HealthRoute {
   }
 
   public routes(): Router {
-    this.router.get('/gig-health', this.healthController.health.bind(this.healthController));
+    this.router.get('/chat-health', this.healthController.health.bind(this.healthController));
 
     return this.router;
   }

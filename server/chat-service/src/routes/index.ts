@@ -5,7 +5,7 @@ import { MessageRoute } from '@chat/routes/message.route';
 
 import { verifyGatewayRequest } from '@emrecolak-23/jobber-share';
 
-const BASE_PATH = '/api/v1/chat';
+const BASE_PATH = '/api/v1/message';
 
 export const appRoutes = (app: Application) => {
   const healthRoutes = container.resolve(HealthRoute);
