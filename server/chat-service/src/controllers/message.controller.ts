@@ -1,0 +1,45 @@
+import { MessageService } from '@chat/services';
+import { Request, Response } from 'express';
+import { injectable, singleton } from 'tsyringe';
+import { StatusCodes } from 'http-status-codes';
+import { IMessageAttributes, IMessageDocument } from '@chat/models';
+
+@singleton()
+@injectable()
+export class MessageController {
+  constructor(private readonly messageService: MessageService) {}
+
+  async createMessage(req: Request, res: Response): Promise<void> {
+    const { hasConversationId } = req.body;
+
+    if (!hasConversationId) {
+      const { conversationId, senderUsername, receiverUsername } = req.body;
+      await this.messageService.createConversation(conversationId, senderUsername, receiverUsername);
+    }
+
+    const messageData: IMessageAttributes = {
+      conversationId: req.body.conversationId,
+      senderUsername: req.body.senderUsername,
+      receiverUsername: req.body.receiverUsername,
+      senderPicture: req.body.senderPicture,
+      receiverPicture: req.body.receiverPicture,
+      buyerId: req.body.buyerId,
+      sellerId: req.body.sellerId,
+      body: req.body.body,
+      file: req.body.file,
+      fileType: req.body.fileType,
+      fileSize: req.body.fileSize,
+      fileName: req.body.fileName,
+      gigId: req.body.gigId,
+      isRead: req.body.isRead,
+      hasOffer: req.body.hasOffer,
+      offer: req.body.offer
+    };
+
+    const message: IMessageDocument = await this.messageService.addMessage(messageData);
+    res.status(StatusCodes.CREATED).json({
+      message: 'Message created successfully',
+      conversationId: message.conversationId
+    });
+  }
+}
