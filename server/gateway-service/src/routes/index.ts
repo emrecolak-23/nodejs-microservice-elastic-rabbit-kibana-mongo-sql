@@ -9,6 +9,7 @@ import { AuthMiddleware } from '@gateway/middlewares';
 import { CurrentUserRoute } from './current-user.route';
 import { SellerRoute } from './seller.route';
 import { GigRoute } from './gig.route';
+import { MessageRoute } from './message.route';
 
 const BASE_PATH = '/api/gateway/v1';
 
@@ -22,6 +23,7 @@ export const appRoutes = (app: Application) => {
   const authMiddleware = container.resolve(AuthMiddleware);
   const sellerRoute = container.resolve(SellerRoute);
   const gigRoute = container.resolve(GigRoute);
+  const messageRoute = container.resolve(MessageRoute);
 
   app.use('', healthRoute.routes());
 
@@ -51,5 +53,12 @@ export const appRoutes = (app: Application) => {
     authMiddleware.verifyUser.bind(authMiddleware),
     authMiddleware.checkAuthentication.bind(authMiddleware),
     sellerRoute.routes()
+  );
+
+  app.use(
+    `${BASE_PATH}/message`,
+    authMiddleware.verifyUser.bind(authMiddleware),
+    authMiddleware.checkAuthentication.bind(authMiddleware),
+    messageRoute.routes()
   );
 };
