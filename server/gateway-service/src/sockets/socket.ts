@@ -1,7 +1,7 @@
 import { EnvConfig } from '@gateway/configs';
 import { container } from 'tsyringe';
 import { Logger } from 'winston';
-import { winstonLogger } from '@emrecolak-23/jobber-share';
+import { IMessageDocument, winstonLogger } from '@emrecolak-23/jobber-share';
 import { Server, Socket } from 'socket.io';
 import { GatewayCache } from '@gateway/redis/gateway.cache';
 import { io, Socket as SocketClient } from 'socket.io-client';
@@ -84,6 +84,10 @@ export class SocketIOAppHandler {
 
     chatSocketClient.io.on('reconnect_failed', () => {
       this.log.error('ChatService reconnect failed after all attempts');
+    });
+
+    chatSocketClient.on('message received', (data: IMessageDocument) => {
+      this.io.emit('message received', data);
     });
   }
 }
