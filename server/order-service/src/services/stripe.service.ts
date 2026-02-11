@@ -100,4 +100,11 @@ export class StripeService {
 
     return paymentIntent;
   }
+
+  async refundPaymentIntent(paymentIntentId: string): Promise<Stripe.Refund> {
+    const refund: Stripe.Response<Stripe.Refund> = await this.stripe.refunds.create({
+      payment_intent: paymentIntentId
+    });
+    return refund;
+  }
 }

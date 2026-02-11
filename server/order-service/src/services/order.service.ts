@@ -116,7 +116,7 @@ export class OrderService {
     return order;
   }
 
-  async approveOrder(orderId: string, data: IOrderMessage): Promise<void> {
+  async approveOrder(orderId: string, data: IOrderMessage): Promise<IOrderDocument> {
     const approvedOrder = await this.orderRepository.approveOrder(orderId);
 
     // update seller info
@@ -152,6 +152,8 @@ export class OrderService {
     });
 
     this.notificationService.sendNotification(approvedOrder, approvedOrder.sellerUsername, 'Approved an order for your gig');
+
+    return approvedOrder;
   }
 
   async deliverOrder(orderId: string, delivered: boolean, deliveredWork: IDeliveredWork): Promise<IOrderDocument> {

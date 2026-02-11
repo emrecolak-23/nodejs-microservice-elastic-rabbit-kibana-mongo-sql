@@ -55,4 +55,46 @@ export class OrderController {
       orders: orders
     });
   }
+
+  async cancelOrder(req: Request, res: Response): Promise<void> {
+    const { paymentIntent, orderData } = req.body;
+    const { orderId } = req.params;
+    const refund: Stripe.Refund = await this.stripeService.refundPaymentIntent(paymentIntent);
+    await this.orderService.cancelOrder(orderId as string, orderData);
+
+    res.status(StatusCodes.OK).json({
+      message: 'Order cancelled successfully',
+      refund: refund
+    });
+  }
+
+  async requestDeliveryExtension(req: Request, res: Response): Promise<void> {
+    const { orderId } = req.params;
+    const order: IOrderDocument = await this.orderService.requestDeliverExtension(orderId as string, req.body);
+    res.status(StatusCodes.OK).json({
+      message: 'Delivery extension requested successfully',
+      order: order
+    });
+  }
+
+  async deliveryDate(req: Request, res: Response): Promise<void> {
+    const { orderId, type } = req.params;
+    const order: IOrderDocument =
+      type === 'approve'
+        ? await this.orderService.approveDeliveryExtension(orderId as string, req.body)
+        : await this.orderService.rejectDeliveryExtension(orderId as string);
+    res.status(StatusCodes.OK).json({
+      message: 'Delivery date updated successfully',
+      order: order
+    });
+  }
+
+  async approveOrder(req: Request, res: Response): Promise<void> {
+    const { orderId } = req.params;
+    const order: IOrderDocument = await this.orderService.approveOrder(orderId as string, req.body);
+    res.status(StatusCodes.OK).json({
+      message: 'Order approved successfully',
+      order: order
+    });
+  }
 }
