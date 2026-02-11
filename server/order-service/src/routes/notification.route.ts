@@ -13,10 +13,7 @@ export class NotificationRoute {
 
   public routes(): Router {
     this.router.get('/notification/:userTo', this.notificationController.getNotifications.bind(this.notificationController));
-    this.router.put(
-      '/notification/mark-as-read/:notificationId',
-      this.notificationController.markNotificationAsRead.bind(this.notificationController)
-    );
+    this.router.put('/notification/mark-as-read', this.notificationController.markNotificationAsRead.bind(this.notificationController));
     return this.router;
   }
 }

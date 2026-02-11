@@ -23,7 +23,8 @@ export class NotificationController {
   }
 
   async markNotificationAsRead(req: Request, res: Response): Promise<void> {
-    const notification: INotificationDocument = await this.notificationService.markNotificationAsRead(req.params.notificationId as string);
+    const { notificationId } = req.body;
+    const notification: INotificationDocument = await this.notificationService.markNotificationAsRead(notificationId as string);
 
     await this.orderService.sendSocketNotification(notification.orderId);
 
