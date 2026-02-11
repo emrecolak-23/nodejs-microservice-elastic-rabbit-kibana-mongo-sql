@@ -14,8 +14,8 @@ export class NotficationRepository {
   }
 
   async getNotificationById(notificationId: string): Promise<INotificationDocument | null> {
-    const notification = await this.notificationModel.findById(notificationId);
-    return notification;
+    const notification = await this.notificationModel.findById(notificationId).lean();
+    return notification as INotificationDocument | null;
   }
 
   async getNotificationsByUserTo(userTo: string): Promise<INotificationDocument[]> {
@@ -26,6 +26,7 @@ export class NotficationRepository {
   async markNotificationAsRead(notificationId: string): Promise<INotificationDocument> {
     const updatedNotification = (await this.notificationModel
       .findOneAndUpdate({ _id: new Types.ObjectId(notificationId) }, { $set: { isRead: true } }, { new: true })
+      .lean()
       .exec()) as INotificationDocument;
     return updatedNotification;
   }

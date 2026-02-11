@@ -1,7 +1,7 @@
 import { injectable, singleton } from 'tsyringe';
 import { NotficationRepository } from '@order/repositories/notification.repository';
 import { INotificationDocument, INotificationAttributes } from '@order/models/notification.schema';
-import { IOrderDocument, IOrderNotifcation, NotFoundError } from '@emrecolak-23/jobber-share';
+import { IOrderDocument, NotFoundError } from '@emrecolak-23/jobber-share';
 import { socketIOOrderObject } from '@order/server';
 
 @injectable()

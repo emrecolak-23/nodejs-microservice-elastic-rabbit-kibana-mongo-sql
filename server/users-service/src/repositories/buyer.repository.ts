@@ -8,11 +8,11 @@ export class BuyerRepository {
   constructor(@inject('BuyerModel') private readonly buyerModel: IBuyerModel) {}
 
   async getBuyerByEmail(email: string): Promise<IBuyerDocument | null> {
-    return this.buyerModel.findOne({ email });
+    return this.buyerModel.findOne({ email }).lean() as Promise<IBuyerDocument | null>;
   }
 
   async getBuyerByUsername(username: string): Promise<IBuyerDocument | null> {
-    return this.buyerModel.findOne({ username });
+    return this.buyerModel.findOne({ username }).lean() as Promise<IBuyerDocument | null>;
   }
 
   async getRandomBuyers(count: number): Promise<IBuyerDocument[]> {

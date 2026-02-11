@@ -9,15 +9,15 @@ export class SellerRepository {
   constructor(@inject('SellerModel') private readonly sellerModel: ISellerModel) {}
 
   async getSellerById(sellerId: string): Promise<ISellerDocument | null> {
-    return this.sellerModel.findById(new Types.ObjectId(sellerId)).exec() as Promise<ISellerDocument | null>;
+    return this.sellerModel.findById(new Types.ObjectId(sellerId)).lean().exec() as Promise<ISellerDocument | null>;
   }
 
   async getSellerByUsername(username: string): Promise<ISellerDocument | null> {
-    return this.sellerModel.findOne({ username }).exec() as Promise<ISellerDocument | null>;
+    return this.sellerModel.findOne({ username }).lean().exec() as Promise<ISellerDocument | null>;
   }
 
   async getSellerByEmail(email: string): Promise<ISellerDocument | null> {
-    return this.sellerModel.findOne({ email }).exec() as Promise<ISellerDocument | null>;
+    return this.sellerModel.findOne({ email }).lean().exec() as Promise<ISellerDocument | null>;
   }
 
   async getRandomSellers(count: number): Promise<ISellerDocument[]> {
@@ -53,6 +53,7 @@ export class SellerRepository {
         },
         { new: true }
       )
+      .lean()
       .exec() as Promise<ISellerDocument>;
   }
 
@@ -63,13 +64,14 @@ export class SellerRepository {
     session?: ClientSession
   ): Promise<ISellerDocument> {
     const options = session ? { new: true, session } : { new: true };
-    return this.sellerModel.findByIdAndUpdate(sellerId, { $inc: { [field]: value } }, options).exec() as Promise<ISellerDocument>;
+    return this.sellerModel.findByIdAndUpdate(sellerId, { $inc: { [field]: value } }, options).lean().exec() as Promise<ISellerDocument>;
   }
 
   async updateSellerCancelledJobsCount(sellerId: string, session?: ClientSession): Promise<ISellerDocument> {
     const options = session ? { new: true, session } : { new: true };
     return this.sellerModel
       .findByIdAndUpdate(sellerId, { $inc: { cancelledJobs: 1, ongoingJobs: -1 } }, options)
+      .lean()
       .exec() as Promise<ISellerDocument>;
   }
 
@@ -92,6 +94,7 @@ export class SellerRepository {
         },
         options
       )
+      .lean()
       .exec() as Promise<ISellerDocument>;
   }
 

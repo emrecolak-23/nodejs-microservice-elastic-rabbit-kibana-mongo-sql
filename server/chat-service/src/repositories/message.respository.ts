@@ -84,31 +84,35 @@ export class MessageRepository {
   }
 
   async updateOffer(messageId: string, type: string): Promise<IMessageDocument | null> {
-    const message: IMessageDocument | null = (await this.messageModel.findOneAndUpdate(
-      {
-        _id: messageId
-      },
-      {
-        $set: {
-          [`offer.${type}`]: true
-        }
-      },
-      { new: true }
-    )) as IMessageDocument;
+    const message: IMessageDocument | null = (await this.messageModel
+      .findOneAndUpdate(
+        {
+          _id: messageId
+        },
+        {
+          $set: {
+            [`offer.${type}`]: true
+          }
+        },
+        { new: true }
+      )
+      .lean()) as IMessageDocument;
 
     return message;
   }
 
   async markMessageAsRead(messageId: string): Promise<IMessageDocument> {
-    const message: IMessageDocument | null = (await this.messageModel.findOneAndUpdate(
-      {
-        _id: messageId
-      },
-      {
-        $set: { isRead: true }
-      },
-      { new: true }
-    )) as IMessageDocument;
+    const message: IMessageDocument | null = (await this.messageModel
+      .findOneAndUpdate(
+        {
+          _id: messageId
+        },
+        {
+          $set: { isRead: true }
+        },
+        { new: true }
+      )
+      .lean()) as IMessageDocument;
 
     return message;
   }
@@ -127,7 +131,7 @@ export class MessageRepository {
   }
 
   async getMessageById(messageId: string): Promise<IMessageDocument | null> {
-    const message: IMessageDocument | null = await this.messageModel.findById(messageId);
+    const message: IMessageDocument | null = (await this.messageModel.findById(messageId).lean()) as IMessageDocument | null;
     return message;
   }
 }
