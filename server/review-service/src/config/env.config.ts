@@ -8,6 +8,11 @@ dotenv.config({});
 export class EnvConfig {
   public ENABLE_APM: string;
   public GATEWAY_JWT_TOKEN: string;
+  public DATABASE_HOST: string;
+  public DATABASE_USER: string;
+  public DATABASE_PASSWORD: string;
+  public DATABASE_PORT: string;
+  public DATABASE_NAME: string;
   public JWT_TOKEN: string;
   public NODE_ENV: string;
   public CLIENT_URL: string;
@@ -22,6 +27,11 @@ export class EnvConfig {
 
   constructor() {
     this.ENABLE_APM = process.env.ENABLE_APM || '0';
+    this.DATABASE_HOST = process.env.DATABASE_HOST || '';
+    this.DATABASE_PORT = process.env.DATABASE_PORT || '';
+    this.DATABASE_USER = process.env.DATABASE_USER || '';
+    this.DATABASE_PASSWORD = process.env.DATABASE_PASSWORD || '';
+    this.DATABASE_NAME = process.env.DATABASE_NAME || '';
     this.GATEWAY_JWT_TOKEN = process.env.GATEWAY_JWT_TOKEN || '';
     this.JWT_TOKEN = process.env.JWT_TOKEN || '';
     this.NODE_ENV = process.env.NODE_ENV || 'development';
