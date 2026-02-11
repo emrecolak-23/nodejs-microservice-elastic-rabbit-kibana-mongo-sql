@@ -1,7 +1,7 @@
 import { injectable, singleton } from 'tsyringe';
 import { OrderRepository } from '@order/repositories/order.repository';
 import { IOrderMessage, lowerCase, NotFoundError } from '@emrecolak-23/jobber-share';
-import { IOrderAttributes } from '@order/models/order.schema';
+import { IDeliveredWork, IOrderAttributes } from '@order/models/order.schema';
 import { IOrderDocument } from '@emrecolak-23/jobber-share';
 import { OrderProducer } from '@order/queues/order.producer';
 import { MESSAGE_TYPES, ORDER_QUEUE_CONFIG } from '@order/queues/types/producer.types';
@@ -152,5 +152,32 @@ export class OrderService {
     });
 
     await this.notificationService.sendNotification(approvedOrder, approvedOrder.sellerUsername, 'Approved an order for your gig');
+  }
+
+  async deliverOrder(orderId: string, delivered: boolean, deliveredWork: IDeliveredWork): Promise<IOrderDocument> {
+    const deliveredOrder = await this.orderRepository.deliverOrder(orderId, delivered, deliveredWork);
+
+    if (deliveredOrder) {
+      const messageDetails: IOrderMessage = {
+        orderId: deliveredOrder.orderId,
+        buyerUsername: lowerCase(deliveredOrder.buyerUsername),
+        sellerUsername: lowerCase(deliveredOrder.sellerUsername),
+        title: deliveredOrder.offer.gigTitle,
+        description: deliveredOrder.offer.description,
+        orderUrl: `${this.config.CLIENT_URL}/orders/${deliveredOrder.orderId}/activities`,
+        template: 'orderDelivered'
+      };
+
+      await this.orderProducer.publishDirectMessage({
+        exchangeName: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.exchangeName,
+        routingKey: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.routingKey,
+        message: JSON.stringify(messageDetails),
+        logMessage: 'Order delivered message sent to notification service'
+      });
+
+      await this.notificationService.sendNotification(deliveredOrder, deliveredOrder.buyerUsername, 'Delivered an order for your gig');
+    }
+
+    return deliveredOrder;
   }
 }

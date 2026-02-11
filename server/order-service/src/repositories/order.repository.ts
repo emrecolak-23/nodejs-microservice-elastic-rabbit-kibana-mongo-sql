@@ -1,5 +1,5 @@
 import { injectable, singleton, inject } from 'tsyringe';
-import { IOrderAttributes, IOrderModel } from '@order/models/order.schema';
+import { IDeliveredWork, IOrderAttributes, IOrderModel } from '@order/models/order.schema';
 import { IOrderDocument } from '@emrecolak-23/jobber-share';
 
 @injectable()
@@ -39,6 +39,21 @@ export class OrderRepository {
   async approveOrder(orderId: string): Promise<IOrderDocument> {
     const order = await this.orderModel
       .findOneAndUpdate({ orderId }, { $set: { approved: true, status: 'Completed', approvedAt: new Date() } }, { new: true })
+      .lean<IOrderDocument>()
+      .exec();
+    return order as IOrderDocument;
+  }
+
+  async deliverOrder(orderId: string, delivered: boolean, deliveredWork: IDeliveredWork): Promise<IOrderDocument> {
+    const order = await this.orderModel
+      .findOneAndUpdate(
+        { orderId },
+        {
+          $set: { delivered, deliveredWork, status: 'Delivered', ['events.orderDelivered']: new Date() },
+          $push: { deliveredWork }
+        },
+        { new: true }
+      )
       .lean<IOrderDocument>()
       .exec();
     return order as IOrderDocument;
