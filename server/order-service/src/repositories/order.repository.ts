@@ -107,7 +107,7 @@ export class OrderRepository {
     return order as IOrderDocument;
   }
 
-  async rejectDeliveryExtension(orderId: string, data: IExtendedDelivery): Promise<IOrderDocument> {
+  async rejectDeliveryExtension(orderId: string): Promise<IOrderDocument> {
     const order = await this.orderModel
       .findOneAndUpdate(
         { orderId },
