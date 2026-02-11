@@ -245,8 +245,8 @@ export class OrderService {
     return approvedExtension;
   }
 
-  async rejectDeliveryExtension(orderId: string, data: IExtendedDelivery): Promise<IOrderDocument> {
-    const rejectedExtension = await this.orderRepository.rejectDeliveryExtension(orderId, data);
+  async rejectDeliveryExtension(orderId: string): Promise<IOrderDocument> {
+    const rejectedExtension = await this.orderRepository.rejectDeliveryExtension(orderId);
 
     if (rejectedExtension) {
       const messageDetails: IOrderMessage = {
