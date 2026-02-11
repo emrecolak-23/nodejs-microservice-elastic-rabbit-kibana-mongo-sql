@@ -1,7 +1,7 @@
 import { EnvConfig } from '@gateway/configs';
 import { container } from 'tsyringe';
 import { Logger } from 'winston';
-import { IAuthPayload, IMessageDocument, winstonLogger } from '@emrecolak-23/jobber-share';
+import { IAuthPayload, IMessageDocument, IOrderDocument, IOrderNotifcation, winstonLogger } from '@emrecolak-23/jobber-share';
 import { Server, Socket } from 'socket.io';
 import { GatewayCache } from '@gateway/redis/gateway.cache';
 import { io, Socket as SocketClient } from 'socket.io-client';
@@ -213,6 +213,15 @@ export class SocketIOAppHandler {
         chatSocketClient = null;
       }
       setTimeout(() => this.chatSocketServiceIOConnection(), 10000);
+    });
+
+    orderSocketClient.on('order notification', (data: IOrderDocument, notification: IOrderNotifcation) => {
+      if (data.sellerUsername) {
+        this.io.to(`user:${data.sellerUsername}`).emit('order notification', data, notification);
+      }
+      if (data.buyerUsername) {
+        this.io.to(`user:${data.buyerUsername}`).emit('order notification', data, notification);
+      }
     });
   }
 }

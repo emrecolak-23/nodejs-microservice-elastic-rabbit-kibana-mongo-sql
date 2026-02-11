@@ -4,9 +4,14 @@ import { container } from 'tsyringe';
 import { EnvConfig } from '@order/config';
 import { OrderServer } from '@order/server';
 import { Database } from '@order/loaders';
+import { NotificationModel } from '@order/models/notification.schema';
+import { OrderModel } from '@order/models/order.schema';
 
 const envConfig = container.resolve(EnvConfig);
 const database = container.resolve(Database);
+
+container.register('NotificationModel', { useValue: NotificationModel });
+container.register('OrderModel', { useValue: OrderModel });
 
 class Application {
   constructor(private readonly orderServer: OrderServer) {}
