@@ -27,4 +27,20 @@ export class OrderRepository {
     await newOrder.save();
     return newOrder.toJSON() as IOrderDocument;
   }
+
+  async cancelOrder(orderId: string): Promise<IOrderDocument> {
+    const order = await this.orderModel
+      .findOneAndUpdate({ orderId }, { $set: { cancelled: true, status: 'Cancelled', approvedAt: new Date() } }, { new: true })
+      .lean<IOrderDocument>()
+      .exec();
+    return order as IOrderDocument;
+  }
+
+  async approveOrder(orderId: string): Promise<IOrderDocument> {
+    const order = await this.orderModel
+      .findOneAndUpdate({ orderId }, { $set: { approved: true, status: 'Completed', approvedAt: new Date() } }, { new: true })
+      .lean<IOrderDocument>()
+      .exec();
+    return order as IOrderDocument;
+  }
 }

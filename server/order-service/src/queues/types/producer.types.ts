@@ -3,6 +3,10 @@ export const ORDER_QUEUE_CONFIG = {
     exchangeName: 'jobber-seller-update',
     routingKey: 'user-seller'
   },
+  BUYER_QUEUE_CONFIG: {
+    exchangeName: 'jobber-buyer-update',
+    routingKey: 'user-buyer'
+  },
   NOTIFICATION_QUEUE_CONFIG: {
     exchangeName: 'jobber-order-notification',
     routingKey: 'order-email'
@@ -12,5 +16,6 @@ export const ORDER_QUEUE_CONFIG = {
 export const MESSAGE_TYPES = {
   CREATE_ORDER: 'create-order',
   APPROVE_ORDER: 'approve-order',
-  CANCEL_ORDER: 'cancel-order'
+  CANCEL_ORDER: 'cancel-order',
+  PURCHASED_GIGS: 'purchased-gigs'
 };

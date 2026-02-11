@@ -79,4 +79,78 @@ export class OrderService {
     await this.notificationService.sendNotification(order, orderData.sellerUsername, 'Placed an order for your gig');
     return order;
   }
+
+  async cancelOrder(orderId: string, data: IOrderMessage): Promise<IOrderDocument> {
+    const order = await this.orderRepository.cancelOrder(orderId);
+
+    // update seller info
+    const messageDetails: IOrderMessage = {
+      sellerId: order.sellerId,
+      type: MESSAGE_TYPES.CANCEL_ORDER
+    };
+
+    await this.orderProducer.publishDirectMessage({
+      exchangeName: ORDER_QUEUE_CONFIG.SELLER_QUEUE_CONFIG.exchangeName,
+      routingKey: ORDER_QUEUE_CONFIG.SELLER_QUEUE_CONFIG.routingKey,
+      message: JSON.stringify(messageDetails),
+      logMessage: 'Order cancelled message sent to user service'
+    });
+
+    // update buyer info
+    const buyerMessageDetails: IOrderMessage = {
+      orderId: order.orderId,
+      type: MESSAGE_TYPES.CANCEL_ORDER,
+      buyerId: order.buyerId,
+      purchasedGigs: data.purchasedGigs
+    };
+
+    await this.orderProducer.publishDirectMessage({
+      exchangeName: ORDER_QUEUE_CONFIG.BUYER_QUEUE_CONFIG.exchangeName,
+      routingKey: ORDER_QUEUE_CONFIG.BUYER_QUEUE_CONFIG.routingKey,
+      message: JSON.stringify(buyerMessageDetails),
+      logMessage: 'Order cancelled message sent to user service'
+    });
+
+    await this.notificationService.sendNotification(order, order.sellerUsername, 'Cancelled an order for your gig');
+
+    return order;
+  }
+
+  async approveOrder(orderId: string, data: IOrderMessage): Promise<void> {
+    const approvedOrder = await this.orderRepository.approveOrder(orderId);
+
+    // update seller info
+    const messageDetails: IOrderMessage = {
+      sellerId: data.sellerId,
+      type: MESSAGE_TYPES.APPROVE_ORDER,
+      buyerId: data.buyerId,
+      ongoingJobs: data.ongoingJobs,
+      completedJobs: data.completedJobs,
+      totalEarnings: data.totalEarnings,
+      recentDelivery: data.recentDelivery
+    } as IOrderMessage;
+
+    await this.orderProducer.publishDirectMessage({
+      exchangeName: ORDER_QUEUE_CONFIG.SELLER_QUEUE_CONFIG.exchangeName,
+      routingKey: ORDER_QUEUE_CONFIG.SELLER_QUEUE_CONFIG.routingKey,
+      message: JSON.stringify(messageDetails),
+      logMessage: 'Order approved message sent to user service'
+    });
+
+    // update buyer info
+    const buyerMessageDetails: IOrderMessage = {
+      type: MESSAGE_TYPES.PURCHASED_GIGS,
+      buyerId: approvedOrder.buyerId,
+      purchasedGigs: approvedOrder.gigId
+    } as IOrderMessage;
+
+    await this.orderProducer.publishDirectMessage({
+      exchangeName: ORDER_QUEUE_CONFIG.BUYER_QUEUE_CONFIG.exchangeName,
+      routingKey: ORDER_QUEUE_CONFIG.BUYER_QUEUE_CONFIG.routingKey,
+      message: JSON.stringify(buyerMessageDetails),
+      logMessage: 'Order approved message sent to user service'
+    });
+
+    await this.notificationService.sendNotification(approvedOrder, approvedOrder.sellerUsername, 'Approved an order for your gig');
+  }
 }
