@@ -56,6 +56,15 @@ export class OrderController {
     });
   }
 
+  async getOrdersByBuyerId(req: Request, res: Response): Promise<void> {
+    const { buyerId } = req.params;
+    const orders: IOrderDocument[] = await this.orderService.getOrdersByBuyerId(buyerId as string);
+    res.status(StatusCodes.OK).json({
+      message: 'Orders retrieved successfully',
+      orders: orders
+    });
+  }
+
   async cancelOrder(req: Request, res: Response): Promise<void> {
     const { paymentIntent, orderData } = req.body;
     const { orderId } = req.params;
