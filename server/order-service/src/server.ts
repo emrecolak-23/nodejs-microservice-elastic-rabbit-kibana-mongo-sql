@@ -16,6 +16,7 @@ import { appRoutes } from '@order/routes';
 import { Channel } from 'amqplib';
 import { Server } from 'socket.io';
 import { QueueConnection } from './queues/connection';
+import { OrderConsumer } from './queues/order.consumer';
 
 const SERVER_PORT = 4006;
 
@@ -29,7 +30,8 @@ export class OrderServer {
   constructor(
     private readonly config: EnvConfig,
     private readonly elasticSearch: ElasticSearch,
-    private readonly queueConnection: QueueConnection
+    private readonly queueConnection: QueueConnection,
+    private readonly orderConsumer: OrderConsumer
   ) {}
 
   public start(app: Application): void {
@@ -75,6 +77,7 @@ export class OrderServer {
 
   private async startQueues(): Promise<void> {
     orderChannel = (await this.queueConnection.connect()) as Channel;
+    await this.orderConsumer.consumeReviewFanoutMessages(orderChannel);
   }
 
   private routesMiddleware(app: Application): void {

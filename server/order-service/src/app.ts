@@ -6,10 +6,11 @@ import { OrderServer } from '@order/server';
 import { Database } from '@order/loaders';
 import { NotificationModel } from '@order/models/notification.schema';
 import { OrderModel } from '@order/models/order.schema';
+import { Redis } from '@order/loaders/redis';
 
 const envConfig = container.resolve(EnvConfig);
 const database = container.resolve(Database);
-
+const redis = container.resolve(Redis);
 container.register('NotificationModel', { useValue: NotificationModel });
 container.register('OrderModel', { useValue: OrderModel });
 
@@ -19,6 +20,7 @@ class Application {
     envConfig.cloudinaryConfig();
     const app: Express = express();
     database.databaseConnection();
+    await redis.connect();
     this.orderServer.start(app);
   }
 }

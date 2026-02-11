@@ -12,6 +12,7 @@ export class EnvConfig {
   public JWT_TOKEN: string;
   public NODE_ENV: string;
   public CLIENT_URL: string;
+  public REDIS_HOST: string;
   public API_GATEWAY_URL: string;
   public RABBITMQ_ENDPOINT: string;
   public DATABASE_URL: string;
@@ -28,6 +29,7 @@ export class EnvConfig {
     this.JWT_TOKEN = process.env.JWT_TOKEN || '';
     this.NODE_ENV = process.env.NODE_ENV || 'development';
     this.CLIENT_URL = process.env.CLIENT_URL || '';
+    this.REDIS_HOST = process.env.REDIS_HOST || '';
     this.API_GATEWAY_URL = process.env.API_GATEWAY_URL || '';
     this.RABBITMQ_ENDPOINT = process.env.RABBITMQ_ENDPOINT || '';
     this.DATABASE_URL = process.env.DATABASE_URL || '';
