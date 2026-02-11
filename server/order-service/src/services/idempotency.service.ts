@@ -61,4 +61,25 @@ export class IdempotencyService {
 
     this.log.info(`Idempotency key cleared: ${messageId}`);
   }
+
+  async getOrCreate(id: string, value: string, ttlSeconds: number): Promise<string> {
+    const key = this.getKey(id);
+
+    const wasSet = await this.redis.executeCommand(() => this.redis.redisClient.set(key, value, { NX: true, EX: ttlSeconds }));
+
+    if (wasSet === 'OK') {
+      this.log.debug(`Idempotency key created: ${id} (ttl=${ttlSeconds}s)`);
+      return value;
+    }
+
+    const existing = await this.redis.executeCommand(() => this.redis.redisClient.get(key));
+
+    if (existing) {
+      this.log.debug(`Idempotency key reused: ${id}`);
+      return existing;
+    }
+
+    this.log.warn(`Failed to read existing idempotency key: ${id}, using new value as fallback`);
+    return value;
+  }
 }
