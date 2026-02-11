@@ -1,6 +1,6 @@
 import { injectable, singleton } from 'tsyringe';
 import { OrderRepository } from '@order/repositories/order.repository';
-import { IOrderMessage, lowerCase, NotFoundError } from '@emrecolak-23/jobber-share';
+import { IExtendedDelivery, IOrderMessage, lowerCase, NotFoundError } from '@emrecolak-23/jobber-share';
 import { IDeliveredWork, IOrderAttributes } from '@order/models/order.schema';
 import { IOrderDocument } from '@emrecolak-23/jobber-share';
 import { OrderProducer } from '@order/queues/order.producer';
@@ -76,7 +76,7 @@ export class OrderService {
       logMessage: 'Order email message sent to notification service'
     });
 
-    await this.notificationService.sendNotification(order, orderData.sellerUsername, 'Placed an order for your gig');
+    this.notificationService.sendNotification(order, orderData.sellerUsername, 'Placed an order for your gig');
     return order;
   }
 
@@ -111,7 +111,7 @@ export class OrderService {
       logMessage: 'Order cancelled message sent to user service'
     });
 
-    await this.notificationService.sendNotification(order, order.sellerUsername, 'Cancelled an order for your gig');
+    this.notificationService.sendNotification(order, order.sellerUsername, 'Cancelled an order for your gig');
 
     return order;
   }
@@ -151,7 +151,7 @@ export class OrderService {
       logMessage: 'Order approved message sent to user service'
     });
 
-    await this.notificationService.sendNotification(approvedOrder, approvedOrder.sellerUsername, 'Approved an order for your gig');
+    this.notificationService.sendNotification(approvedOrder, approvedOrder.sellerUsername, 'Approved an order for your gig');
   }
 
   async deliverOrder(orderId: string, delivered: boolean, deliveredWork: IDeliveredWork): Promise<IOrderDocument> {
@@ -175,9 +175,105 @@ export class OrderService {
         logMessage: 'Order delivered message sent to notification service'
       });
 
-      await this.notificationService.sendNotification(deliveredOrder, deliveredOrder.buyerUsername, 'Delivered an order for your gig');
+      this.notificationService.sendNotification(deliveredOrder, deliveredOrder.buyerUsername, 'Delivered an order for your gig');
     }
 
     return deliveredOrder;
+  }
+
+  async requestDeliverExtension(orderId: string, data: IExtendedDelivery): Promise<IOrderDocument> {
+    const orderWithExtension = await this.orderRepository.requestDeliverExtension(orderId, data);
+
+    if (orderWithExtension) {
+      const messageDetails: IOrderMessage = {
+        orderId: orderWithExtension.orderId,
+        buyerUsername: lowerCase(orderWithExtension.buyerUsername),
+        sellerUsername: lowerCase(orderWithExtension.sellerUsername),
+        originalDate: orderWithExtension.offer.oldDeliveryDate,
+        newDate: orderWithExtension.offer.newDeliveryDate,
+        reason: orderWithExtension.offer.reason,
+        orderUrl: `${this.config.CLIENT_URL}/orders/${orderWithExtension.orderId}/activities`,
+        template: 'orderExtension'
+      };
+
+      await this.orderProducer.publishDirectMessage({
+        exchangeName: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.exchangeName,
+        routingKey: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.routingKey,
+        message: JSON.stringify(messageDetails),
+        logMessage: 'Order extension requested message sent to notification service'
+      });
+
+      this.notificationService.sendNotification(
+        orderWithExtension,
+        orderWithExtension.buyerUsername,
+        'Requested an order delivery extension'
+      );
+    }
+
+    return orderWithExtension;
+  }
+
+  async approveDeliveryExtension(orderId: string, data: IExtendedDelivery): Promise<IOrderDocument> {
+    const approvedExtension = await this.orderRepository.approveDeliveryExtension(orderId, data);
+
+    if (approvedExtension) {
+      const messageDetails: IOrderMessage = {
+        subject: 'Congratulations! Your order delivery extension request was approved',
+        buyerUsername: lowerCase(approvedExtension.buyerUsername),
+        sellerUsername: lowerCase(approvedExtension.sellerUsername),
+        header: 'Request Accepted',
+        type: 'accepted',
+        message: 'You can continue working on the order',
+        orderUrl: `${this.config.CLIENT_URL}/orders/${approvedExtension.orderId}/activities`,
+        template: 'orderExtensionApproval'
+      };
+
+      await this.orderProducer.publishDirectMessage({
+        exchangeName: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.exchangeName,
+        routingKey: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.routingKey,
+        message: JSON.stringify(messageDetails),
+        logMessage: 'Order extension approved message sent to notification service'
+      });
+
+      this.notificationService.sendNotification(
+        approvedExtension,
+        approvedExtension.sellerUsername,
+        'Approved your order delivery date extension'
+      );
+    }
+
+    return approvedExtension;
+  }
+
+  async rejectDeliveryExtension(orderId: string, data: IExtendedDelivery): Promise<IOrderDocument> {
+    const rejectedExtension = await this.orderRepository.rejectDeliveryExtension(orderId, data);
+
+    if (rejectedExtension) {
+      const messageDetails: IOrderMessage = {
+        subject: 'Sorry! Your order delivery extension request was rejected',
+        buyerUsername: lowerCase(rejectedExtension.buyerUsername),
+        sellerUsername: lowerCase(rejectedExtension.sellerUsername),
+        header: 'Request Rejected',
+        type: 'rejected',
+        message: 'You can contact the buyer for more information',
+        orderUrl: `${this.config.CLIENT_URL}/orders/${rejectedExtension.orderId}/activities`,
+        template: 'orderExtensionApproval'
+      };
+
+      await this.orderProducer.publishDirectMessage({
+        exchangeName: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.exchangeName,
+        routingKey: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.routingKey,
+        message: JSON.stringify(messageDetails),
+        logMessage: 'Order extension rejected message sent to notification service'
+      });
+
+      this.notificationService.sendNotification(
+        rejectedExtension,
+        rejectedExtension.sellerUsername,
+        'Rejected your order delivery extension'
+      );
+    }
+
+    return rejectedExtension;
   }
 }
