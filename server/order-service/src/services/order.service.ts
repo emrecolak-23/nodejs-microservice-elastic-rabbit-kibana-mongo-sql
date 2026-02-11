@@ -17,6 +17,7 @@ import { EnvConfig } from '@order/config';
 import { NotificationService } from './notification.service';
 import crypto from 'crypto';
 import { UploadApiResponse } from 'cloudinary';
+import { socketIOOrderObject } from '@order/server';
 @injectable()
 @singleton()
 export class OrderService {
@@ -313,5 +314,15 @@ export class OrderService {
       );
     }
     return updatedOrderReview;
+  }
+
+  async sendSocketNotification(orderId: string): Promise<void> {
+    const order: IOrderDocument | undefined = await this.orderRepository.getOrderById(orderId);
+
+    if (!order) {
+      throw new NotFoundError('Order not found', 'OrderService sendSocketNotification() method error');
+    }
+
+    socketIOOrderObject.emit('order notification', order);
   }
 }
