@@ -5,7 +5,7 @@ import { StripeService } from '@order/services/stripe.service';
 import Stripe from 'stripe';
 import { StatusCodes } from 'http-status-codes';
 import { IOrderAttributes } from '@order/models/order.schema';
-import { IOrderDocument } from '@emrecolak-23/jobber-share';
+import { IDeliveredWork, IOrderDocument } from '@emrecolak-23/jobber-share';
 
 @injectable()
 @singleton()
@@ -94,6 +94,31 @@ export class OrderController {
     const order: IOrderDocument = await this.orderService.approveOrder(orderId as string, req.body);
     res.status(StatusCodes.OK).json({
       message: 'Order approved successfully',
+      order: order
+    });
+  }
+
+  async deliverOrder(req: Request, res: Response): Promise<void> {
+    const { orderId } = req.params;
+    let file: string = req.body.file;
+    const fileType: string = req.body.fileType;
+
+    if (file) {
+      file = await this.orderService.uploadOrderFile(file, fileType);
+    }
+
+    const deliveredWork: IDeliveredWork = {
+      message: req.body.message,
+      file,
+      fileType,
+      fileSize: req.body.fileSize,
+      fileName: req.body.fileName
+    };
+
+    const order: IOrderDocument = await this.orderService.deliverOrder(orderId as string, true, deliveredWork);
+
+    res.status(StatusCodes.OK).json({
+      message: 'Order delivered successfully',
       order: order
     });
   }

@@ -1,12 +1,22 @@
 import { injectable, singleton } from 'tsyringe';
 import { OrderRepository } from '@order/repositories/order.repository';
-import { IExtendedDelivery, IOrderMessage, IReviewMessageDetails, lowerCase, NotFoundError } from '@emrecolak-23/jobber-share';
+import {
+  BadRequestError,
+  IExtendedDelivery,
+  IOrderMessage,
+  IReviewMessageDetails,
+  lowerCase,
+  NotFoundError,
+  uploads
+} from '@emrecolak-23/jobber-share';
 import { IDeliveredWork, IOrderAttributes } from '@order/models/order.schema';
 import { IOrderDocument } from '@emrecolak-23/jobber-share';
 import { OrderProducer } from '@order/queues/order.producer';
 import { MESSAGE_TYPES, ORDER_QUEUE_CONFIG } from '@order/queues/types/producer.types';
 import { EnvConfig } from '@order/config';
 import { NotificationService } from './notification.service';
+import crypto from 'crypto';
+import { UploadApiResponse } from 'cloudinary';
 @injectable()
 @singleton()
 export class OrderService {
@@ -154,6 +164,19 @@ export class OrderService {
     this.notificationService.sendNotification(approvedOrder, approvedOrder.sellerUsername, 'Approved an order for your gig');
 
     return approvedOrder;
+  }
+
+  async uploadOrderFile(file: string, fileType: string): Promise<string> {
+    const randomBytes: Buffer = await Promise.resolve(crypto.randomBytes(20));
+    const randomCharacters: string = randomBytes.toString('hex');
+    const result: UploadApiResponse | undefined =
+      fileType === 'zip'
+        ? ((await uploads(file, `${randomCharacters}.zip`)) as UploadApiResponse)
+        : ((await uploads(file, `${randomCharacters}.${fileType}`)) as UploadApiResponse);
+    if (!result?.public_id) {
+      throw new BadRequestError('File upload failed. Please try again.', 'OrderService uploadOrderFile() method error');
+    }
+    return result.secure_url;
   }
 
   async deliverOrder(orderId: string, delivered: boolean, deliveredWork: IDeliveredWork): Promise<IOrderDocument> {
