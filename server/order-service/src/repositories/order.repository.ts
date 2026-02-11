@@ -1,6 +1,6 @@
 import { injectable, singleton, inject } from 'tsyringe';
 import { IDeliveredWork, IOrderAttributes, IOrderModel } from '@order/models/order.schema';
-import { IOrderDocument, IExtendedDelivery } from '@emrecolak-23/jobber-share';
+import { IOrderDocument, IExtendedDelivery, IReviewMessageDetails } from '@emrecolak-23/jobber-share';
 
 @injectable()
 @singleton()
@@ -120,6 +120,39 @@ export class OrderRepository {
               reason: ''
             }
           }
+        },
+        { new: true }
+      )
+      .lean<IOrderDocument>()
+      .exec();
+    return order as IOrderDocument;
+  }
+
+  async updateOrderReview(data: IReviewMessageDetails): Promise<IOrderDocument> {
+    const { review, rating } = data;
+
+    const order = await this.orderModel
+      .findOneAndUpdate(
+        { orderId: data.orderId },
+        {
+          $set:
+            data.type === 'buyer-review'
+              ? {
+                  buyerReview: {
+                    review,
+                    rating,
+                    date: new Date(`${data.createdAt}`)
+                  },
+                  ['events.buyerReview']: new Date(`${data.createdAt}`)
+                }
+              : {
+                  sellerReview: {
+                    review,
+                    rating,
+                    date: new Date(`${data.createdAt}`)
+                  },
+                  ['events.sellerReview']: new Date(`${data.createdAt}`)
+                }
         },
         { new: true }
       )

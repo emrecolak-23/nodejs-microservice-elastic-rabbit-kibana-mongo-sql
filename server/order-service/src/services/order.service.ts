@@ -1,6 +1,6 @@
 import { injectable, singleton } from 'tsyringe';
 import { OrderRepository } from '@order/repositories/order.repository';
-import { IExtendedDelivery, IOrderMessage, lowerCase, NotFoundError } from '@emrecolak-23/jobber-share';
+import { IExtendedDelivery, IOrderMessage, IReviewMessageDetails, lowerCase, NotFoundError } from '@emrecolak-23/jobber-share';
 import { IDeliveredWork, IOrderAttributes } from '@order/models/order.schema';
 import { IOrderDocument } from '@emrecolak-23/jobber-share';
 import { OrderProducer } from '@order/queues/order.producer';
@@ -275,5 +275,18 @@ export class OrderService {
     }
 
     return rejectedExtension;
+  }
+
+  async updateOrderReview(data: IReviewMessageDetails): Promise<IOrderDocument> {
+    const updatedOrderReview = await this.orderRepository.updateOrderReview(data);
+
+    if (updatedOrderReview) {
+      this.notificationService.sendNotification(
+        updatedOrderReview,
+        data.type === 'buyer-review' ? updatedOrderReview.sellerUsername : updatedOrderReview.buyerUsername,
+        `Left your a ${data.rating} star review`
+      );
+    }
+    return updatedOrderReview;
   }
 }
