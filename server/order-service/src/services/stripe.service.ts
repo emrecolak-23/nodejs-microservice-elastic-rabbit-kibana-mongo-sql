@@ -25,7 +25,7 @@ export class StripeService {
     return email.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
   }
 
-  private calculateAmountInCents(price: number): number {
+  calculateAmountInCents(price: number): number {
     const priceInCents = Math.round(price * 100);
     const serviceFeeInCents = price < 50 ? Math.round(price * 5.5) + 200 : Math.round(price * 5.5);
     return priceInCents + serviceFeeInCents;
