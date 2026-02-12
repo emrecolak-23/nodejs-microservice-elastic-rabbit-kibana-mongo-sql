@@ -23,6 +23,7 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { SocketIOAppHandler } from '@gateway/sockets/socket';
 import { axiosMessageInstance } from './services/api/message.service';
 import { axiosOrderInstance } from './services/api/order.service';
+import { axiosReviewInstance } from './services/api/review.service';
 
 const SERVER_PORT = 4000;
 export let socketIO: Server;
@@ -74,6 +75,7 @@ export class GatewayServer {
         axiosGigInstance.defaults.headers['Authorization'] = `Bearer ${req.session.jwt}`;
         axiosMessageInstance.defaults.headers['Authorization'] = `Bearer ${req.session.jwt}`;
         axiosOrderInstance.defaults.headers['Authorization'] = `Bearer ${req.session.jwt}`;
+        axiosReviewInstance.defaults.headers['Authorization'] = `Bearer ${req.session.jwt}`;
       }
 
       next();

@@ -5,3 +5,4 @@ export * from './users/seller.controller';
 export * from './gig/gig.controller';
 export * from './chat/message.controller';
 export * from './order/order.controller';
+export * from './review/review.controller';
