@@ -35,4 +35,12 @@ export class ReviewService {
 
     return row;
   }
+
+  async getReviewsByGigId(gigId: string): Promise<IReviewDocument[]> {
+    return this.reviewRepository.getReviewsByGigId(gigId);
+  }
+
+  async getReviewsBySellerId(sellerId: string): Promise<IReviewDocument[]> {
+    return this.reviewRepository.getReviewsBySellerId(sellerId);
+  }
 }

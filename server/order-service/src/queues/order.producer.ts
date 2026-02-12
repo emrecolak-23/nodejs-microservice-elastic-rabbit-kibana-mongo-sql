@@ -10,6 +10,7 @@ interface PublishOptions {
   routingKey: string;
   message: string;
   logMessage: string;
+  channel: Channel | undefined;
 }
 
 @injectable()
@@ -66,13 +67,17 @@ export class OrderProducer {
 
   async publishDirectMessage(options: PublishOptions): Promise<boolean> {
     const { exchangeName, routingKey, message, logMessage } = options;
+    let channel: Channel | undefined = options.channel;
 
     for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
       try {
-        const channel = await this.getChannel();
+        if (!channel) {
+          channel = await this.getChannel();
+        }
         await this.ensureExchange(channel, exchangeName);
+        const messageId = crypto.randomUUID();
 
-        const success = channel.publish(exchangeName, routingKey, Buffer.from(message), { persistent: true });
+        const success = channel.publish(exchangeName, routingKey, Buffer.from(message), { persistent: true, messageId });
 
         if (success) {
           this.log.info(logMessage);
