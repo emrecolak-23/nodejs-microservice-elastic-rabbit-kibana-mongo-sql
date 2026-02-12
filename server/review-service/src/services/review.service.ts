@@ -2,7 +2,6 @@ import { injectable, singleton } from 'tsyringe';
 import { ReviewRepository } from '@review/repositories/review.repository';
 import { IReviewDocument, IReviewMessageDetails } from '@emrecolak-23/jobber-share';
 import { ReviewerProducer } from '@review/queues/reviewer.producer';
-import { reviewChannel } from '@review/server';
 
 @singleton()
 @injectable()
@@ -27,7 +26,6 @@ export class ReviewService {
     };
 
     await this.reviewerProducer.publishFanoutMessage({
-      channel: reviewChannel,
       exchangeName: 'reviewer',
       message: JSON.stringify(reviewMessage),
       logMessage: 'Review message sent to reviewer service'

@@ -10,7 +10,6 @@ interface PublishOptions {
   exchangeName: string;
   message: string;
   logMessage: string;
-  channel: ConfirmChannel | undefined;
 }
 
 @injectable()
@@ -29,6 +28,10 @@ export class ReviewerProducer {
     private readonly queueConnection: QueueConnection
   ) {}
 
+  private async getChannel(): Promise<ConfirmChannel> {
+    return this.queueConnection.getConfirmChannel();
+  }
+
   private clearExchanges(): void {
     this.initializedExchanges.clear();
   }
@@ -44,14 +47,11 @@ export class ReviewerProducer {
 
   async publishFanoutMessage(options: PublishOptions): Promise<boolean> {
     const { exchangeName, message, logMessage } = options;
-    let channel: ConfirmChannel | undefined = options.channel;
     const messageId = crypto.randomUUID();
 
     for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
       try {
-        if (!channel) {
-          channel = (await this.queueConnection.connect()) as ConfirmChannel;
-        }
+        const channel = await this.getChannel();
         await this.ensureExchange(channel, exchangeName);
 
         await this.publishWithConfirm(channel, exchangeName, message, messageId, attempt);

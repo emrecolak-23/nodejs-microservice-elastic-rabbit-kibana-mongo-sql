@@ -7,9 +7,10 @@ import { injectable, singleton } from 'tsyringe';
 @singleton()
 @injectable()
 export class QueueConnection {
-  private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'reviewQueueConnection', 'debug');
+  private readonly log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'reviewQueueConnection', 'debug');
   private connection: ChannelModel | null = null;
   private channel: Channel | null = null;
+  private confirmChannel: ConfirmChannel | null = null;
   private isConnecting: boolean = false;
   private isSigintHandlerSet: boolean = false;
 
@@ -18,29 +19,47 @@ export class QueueConnection {
 
   constructor(private readonly config: EnvConfig) {}
 
-  async connect(): Promise<Channel> {
-    if (this.channel && this.connection) {
-      return this.channel;
+  async getChannel(): Promise<Channel> {
+    await this.ensureConnection();
+
+    if (!this.channel) {
+      this.channel = await this.connection!.createChannel();
+      this.setupChannelEvents(this.channel, 'Channel');
+      this.log.info('Channel created');
     }
+
+    return this.channel;
+  }
+
+  async getConfirmChannel(): Promise<ConfirmChannel> {
+    await this.ensureConnection();
+
+    if (!this.confirmChannel) {
+      this.confirmChannel = await this.connection!.createConfirmChannel();
+      this.setupChannelEvents(this.confirmChannel, 'ConfirmChannel');
+      this.log.info('ConfirmChannel created');
+    }
+
+    return this.confirmChannel;
+  }
+
+  private async ensureConnection(): Promise<void> {
+    if (this.connection) return;
 
     if (this.isConnecting) {
       await this.waitForConnection();
-      return this.channel!;
+      return;
     }
 
     this.isConnecting = true;
 
     try {
       this.connection = await this.createConnection();
-      this.channel = await this.connection.createChannel();
-
-      this.setupEventHandlers();
+      this.setupConnectionEvents();
       this.handleCloseOnSigint();
-
-      this.log.info('ReviewService connected to queue successfully');
-      return this.channel;
+      this.log.info('RabbitMQ connection established');
     } catch (error) {
-      this.log.log('error', 'ReviewService QueueConnection.connect() method error:', error);
+      this.log.error('RabbitMQ connection failed:', error);
       throw error;
     } finally {
       this.isConnecting = false;
@@ -52,7 +71,7 @@ export class QueueConnection {
       return await client.connect(this.config.RABBITMQ_ENDPOINT);
     } catch (error) {
       if (retryCount < this.MAX_RETRIES) {
-        this.log.warn(`RabbitMQ connection failed, retrying in ${this.RETRY_DELAY}ms... (${retryCount + 1}/${this.MAX_RETRIES})`);
+        this.log.warn(`Connection failed, retrying in ${this.RETRY_DELAY}ms... (${retryCount + 1}/${this.MAX_RETRIES})`);
         await this.delay(this.RETRY_DELAY);
         return this.createConnection(retryCount + 1);
       }
@@ -60,14 +79,12 @@ export class QueueConnection {
     }
   }
 
-  private setupEventHandlers(): void {
+  private setupConnectionEvents(): void {
     if (!this.connection) return;
 
     this.connection.on('close', async (err) => {
       this.log.warn('RabbitMQ connection closed', err);
-      this.channel = null;
-      this.connection = null;
-
+      this.resetAll();
       await this.reconnect();
     });
 
@@ -82,23 +99,34 @@ export class QueueConnection {
     this.connection.on('unblocked', () => {
       this.log.info('RabbitMQ connection unblocked');
     });
+  }
 
-    if (this.channel) {
-      this.channel.on('error', (err) => {
-        this.log.error('RabbitMQ channel error:', err);
-      });
+  private setupChannelEvents(channel: Channel | ConfirmChannel, name: 'Channel' | 'ConfirmChannel'): void {
+    const eventEmitter = channel as NodeJS.EventEmitter;
 
-      this.channel.on('close', () => {
-        this.log.warn('RabbitMQ channel closed');
-      });
-    }
+    eventEmitter.on('error', (err) => {
+      this.log.error(`${name} error:`, err);
+      if (name === 'Channel') this.channel = null;
+      else this.confirmChannel = null;
+    });
+
+    eventEmitter.on('close', () => {
+      this.log.warn(`${name} closed`);
+      if (name === 'Channel') this.channel = null;
+      else this.confirmChannel = null;
+    });
+  }
+
+  private resetAll(): void {
+    this.channel = null;
+    this.confirmChannel = null;
+    this.connection = null;
   }
 
   private async reconnect(): Promise<void> {
     this.log.info('Attempting to reconnect to RabbitMQ...');
-
     try {
-      await this.connect();
+      await this.ensureConnection();
       this.log.info('Reconnected to RabbitMQ successfully');
     } catch (error) {
       this.log.error('Failed to reconnect to RabbitMQ:', error);
@@ -122,6 +150,7 @@ export class QueueConnection {
       this.log.info('Closing RabbitMQ connection...');
       try {
         if (this.channel) await this.channel.close();
+        if (this.confirmChannel) await this.confirmChannel.close();
         if (this.connection) await this.connection.close();
         this.log.info('RabbitMQ connection closed gracefully');
       } catch (error) {
@@ -132,21 +161,7 @@ export class QueueConnection {
     this.isSigintHandlerSet = true;
   }
 
-  async createConfirmChannel(): Promise<ConfirmChannel> {
-    if (!this.connection) {
-      await this.connect();
-    }
-
-    const confirmChannel = await this.connection!.createConfirmChannel();
-    this.log.info('ReviewService confirm channel created successfully');
-    return confirmChannel;
-  }
-
   isConnected(): boolean {
-    return this.connection !== null && this.channel !== null;
-  }
-
-  getChannel(): Channel | null {
-    return this.channel;
+    return this.connection !== null;
   }
 }

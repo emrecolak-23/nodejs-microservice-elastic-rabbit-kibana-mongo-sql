@@ -13,12 +13,12 @@ import { injectable, singleton } from 'tsyringe';
 import { ElasticSearch } from '@review/loaders';
 import { verify } from 'jsonwebtoken';
 import { appRoutes } from '@review/routes';
-import { ConfirmChannel } from 'amqplib';
 import { QueueConnection } from '@review/queues/connection';
+import { Channel } from 'amqplib';
 
 const SERVER_PORT = 4007;
 
-export let reviewChannel: ConfirmChannel | undefined;
+export let reviewChannel: Channel | undefined;
 
 @singleton()
 @injectable()
@@ -72,7 +72,7 @@ export class ReviewServer {
   }
 
   private async startQueues(): Promise<void> {
-    reviewChannel = await this.queueConnection.createConfirmChannel();
+    reviewChannel = await this.queueConnection.getChannel();
   }
 
   private routesMiddleware(app: Application): void {
