@@ -16,7 +16,7 @@
     "test": "jest --coverage=true -w=1 --forceExit --detectOpenHandles --watchAll=false"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^9.3.0",
+    "@elastic/elasticsearch": "^8.17.0",
     "@emrecolak-23/jobber-share": "^0.0.14",
     "@faker-js/faker": "^10.3.0",
     "amqplib": "^0.10.9",

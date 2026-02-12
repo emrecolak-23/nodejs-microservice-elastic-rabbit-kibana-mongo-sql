@@ -72,15 +72,24 @@ services:
     image: elasticsearch:8.17.0
     restart: always
     environment:
-      - discovery.type=single-node
-      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
-      - xpack.security.enabled=false
+      ES_JAVA_OPTS: -Xmx1g -Xms1g
+      bootstrap.memory_lock: 'true'
+      discovery.type: single-node
+      network.host: 0.0.0.0
+      transport.host: 127.0.0.1
+      http.host: 0.0.0.0
+      xpack.security.enabled: 'false'
+      xpack.security.authc.api_key.enabled: 'false'
+      xpack.monitoring.collection.enabled: 'false'
+      xpack.security.enrollment.enabled: 'false'
+      xpack.security.authc.token.enabled: 'false'
+      ELASTIC_PASSWORD: admin1234
     healthcheck:
-      test: ['CMD-SHELL', 'curl -f http://localhost:9200/_cluster/health || exit 1']
-      interval: 30s
+      test: ['CMD-SHELL', 'curl -f -u elastic:admin1234 http://localhost:9200/_cluster/health || exit 1'] # ✅ Auth eklendi
+      interval: 10s
       timeout: 10s
-      retries: 5
-      start_period: 30s
+      retries: 10
+      start_period: 60s
     ports:
       - '9200:9200'
     volumes:
@@ -123,8 +132,10 @@ services:
       - ELASTIC_APM_SERVER_URL=http://localhost:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
-      - mysql
-      - elasticsearch
+      mysql:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     networks:
       - jobber
   gateway:
@@ -219,8 +230,10 @@ services:
       - ELASTIC_APM_SERVER_URL=http://localhost:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
-      - mongodb
-      - elasticsearch
+      mongodb:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     networks:
       - jobber
   gig:
@@ -248,8 +261,10 @@ services:
       - ELASTIC_APM_SERVER_URL=http://localhost:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
-      - mongodb
-      - elasticsearch
+      mongodb:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     networks:
       - jobber
 
@@ -279,10 +294,14 @@ services:
       - ELASTIC_APM_SERVER_URL=http://localhost:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
-      - mongodb
-      - redis
-      - rabbitmq
-      - elasticsearch
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     networks:
       - jobber
 
@@ -312,7 +331,14 @@ services:
       - ELASTIC_APM_SERVER_URL=http://localhost:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
-      - elasticsearch
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     networks:
       - jobber
   chat:
@@ -322,7 +348,7 @@ services:
       dockerfile: Dockerfile.dev
     restart: always
     ports:
-      - '4008:4008'
+      - '4005:4005'
     env_file: ./server/chat-service/.env
     environment:
       - ENABLE_APM=0
@@ -337,7 +363,14 @@ services:
       - ELASTIC_APM_SERVER_URL=http://localhost:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
-      - elasticsearch
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
     networks:
       - jobber
 
