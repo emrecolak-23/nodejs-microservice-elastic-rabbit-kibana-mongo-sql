@@ -20,16 +20,15 @@ export class GigGetSellersStrategy implements IGigMessageStrategy {
   async handle(message: GigMessage, channel: Channel): Promise<void> {
     const msg = message as ISeedGigMessage;
     const sellers: ISellerDocument[] = await this.sellerRepository.getRandomSellers(parseInt(`${msg.count}`, 10));
-    await this.userProducer.publishDirectMessage(
-      channel,
-      'jobber-seed-gig',
-      'receive-sellers',
-      JSON.stringify({
+    await this.userProducer.publishDirectMessage({
+      exchangeName: 'jobber-seed-gig',
+      routingKey: 'receive-sellers',
+      message: JSON.stringify({
         type: 'receiveSellers',
         sellers: sellers,
         count: msg.count
       }),
-      'Message sent to gig service'
-    );
+      logMessage: 'Message sent to gig service'
+    });
   }
 }

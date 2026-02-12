@@ -156,7 +156,7 @@ export class UserConsumer {
 
   private async ensureChannel(channel: Channel | null): Promise<Channel> {
     if (!channel) {
-      return (await this.queueConnection.connect()) as Channel;
+      return this.queueConnection.getChannel();
     }
     return channel;
   }

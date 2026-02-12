@@ -16,17 +16,16 @@ export class ReviewCreateStrategy implements IReviewMessageStrategy {
     return MESSAGE_TYPES.REVIEW.CREATE_REVIEW;
   }
 
-  async handle(message: ReviewMessage, channel: Channel): Promise<void> {
+  async handle(message: ReviewMessage, _channel: Channel): Promise<void> {
     await this.sellerRepository.updateSellerReview(message);
-    await this.userProducer.publishDirectMessage(
-      channel,
-      'jobber-update-gig',
-      'update-gig',
-      JSON.stringify({
+    await this.userProducer.publishDirectMessage({
+      exchangeName: 'jobber-update-gig',
+      routingKey: 'update-gig',
+      message: JSON.stringify({
         type: 'update-gig',
         gigReview: message
       }),
-      'Message sent to gig service'
-    );
+      logMessage: 'Message sent to gig service'
+    });
   }
 }
