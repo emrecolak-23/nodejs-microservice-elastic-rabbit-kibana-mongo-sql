@@ -252,6 +252,56 @@ services:
       - elasticsearch
     networks:
       - jobber
+  review:
+    container_name: review_container
+    build:
+      context: ./server/review-service
+      dockerfile: Dockerfile.dev
+    restart: always
+    ports:
+      - '4007:4007'
+    env_file: ./server/review-service/.env
+    environment:
+      - ENABLE_APM=0
+      - NODE_ENV=development
+      - API_GATEWAY_URL=http://gateway_container:4000
+      - GATEWAY_JWT_TOKEN=942421d626948ab10f6809824d95020d
+      - JWT_TOKEN=7cca66193669be5de88f6faa69c4ff57
+      - RABBITMQ_ENDPOINT=amqp://jobber:api@rabbitmq_container:5672
+      - REDIS_HOST=redis://redis_container:6379
+      - DATABASE_URL=postgresql://jobber:api@postgres_container:5432/jobber_reviews
+      - ELASTIC_SEARCH_URL=http://elasticsearch_container:9200
+      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SECRET_TOKEN=
+    depends_on:
+      - elasticsearch
+    networks:
+      - jobber
+  chat:
+    container_name: chat_container
+    build:
+      context: ./server/chat-service
+      dockerfile: Dockerfile.dev
+    restart: always
+    ports:
+      - '4008:4008'
+    env_file: ./server/chat-service/.env
+    environment:
+      - ENABLE_APM=0
+      - NODE_ENV=development
+      - API_GATEWAY_URL=http://gateway_container:4000
+      - GATEWAY_JWT_TOKEN=942421d626948ab10f6809824d95020d
+      - JWT_TOKEN=7cca66193669be5de88f6faa69c4ff57
+      - RABBITMQ_ENDPOINT=amqp://jobber:api@rabbitmq_container:5672
+      - REDIS_HOST=redis://redis_container:6379
+      - DATABASE_URL=postgresql://jobber:api@postgres_container:5432/jobber_chats
+      - ELASTIC_SEARCH_URL=http://elasticsearch_container:9200
+      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SECRET_TOKEN=
+    depends_on:
+      - elasticsearch
+    networks:
+      - jobber
 
 networks:
   jobber:

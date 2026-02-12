@@ -28,10 +28,36 @@ export class Database {
     this.registerEventHandlers();
   }
 
+  async createTableText(): Promise<string> {
+    return `
+    CREATE TABLE IF NOT EXISTS public.reviews (
+      id SERIAL UNIQUE,
+      gigId TEXT NOT NULL,
+      reviewerId TEXT NOT NULL,
+      orderId TEXT NOT NULL,
+      sellerId TEXT NOT NULL,
+      review TEXT NOT NULL,
+      reviewerImage TEXT NOT NULL,
+      reviewerUsername TEXT NOT NULL,
+      country TEXT NOT NULL,
+      reviewType TEXT NOT NULL,
+      rating INTEGER DEFAULT 0 NOT NULL,
+      createdAt TIMESTAMP DEFAULT CURRENT_DATE NOT NULL,
+      updatedAt TIMESTAMP DEFAULT CURRENT_DATE NOT NULL,
+      PRIMARY KEY (id)
+    );
+
+    CREATE INDEX IF NOT EXISTS gigId_idx ON public.reviews (gigId);
+    CREATE INDEX IF NOT EXISTS sellerId_idx ON public.reviews (sellerId);
+    `;
+  }
+
   async connect(retries = 3, delay = 3000): Promise<void> {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         const client = await this.pool.connect();
+        const createTableText = await this.createTableText();
+        await this.pool.query(createTableText);
         client.release();
         this.log.info('ReviewService connected to database successfully');
         return;
