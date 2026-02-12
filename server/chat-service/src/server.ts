@@ -74,7 +74,7 @@ export class ChatServer {
   }
 
   private async startQueues(): Promise<void> {
-    chatChannel = (await this.queueConnection.connect()) as Channel;
+    chatChannel = await this.queueConnection.getChannel();
   }
 
   private routesMiddleware(app: Application): void {
