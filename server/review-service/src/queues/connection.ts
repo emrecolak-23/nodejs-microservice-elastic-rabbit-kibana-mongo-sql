@@ -1,7 +1,7 @@
 import { EnvConfig } from '@review/config';
 import { Logger } from 'winston';
 import { winstonLogger } from '@emrecolak-23/jobber-share';
-import client, { Channel, ChannelModel } from 'amqplib';
+import client, { Channel, ConfirmChannel, ChannelModel } from 'amqplib';
 import { injectable, singleton } from 'tsyringe';
 
 @singleton()
@@ -130,6 +130,16 @@ export class QueueConnection {
     });
 
     this.isSigintHandlerSet = true;
+  }
+
+  async createConfirmChannel(): Promise<ConfirmChannel> {
+    if (!this.connection) {
+      await this.connect();
+    }
+
+    const confirmChannel = await this.connection!.createConfirmChannel();
+    this.log.info('ReviewService confirm channel created successfully');
+    return confirmChannel;
   }
 
   isConnected(): boolean {

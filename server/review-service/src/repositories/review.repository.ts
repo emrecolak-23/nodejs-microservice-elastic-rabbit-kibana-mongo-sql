@@ -1,7 +1,6 @@
 import { injectable, singleton } from 'tsyringe';
 import { Database } from '@review/loaders';
 import { IReviewDocument } from '@emrecolak-23/jobber-share';
-import { QueryResult } from 'pg';
 
 @singleton()
 @injectable()
