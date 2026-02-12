@@ -303,7 +303,11 @@ services:
       - JWT_TOKEN=7cca66193669be5de88f6faa69c4ff57
       - RABBITMQ_ENDPOINT=amqp://jobber:api@rabbitmq_container:5672
       - REDIS_HOST=redis://redis_container:6379
-      - DATABASE_URL=postgresql://jobber:api@postgres_container:5432/jobber_reviews
+      - DATABASE_HOST=postgres_container
+      - DATABASE_USER=jobber
+      - DATABASE_PASSWORD=api
+      - DATABASE_NAME=jobber_reviews
+      - DATABASE_PORT=5432
       - ELASTIC_SEARCH_URL=http://elasticsearch_container:9200
       - ELASTIC_APM_SERVER_URL=http://localhost:8200
       - ELASTIC_APM_SECRET_TOKEN=
@@ -328,7 +332,7 @@ services:
       - JWT_TOKEN=7cca66193669be5de88f6faa69c4ff57
       - RABBITMQ_ENDPOINT=amqp://jobber:api@rabbitmq_container:5672
       - REDIS_HOST=redis://redis_container:6379
-      - DATABASE_URL=postgresql://jobber:api@postgres_container:5432/jobber_chats
+      - DATABASE_URL=mongodb://mongodb_container:27017/jobber_chat
       - ELASTIC_SEARCH_URL=http://elasticsearch_container:9200
       - ELASTIC_APM_SERVER_URL=http://localhost:8200
       - ELASTIC_APM_SECRET_TOKEN=

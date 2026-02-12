@@ -4,8 +4,8 @@ import { OrderService } from '@order/services/order.service';
 import { StripeService } from '@order/services/stripe.service';
 import Stripe from 'stripe';
 import { StatusCodes } from 'http-status-codes';
-import { IOrderAttributes } from '@order/models/order.schema';
-import { IDeliveredWork, IOrderDocument } from '@emrecolak-23/jobber-share';
+import { IDeliveredWork, IOrderAttributes } from '@order/models/order.schema';
+import { IOrderDocument } from '@emrecolak-23/jobber-share';
 
 @injectable()
 @singleton()
@@ -120,7 +120,7 @@ export class OrderController {
       message: req.body.message,
       file,
       fileType,
-      fileSize: req.body.fileSize,
+      fileSize: req.body.fileSize != null ? String(req.body.fileSize) : undefined,
       fileName: req.body.fileName
     };
 
