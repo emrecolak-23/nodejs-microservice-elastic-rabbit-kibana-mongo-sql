@@ -6,8 +6,6 @@ import { GigProducer } from '@gig/queues/gig.producer';
 import { EnvConfig } from '@gig/config';
 import { sellerGig } from '@gig/controllers/test/mocks/gig.mock';
 import { IReviewMessageDetails, ISellerDocument } from '@emrecolak-23/jobber-share';
-import { gigChannel } from '@gig/server';
-
 describe('GigService', () => {
   let gigService: GigService;
   let mockGigRepository: jest.Mocked<GigRepository>;
@@ -121,24 +119,23 @@ describe('GigService', () => {
       const mockCreatedGig = { ...sellerGig, _id: 'new-gig-id' };
       mockGigRepository.createGig.mockResolvedValue(mockCreatedGig as any);
       mockGigRepository.toSellerGig.mockReturnValue(sellerGig);
-      mockGigProducer.publishDirectMessage.mockResolvedValue();
-      mockElasticSearch.addDataToIndex.mockResolvedValue();
+      mockGigProducer.publishDirectMessage.mockResolvedValue(true);
+      mockElasticSearch.addDataToIndex.mockResolvedValue(undefined);
 
       const result = await gigService.createGig(sellerGig);
 
       expect(mockGigRepository.createGig).toHaveBeenCalledWith(sellerGig);
       expect(mockGigRepository.toSellerGig).toHaveBeenCalledWith(mockCreatedGig);
-      expect(mockGigProducer.publishDirectMessage).toHaveBeenCalledWith(
-        gigChannel,
-        'jobber-seller-update',
-        'user-seller',
-        JSON.stringify({
+      expect(mockGigProducer.publishDirectMessage).toHaveBeenCalledWith({
+        exchangeName: 'jobber-seller-update',
+        routingKey: 'user-seller',
+        message: JSON.stringify({
           type: 'update-gig-count',
           gigSellerId: mockCreatedGig.sellerId?.toString(),
           count: 1
         }),
-        'Details sent to users service'
-      );
+        logMessage: 'Details sent to users service'
+      });
       expect(mockElasticSearch.addDataToIndex).toHaveBeenCalledWith('gigs', sellerGig.id, sellerGig);
       expect(result).toEqual(sellerGig);
     });
@@ -147,23 +144,22 @@ describe('GigService', () => {
   describe('deleteGig method', () => {
     it('should delete a gig successfully', async () => {
       mockGigRepository.deleteGig.mockResolvedValue();
-      mockGigProducer.publishDirectMessage.mockResolvedValue();
+      mockGigProducer.publishDirectMessage.mockResolvedValue(true);
       mockElasticSearch.deleteIndexedData.mockResolvedValue();
 
       await gigService.deleteGig('test-gig-id', 'test-seller-id');
 
       expect(mockGigRepository.deleteGig).toHaveBeenCalledWith('test-gig-id');
-      expect(mockGigProducer.publishDirectMessage).toHaveBeenCalledWith(
-        gigChannel,
-        'jobber-seller-update',
-        'user-seller',
-        JSON.stringify({
+      expect(mockGigProducer.publishDirectMessage).toHaveBeenCalledWith({
+        exchangeName: 'jobber-seller-update',
+        routingKey: 'user-seller',
+        message: JSON.stringify({
           type: 'update-gig-count',
           gigSellerId: 'test-seller-id',
           count: -1
         }),
-        'Details sent to users service'
-      );
+        logMessage: 'Details sent to users service'
+      });
       expect(mockElasticSearch.deleteIndexedData).toHaveBeenCalledWith('gigs', 'test-gig-id');
     });
   });
@@ -355,7 +351,7 @@ describe('GigService', () => {
       const mockCreatedGig = { ...sellerGig };
       mockGigRepository.createGig.mockResolvedValue(mockCreatedGig as any);
       mockGigRepository.toSellerGig.mockReturnValue(sellerGig);
-      mockGigProducer.publishDirectMessage.mockResolvedValue();
+      mockGigProducer.publishDirectMessage.mockResolvedValue(true);
       mockElasticSearch.addDataToIndex.mockResolvedValue();
 
       await gigService.seedData(sellers, '10');

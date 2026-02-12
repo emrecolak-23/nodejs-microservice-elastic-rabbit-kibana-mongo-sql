@@ -18,7 +18,6 @@ import { NotificationService } from './notification.service';
 import crypto from 'crypto';
 import { UploadApiResponse } from 'cloudinary';
 import { socketIOOrderObject } from '@order/server';
-import { orderChannel } from '@order/server';
 @injectable()
 @singleton()
 export class OrderService {
@@ -59,7 +58,6 @@ export class OrderService {
     };
 
     await this.orderProducer.publishDirectMessage({
-      channel: orderChannel,
       exchangeName: ORDER_QUEUE_CONFIG.SELLER_QUEUE_CONFIG.exchangeName,
       routingKey: ORDER_QUEUE_CONFIG.SELLER_QUEUE_CONFIG.routingKey,
       message: JSON.stringify(messageDetails),
@@ -83,7 +81,6 @@ export class OrderService {
     } as IOrderMessage;
 
     await this.orderProducer.publishDirectMessage({
-      channel: orderChannel,
       exchangeName: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.exchangeName,
       routingKey: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.routingKey,
       message: JSON.stringify(emailMessageDetails),
@@ -104,7 +101,6 @@ export class OrderService {
     };
 
     await this.orderProducer.publishDirectMessage({
-      channel: orderChannel,
       exchangeName: ORDER_QUEUE_CONFIG.SELLER_QUEUE_CONFIG.exchangeName,
       routingKey: ORDER_QUEUE_CONFIG.SELLER_QUEUE_CONFIG.routingKey,
       message: JSON.stringify(messageDetails),
@@ -120,7 +116,6 @@ export class OrderService {
     };
 
     await this.orderProducer.publishDirectMessage({
-      channel: orderChannel,
       exchangeName: ORDER_QUEUE_CONFIG.BUYER_QUEUE_CONFIG.exchangeName,
       routingKey: ORDER_QUEUE_CONFIG.BUYER_QUEUE_CONFIG.routingKey,
       message: JSON.stringify(buyerMessageDetails),
@@ -147,7 +142,6 @@ export class OrderService {
     } as IOrderMessage;
 
     await this.orderProducer.publishDirectMessage({
-      channel: orderChannel,
       exchangeName: ORDER_QUEUE_CONFIG.SELLER_QUEUE_CONFIG.exchangeName,
       routingKey: ORDER_QUEUE_CONFIG.SELLER_QUEUE_CONFIG.routingKey,
       message: JSON.stringify(messageDetails),
@@ -162,7 +156,6 @@ export class OrderService {
     } as IOrderMessage;
 
     await this.orderProducer.publishDirectMessage({
-      channel: orderChannel,
       exchangeName: ORDER_QUEUE_CONFIG.BUYER_QUEUE_CONFIG.exchangeName,
       routingKey: ORDER_QUEUE_CONFIG.BUYER_QUEUE_CONFIG.routingKey,
       message: JSON.stringify(buyerMessageDetails),
@@ -202,7 +195,6 @@ export class OrderService {
       };
 
       await this.orderProducer.publishDirectMessage({
-        channel: orderChannel,
         exchangeName: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.exchangeName,
         routingKey: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.routingKey,
         message: JSON.stringify(messageDetails),
@@ -231,7 +223,6 @@ export class OrderService {
       };
 
       await this.orderProducer.publishDirectMessage({
-        channel: orderChannel,
         exchangeName: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.exchangeName,
         routingKey: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.routingKey,
         message: JSON.stringify(messageDetails),
@@ -264,7 +255,6 @@ export class OrderService {
       };
 
       await this.orderProducer.publishDirectMessage({
-        channel: orderChannel,
         exchangeName: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.exchangeName,
         routingKey: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.routingKey,
         message: JSON.stringify(messageDetails),
@@ -297,7 +287,6 @@ export class OrderService {
       };
 
       await this.orderProducer.publishDirectMessage({
-        channel: orderChannel,
         exchangeName: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.exchangeName,
         routingKey: ORDER_QUEUE_CONFIG.NOTIFICATION_QUEUE_CONFIG.routingKey,
         message: JSON.stringify(messageDetails),

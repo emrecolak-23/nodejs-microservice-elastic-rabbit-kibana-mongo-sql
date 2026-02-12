@@ -4,7 +4,6 @@ import { IRatingTypes, IReviewMessageDetails, ISellerDocument, ISellerGig, winst
 import { ElasticSearch } from '@gig/loaders';
 import { SearchRepository } from '@gig/repositories/search.repository';
 import { GigProducer } from '@gig/queues/gig.producer';
-import { gigChannel } from '@gig/server';
 import { faker } from '@faker-js/faker';
 import { Logger } from 'winston';
 import { EnvConfig } from '@gig/config';
@@ -50,13 +49,12 @@ export class GigService {
     const createdGig = await this.gigRepository.createGig(gigData);
 
     const sellerGig: ISellerGig = this.gigRepository.toSellerGig(createdGig);
-    await this.gigProducer.publishDirectMessage(
-      gigChannel,
-      'jobber-seller-update',
-      'user-seller',
-      JSON.stringify({ type: 'update-gig-count', gigSellerId: createdGig.sellerId?.toString(), count: 1 }),
-      'Details sent to users service'
-    );
+    await this.gigProducer.publishDirectMessage({
+      exchangeName: 'jobber-seller-update',
+      routingKey: 'user-seller',
+      message: JSON.stringify({ type: 'update-gig-count', gigSellerId: createdGig.sellerId?.toString(), count: 1 }),
+      logMessage: 'Details sent to users service'
+    });
     await this.elasticSearch.addDataToIndex('gigs', `${sellerGig.id}`, sellerGig);
 
     return sellerGig;
@@ -64,13 +62,12 @@ export class GigService {
 
   async deleteGig(gigId: string, sellerId: string): Promise<void> {
     await this.gigRepository.deleteGig(gigId);
-    await this.gigProducer.publishDirectMessage(
-      gigChannel,
-      'jobber-seller-update',
-      'user-seller',
-      JSON.stringify({ type: 'update-gig-count', gigSellerId: sellerId, count: -1 }),
-      'Details sent to users service'
-    );
+    await this.gigProducer.publishDirectMessage({
+      exchangeName: 'jobber-seller-update',
+      routingKey: 'user-seller',
+      message: JSON.stringify({ type: 'update-gig-count', gigSellerId: sellerId, count: -1 }),
+      logMessage: 'Details sent to users service'
+    });
     await this.elasticSearch.deleteIndexedData('gigs', `${gigId}`);
   }
 

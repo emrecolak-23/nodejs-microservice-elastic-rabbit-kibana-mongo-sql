@@ -24,7 +24,7 @@ export class OrderConsumer {
 
   private async getChannel(): Promise<Channel> {
     if (!this.channel) {
-      this.channel = (await this.queueConnection.connect()) as Channel;
+      this.channel = await this.queueConnection.getChannel();
     }
     return this.channel;
   }

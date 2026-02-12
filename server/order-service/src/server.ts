@@ -76,7 +76,7 @@ export class OrderServer {
   }
 
   private async startQueues(): Promise<void> {
-    orderChannel = (await this.queueConnection.connect()) as Channel;
+    orderChannel = await this.queueConnection.getChannel();
     await this.orderConsumer.consumeReviewFanoutMessages(orderChannel);
   }
 

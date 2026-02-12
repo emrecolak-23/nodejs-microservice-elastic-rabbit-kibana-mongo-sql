@@ -75,7 +75,7 @@ export class GigServer {
   }
 
   private async startQueues(): Promise<void> {
-    gigChannel = (await this.queueConnection.connect()) as Channel;
+    gigChannel = await this.queueConnection.getChannel();
     await this.gigConsumer.consumeGigDirectMessage(gigChannel);
     await this.gigConsumer.consumeSeedDirectMessage(gigChannel);
   }

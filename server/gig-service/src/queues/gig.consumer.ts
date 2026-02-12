@@ -22,7 +22,7 @@ export class GigConsumer {
 
   private async ensureChannel(channel: Channel | null): Promise<Channel> {
     if (!channel) {
-      channel = (await this.queueConnection.connect()) as Channel;
+      channel = await this.queueConnection.getChannel();
     }
     return channel;
   }
