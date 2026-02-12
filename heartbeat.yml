@@ -1,0 +1,84 @@
+# System monitoring KAPALI
+heartbeat.config.monitors:
+  path: ${path.config}/monitors.d/*.yml
+  reload.enabled: false
+
+# Sadece HTTP health check
+heartbeat.monitors:
+  - type: http
+    id: api-gateway
+    name: Gateway Service
+    schedule: '@every 5s'
+    hosts: ['http://gateway:4000/gateway-health']
+    check.request.method: GET
+    check.response.status: [200]
+
+  - type: http
+    id: notification
+    name: Notification Service
+    schedule: '@every 5s'
+    hosts: ['http://notifications:4001/notification-health']
+    check.request.method: GET
+    check.response.status: [200]
+
+  - type: http
+    id: auth
+    name: Auth Service
+    schedule: '@every 5s'
+    hosts: ['http://auth:4002/auth-health']
+    check.request.method: GET
+    check.response.status: [200]
+
+  - type: http
+    id: users
+    name: Users Service
+    schedule: '@every 5s'
+    hosts: ['http://users:4003/user-health']
+    check.request.method: GET
+    check.response.status: [200]
+
+  - type: http
+    id: gigs
+    name: Gigs Service
+    schedule: '@every 5s'
+    hosts: ['http://gig:4004/gig-health']
+    check.request.method: GET
+    check.response.status: [200]
+
+  - type: http
+    id: chat
+    name: Chat Service
+    schedule: '@every 5s'
+    hosts: ['http://chat:4005/chat-health']
+    check.request.method: GET
+    check.response.status: [200]
+
+  - type: http
+    id: orders
+    name: Orders Service
+    schedule: '@every 5s'
+    hosts: ['http://order:4006/order-health']
+    check.request.method: GET
+    check.response.status: [200]
+
+  - type: http
+    id: reviews
+    name: Reviews Service
+    schedule: '@every 5s'
+    hosts: ['http://review:4007/review-health']
+    check.request.method: GET
+    check.response.status: [200]
+
+# Processors - Docker/system metadata KAPALI
+processors: []
+
+# Monitoring KAPALI
+monitoring.enabled: false
+
+output.elasticsearch:
+  hosts: ['http://elasticsearch:9200']
+  username: 'elastic'
+  password: 'admin1234'
+
+setup.kibana:
+  host: 'http://kibana:5601'

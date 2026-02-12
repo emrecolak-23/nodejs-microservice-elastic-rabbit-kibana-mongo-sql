@@ -110,6 +110,42 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
+
+  metricbeat:
+    container_name: metricbeat_container
+    build:
+      context: .
+      dockerfile: metricbeat.Dockerfile
+    user: root
+    ports:
+      - 5066:5066
+    networks:
+      - jobber
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /proc:/hostfs/proc:ro
+      - /:/hostfs:ro
+    command: ['--strict.perms=false', '--system.hostfs=/hostfs']
+    depends_on:
+      - elasticsearch
+
+  heartbeat:
+    container_name: heartbeat_container
+    build:
+      context: .
+      dockerfile: heartbeat.Dockerfile
+    user: root
+    hostname: heartbeat
+    cap_add:
+      - NET_RAW
+    networks:
+      - jobber
+    command: ['--strict.perms=false']
+    depends_on:
+      - elasticsearch
+      - kibana
+
   auth:
     container_name: auth_container
     build:
