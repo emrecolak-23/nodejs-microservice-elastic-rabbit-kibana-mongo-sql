@@ -8,6 +8,9 @@ import * as path from 'path';
 const log: Logger = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'mailTransportHelper', 'debug');
 
 export async function emailTemplates(template: string, receiver: string, locals: IEmailLocals): Promise<void> {
+  if (!template || typeof template !== 'string') {
+    throw new Error(`emailTemplates: template must be a non-empty string, received: ${typeof template}`);
+  }
   try {
     const smtpTransport: Transporter = nodemailer.createTransport({
       host: 'smtp.ethereal.email',

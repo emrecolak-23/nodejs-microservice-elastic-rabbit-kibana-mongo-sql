@@ -38,6 +38,10 @@ export async function consumeAuthEmailMessages(channel: Channel): Promise<void> 
   await setupEmailConsumer(channel, 'jobber-email-notification', 'auth-email', 'auth-email-queue', async (msg) => {
     const data = JSON.parse(msg.content.toString());
     const { receiverEmail, username, verifyLink, resetLink, template } = data;
+    if (!template) {
+      log.error('Auth email message missing template field', { data });
+      return;
+    }
     const locals: IEmailLocals = {
       appLink: `${config.CLIENT_URL}`,
       appIcon: 'https://i.ibb.co/rR9tGcrZ/jobber3057-logowik-com.webp',
@@ -109,6 +113,10 @@ export async function consumeOrderEmailMessages(channel: Channel): Promise<void>
       total
     };
 
+    if (!template) {
+      log.error('Order email message missing template field', { data });
+      return;
+    }
     if (template === 'orderPlaced') {
       await sendEmail('orderPlaced', receiverEmail, locals);
       await sendEmail('orderReceipt', receiverEmail, locals);
