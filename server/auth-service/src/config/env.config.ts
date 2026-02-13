@@ -4,6 +4,20 @@ import cloudinary from 'cloudinary';
 
 dotenv.config({});
 
+if (process.env.ENABLE_APM === '1') {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('elastic-apm-node').start({
+    serviceName: 'jobber-auth',
+    serverUrl: process.env.ELASTIC_APM_SERVER_URL || '',
+    secretToken: process.env.ELASTIC_APM_SECRET_TOKEN || '',
+    environment: process.env.NODE_ENV || 'development',
+    active: true,
+    captureBody: 'all',
+    errorOnAbortedRequests: true,
+    captureErrorLogStackTraces: true
+  });
+}
+
 @singleton()
 @injectable()
 export class EnvConfig {
@@ -51,7 +65,7 @@ export class EnvConfig {
     cloudinary.v2.config({
       cloud_name: this.CLOUD_NAME,
       api_key: this.CLOUD_API_KEY,
-      api_secret: this.CLOUD_API_SECRET,
+      api_secret: this.CLOUD_API_SECRET
     });
   }
 }

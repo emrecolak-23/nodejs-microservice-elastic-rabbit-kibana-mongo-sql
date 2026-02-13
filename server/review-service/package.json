@@ -20,7 +20,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.22.0",
   "dependencies": {
-    "@elastic/elasticsearch": "^8.17.0",
+    "@elastic/elasticsearch": "8.17.0",
     "@emrecolak-23/jobber-share": "^0.0.14",
     "amqplib": "^0.10.9",
     "async-mutex": "^0.5.0",
@@ -28,6 +28,7 @@
     "compression": "^1.8.1",
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
+    "elastic-apm-node": "^4.15.0",
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "hpp": "^0.2.3",

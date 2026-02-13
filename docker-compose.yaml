@@ -115,6 +115,26 @@ services:
       elasticsearch:
         condition: service_healthy
 
+  apmserver:
+    build:
+      context: .
+      dockerfile: apm-server.Dockerfile
+    container_name: apm_server_container
+    ports:
+      - 8200:8200
+    networks:
+      - jobber
+    command: >
+      apm-server -e
+        -E apm-server.rum.enabled=true
+        -E setup.kibana.host=kibana_container:5601
+        -E setup.template.settings.index.number_of_replicas=0
+        -E apm-server.kibana.enabled=true
+        -E apm-server.kibana.host=kibana_container:5601
+        -E apm-server.kibana.protocol=http
+        -E strict.perms=false
+        -E apm-server.auth.anonymous.enabled=true
+
   metricbeat:
     container_name: metricbeat_container
     build:
@@ -160,7 +180,7 @@ services:
       - '4002:4002'
     env_file: ./server/auth-service/.env
     environment:
-      - ENABLE_APM=0
+      - ENABLE_APM=1
       - GATEWAY_JWT_TOKEN=942421d626948ab10f6809824d95020d
       - JWT_TOKEN=7cca66193669be5de88f6faa69c4ff57
       - NODE_ENV=development
@@ -169,7 +189,7 @@ services:
       - RABBITMQ_ENDPOINT=amqp://jobber:api@rabbitmq_container:5672
       - MYSQL_DB=mysql://jobber:api@mysql_container:3306/jobber_auth
       - ELASTIC_SEARCH_URL=http://elastic:admin1234@elasticsearch_container:9200
-      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SERVER_URL=http://apm_server_container:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
       mysql:
@@ -188,7 +208,7 @@ services:
       - '4000:4000'
     env_file: ./server/gateway-service/.env
     environment:
-      - ENABLE_APM=0
+      - ENABLE_APM=1
       - GATEWAY_JWT_TOKEN=942421d626948ab10f6809824d95020d
       - JWT_TOKEN=7cca66193669be5de88f6faa69c4ff57
       - NODE_ENV=development
@@ -203,7 +223,7 @@ services:
       - REVIEW_BASE_URL=http://review_container:4007
       - REDIS_HOST=redis://redis_container:6379
       - ELASTIC_SEARCH_URL=http://elastic:admin1234@elasticsearch_container:9200
-      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SERVER_URL=http://apm_server_container:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
       redis:
@@ -230,14 +250,14 @@ services:
       - '4001:4001'
     env_file: ./server/notification-service/.env
     environment:
-      - ENABLE_APM=0
+      - ENABLE_APM=1
       - NODE_ENV=development
       - CLIENT_URL=http://localhost:3000
       - RABBITMQ_ENDPOINT=amqp://jobber:api@rabbitmq_container:5672
       - SENDER_EMAIL=eudora.kemmer@ethereal.email
       - SENDER_EMAIL_PASSWORD=GC5xgQhYrfU16489fU
       - ELASTIC_SEARCH_URL=http://elastic:admin1234@elasticsearch_container:9200
-      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SERVER_URL=http://apm_server_container:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
       elasticsearch:
@@ -255,7 +275,7 @@ services:
       - '4003:4003'
     env_file: ./server/users-service/.env
     environment:
-      - ENABLE_APM=0
+      - ENABLE_APM=1
       - NODE_ENV=development
       - API_GATEWAY_URL=http://gateway_container:4000
       - GATEWAY_JWT_TOKEN=942421d626948ab10f6809824d95020d
@@ -267,7 +287,7 @@ services:
       - CLOUDINARY_API_KEY=1234567890
       - CLOUDINARY_API_SECRET=1234567890
       - ELASTIC_SEARCH_URL=http://elastic:admin1234@elasticsearch_container:9200
-      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SERVER_URL=http://apm_server_container:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
       mongodb:
@@ -286,7 +306,7 @@ services:
       - '4004:4004'
     env_file: ./server/gig-service/.env
     environment:
-      - ENABLE_APM=0
+      - ENABLE_APM=1
       - NODE_ENV=development
       - API_GATEWAY_URL=http://gateway_container:4000
       - GATEWAY_JWT_TOKEN=942421d626948ab10f6809824d95020d
@@ -298,7 +318,7 @@ services:
       - CLOUD_API_KEY=1234567890
       - CLOUD_API_SECRET=1234567890
       - ELASTIC_SEARCH_URL=http://elastic:admin1234@elasticsearch_container:9200
-      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SERVER_URL=http://apm_server_container:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
       mongodb:
@@ -318,7 +338,7 @@ services:
       - '4006:4006'
     env_file: ./server/order-service/.env
     environment:
-      - ENABLE_APM=0
+      - ENABLE_APM=1
       - NODE_ENV=development
       - CLIENT_URL=http://localhost:3000
       - API_GATEWAY_URL=http://gateway_container:4000
@@ -331,7 +351,7 @@ services:
       - CLOUD_API_KEY=836697868264717
       - CLOUD_API_SECRET=NuYuBYi6hwQ0d7iwqO6L0-eAiNM
       - ELASTIC_SEARCH_URL=http://elastic:admin1234@elasticsearch_container:9200
-      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SERVER_URL=http://apm_server_container:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
       mongodb:
@@ -355,7 +375,7 @@ services:
       - '4007:4007'
     env_file: ./server/review-service/.env
     environment:
-      - ENABLE_APM=0
+      - ENABLE_APM=1
       - NODE_ENV=development
       - API_GATEWAY_URL=http://gateway_container:4000
       - GATEWAY_JWT_TOKEN=942421d626948ab10f6809824d95020d
@@ -368,7 +388,7 @@ services:
       - DATABASE_NAME=jobber_reviews
       - DATABASE_PORT=5432
       - ELASTIC_SEARCH_URL=http://elastic:admin1234@elasticsearch_container:9200
-      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SERVER_URL=http://apm_server_container:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
       postgres:
@@ -391,7 +411,7 @@ services:
       - '4005:4005'
     env_file: ./server/chat-service/.env
     environment:
-      - ENABLE_APM=0
+      - ENABLE_APM=1
       - NODE_ENV=development
       - API_GATEWAY_URL=http://gateway_container:4000
       - GATEWAY_JWT_TOKEN=942421d626948ab10f6809824d95020d
@@ -400,7 +420,7 @@ services:
       - REDIS_HOST=redis://redis_container:6379
       - DATABASE_URL=mongodb://mongodb_container:27017/jobber_chat
       - ELASTIC_SEARCH_URL=http://elastic:admin1234@elasticsearch_container:9200
-      - ELASTIC_APM_SERVER_URL=http://localhost:8200
+      - ELASTIC_APM_SERVER_URL=http://apm_server_container:8200
       - ELASTIC_APM_SECRET_TOKEN=
     depends_on:
       mongodb:
