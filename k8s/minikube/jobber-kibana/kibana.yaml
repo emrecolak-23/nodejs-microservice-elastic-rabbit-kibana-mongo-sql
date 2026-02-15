@@ -27,6 +27,11 @@ spec:
           env:
             - name: ELASTICSEARCH_HOSTS
               value: http://jobber-elastic.production.svc.cluster.local:9200
+            - name: ELASTIC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jobber-backend-secret
+                  key: jobber-elasticsearch-password
           ports:
             - name: jobber-kibana
               containerPort: 5601

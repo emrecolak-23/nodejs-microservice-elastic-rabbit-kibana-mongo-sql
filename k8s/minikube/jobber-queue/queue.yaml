@@ -18,9 +18,15 @@ spec:
           image: rabbitmq:4.0-management-alpine
           env:
             - name: RABBITMQ_DEFAULT_USER
-              value: jobber
+              valueFrom:
+                secretKeyRef:
+                  name: jobber-backend-secret
+                  key: jobber-rabbitmq-user
             - name: RABBITMQ_DEFAULT_PASS
-              value: api
+              valueFrom:
+                secretKeyRef:
+                  name: jobber-backend-secret
+                  key: jobber-rabbitmq-password
           resources:
             requests:
               memory: 128Mi
