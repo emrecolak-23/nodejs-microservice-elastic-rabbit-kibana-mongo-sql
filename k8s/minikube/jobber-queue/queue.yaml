@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobber-queue
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jobber-queue
+  template:
+    metadata:
+      labels:
+        app: jobber-queue
+    spec:
+      containers:
+        - name: jobber-queue
+          image: rabbitmq:4.0-management-alpine
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              value: jobber
+            - name: RABBITMQ_DEFAULT_PASS
+              value: api
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 500m
+            limits:
+              memory: 128Mi
+              cpu: 500m
+          ports:
+            - name: queue
+              containerPort: 5672
+              protocol: TCP
+            - name: management
+              containerPort: 15672
+              protocol: TCP
