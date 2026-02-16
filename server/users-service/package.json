@@ -12,7 +12,7 @@
     "lint:fix": "eslint 'src/**/*.ts' --fix",
     "prettier:check": "prettier --check 'src/**/*.{ts,json}'",
     "prettier:fix": "prettier --write 'src/**/*.{ts,json}'",
-    "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json && ts-node tools/copyAssets.ts",
+    "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
     "test": "jest --coverage=true -w=1 --forceExit --detectOpenHandles --watchAll=false"
   },
   "keywords": [],
@@ -61,9 +61,9 @@
     "eslint-plugin-import": "^2.32.0",
     "jest": "^30.2.0",
     "prettier": "^3.8.1",
-    "ts-alias": "^0.0.7",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "tsc-alias": "^1.8.16"
   }
 }

@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2015",
-    "lib": ["dom", "ES2015"],
+    "lib": [
+      "dom",
+      "ES2015"
+    ],
     "module": "commonjs",
     "baseUrl": ".",
     "outDir": "./build",
@@ -20,9 +23,20 @@
     "allowSyntheticDefaultImports": true,
     "pretty": true,
     "resolveJsonModule": true,
-    "plugins": [{ "transform": "typescript-transform-paths" }, { "transform": "typescript-transform-paths", "afterDeclarations": true }],
+    "plugins": [
+      {
+        "transform": "typescript-transform-paths"
+      },
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true
+      }
+    ],
     "paths": {
-      "@order/*": ["src/*"]
-    }
+      "@order/*": [
+        "src/*"
+      ]
+    },
+    "skipLibCheck": true
   }
 }
