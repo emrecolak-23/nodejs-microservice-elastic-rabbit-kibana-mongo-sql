@@ -9,7 +9,8 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: '/storage/data1'
+    path: /data/rabbitmq
+    type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
