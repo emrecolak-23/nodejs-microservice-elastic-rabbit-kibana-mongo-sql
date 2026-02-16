@@ -105,6 +105,15 @@ AuthModel.prototype.hashPassword = async function (password: string): Promise<st
   return hash(password, SALT_ROUND);
 };
 
-// force: treu always deletes tha table where there is a server restart
-AuthModel.sync({});
+// force: true always deletes the table on server restart
+// sync() is wrapped to handle "Duplicate key name" when multiple PM2 instances run sync concurrently
+AuthModel.sync({}).catch((err: { original?: { errno?: number; code?: string }; message?: string }) => {
+  const errno = err?.original?.errno;
+  const code = err?.original?.code;
+  // MySQL 1061 = Duplicate key name (index already exists) - safe to ignore when running multiple instances
+  if (errno === 1061 || code === 'ER_DUP_KEYNAME') {
+    return;
+  }
+  console.error('AuthModel sync failed:', err?.message ?? err);
+});
 export { AuthModel };

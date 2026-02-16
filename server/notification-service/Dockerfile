@@ -1,4 +1,4 @@
-FROM node:20-alpine3.19 AS builder
+FROM node:25-alpine3.22 AS builder
 
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
@@ -9,7 +9,7 @@ COPY tools ./tools
 RUN npm install -g pnpm && pnpm install --no-frozen-lockfile
 RUN pnpm run build
 
-FROM node:20-alpine3.19 AS runner
+FROM node:25-alpine3.22 AS runner
 
 WORKDIR /app
 RUN apk add --no-cache curl

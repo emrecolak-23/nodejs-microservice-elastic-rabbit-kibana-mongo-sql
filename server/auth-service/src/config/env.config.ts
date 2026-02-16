@@ -4,7 +4,7 @@ import cloudinary from 'cloudinary';
 
 dotenv.config({});
 
-if (process.env.ENABLE_APM === '1') {
+if (process.env.ENABLE_APM === '1' && process.env.ELASTIC_APM_SERVER_URL) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('elastic-apm-node').start({
     serviceName: 'jobber-auth',
