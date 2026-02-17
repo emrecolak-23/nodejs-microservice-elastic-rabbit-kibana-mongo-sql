@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jobber-gateway-ingress
+  namespace: production
+#  annotations:
+#    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  defaultBackend:
+    service:
+      name: jobber-gateway
+      port:
+        number: 4000
+  rules:
+    - host: jobberemre.com
+      http:
+        paths:
+          - path: /api/gateway/v1
+            pathType: Prefix
+            backend:
+              service:
+                name: jobber-gateway
+                port:
+                  number: 4000

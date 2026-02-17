@@ -53,8 +53,9 @@ export class GatewayServer {
         name: 'session',
         keys: [`${this.config.SECRET_KEY_ONE}`, `${this.config.SECRET_KEY_TWO}`],
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        secure: this.config.NODE_ENV !== 'development' // Set to true if using HTTPS update with value from config
-        // sameSite: 'none'
+        secure: this.config.NODE_ENV !== 'development',
+        // Set to true if using HTTPS update with value from config
+        ...(this.config.NODE_ENV !== 'development' && { sameSite: 'none' })
       })
     );
     app.use(hpp());
