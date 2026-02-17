@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:4000
+@baseUrl = https://jobberemre.com
 @urlPath = api/gateway/v1/auth
 
 ### Signup
@@ -27,6 +27,10 @@ withCredentials: true
     "password": "Pass123."
 }
 
+
+### Gateway Health
+GET {{baseUrl}}/gateway-health
+Content-Type: application/json
 
 ### 
 GET {{baseUrl}}/{{urlPath}}/search/gig/0/5/forward?query=beauty&delivery_time=3&minPrice=5&maxPrice=20
