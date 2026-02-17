@@ -12,6 +12,10 @@ spec:
       name: jobber-gateway
       port:
         number: 4000
+  tls:
+    - hosts:
+        - jobberemre.com
+      secretName: gateway-ingress-tls
   rules:
     - host: jobberemre.com
       http:
