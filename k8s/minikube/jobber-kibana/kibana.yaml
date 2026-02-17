@@ -24,14 +24,28 @@ spec:
             requests:
               memory: '1Gi'
               cpu: '250m'
-          env:
-            - name: ELASTICSEARCH_HOSTS
-              value: http://jobber-elastic.production.svc.cluster.local:9200
-            - name: ELASTIC_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: jobber-backend-secret
-                  key: jobber-elasticsearch-password
           ports:
             - name: jobber-kibana
               containerPort: 5601
+          env:
+            - name: ELASTICSEARCH_HOSTS
+              value: http://jobber-elastic.production.svc.cluster.local:9200
+            - name: ELASTICSEARCH_USERNAME
+              value: kibana_system
+            - name: ELASTICSEARCH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: jobber-backend-secret
+                  key: kibana-system-password
+            - name: ELASTICSEARCH_SERVICE_ACCOUNT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: jobber-backend-secret
+                  key: jobber-elasticsearch-service-account-token
+          volumeMounts:
+            - name: kibana-config
+              mountPath: /usr/share/kibana/config
+      volumes:
+        - name: kibana-config
+          configMap:
+            name: kibana-config
