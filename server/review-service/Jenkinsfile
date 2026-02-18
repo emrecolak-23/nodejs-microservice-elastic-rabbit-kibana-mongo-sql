@@ -90,7 +90,7 @@ pipeline {
 
         stage("Create New Pods") {
             steps {
-                kubeconfig(credentialsId: 'jenkins-k8s-token', serverUrl: 'https://192.168.105.3:8443') {
+                kubeconfig(credentialsId: 'jenkins-k8s-token', serverUrl: 'https://192.168.105.3:8443', caCertificate: '') {
                     script {
                         def pods = groovyMethods.findPodsFromName('${namespace}', '${serviceName}')
                        
