@@ -7,7 +7,11 @@ pipeline {
         label "Jenkins-Agent"
     }
     when {
-       changeset "server/review-service/**"
+        anyOf {
+            changeset "server/review-service/**"
+            changeset "server/jobber-share/**"
+            triggeredBy 'UserIdCause'  // Manuel build'de de çalışsın
+        }
     }
     tools {
         nodejs "Nodejs"
