@@ -14,7 +14,6 @@ pipeline {
         DOCKER_CREDENTIALS = credentials("dockerhub")
         IMAGE_NAME = "colakkemree" + "/" + "jobber-review"
         IMAGE_TAG = "stable-${BUILD_NUMBER}"
-        GITHUB_NPM_TOKEN = credentials("github-npm-token")
     }
 
     stages {
@@ -27,12 +26,14 @@ pipeline {
         stage("Prepare Environment") {
             steps {
                 git branch: "main", credentialsId: "github", url: "https://github.com/emrecolak-23/nodejs-microservice-elastic-rabbit-kibana-mongo-sql"
-                dir("server/review-service") {
-                    sh """
-                        echo '@emrecolak-23:registry=https://npm.pkg.github.com/emrecolak-23' > .npmrc
-                        echo '//npm.pkg.github.com/:_authToken='\${GITHUB_NPM_TOKEN} >> .npmrc
-                        pnpm install
-                    """
+                withCredentials([string(credentialsId: "github-npm-token", variable: "GITHUB_NPM_TOKEN")]) {
+                    dir("server/review-service") {
+                        sh """
+                            echo '@emrecolak-23:registry=https://npm.pkg.github.com/emrecolak-23' > .npmrc
+                            echo '//npm.pkg.github.com/:_authToken='\${GITHUB_NPM_TOKEN} >> .npmrc
+                            pnpm install
+                        """
+                    }
                 }
             }
         }
