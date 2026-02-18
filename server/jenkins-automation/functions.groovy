@@ -32,7 +32,13 @@ def notifySlack(text, channel, attachments, String slackWebhookCredentialId = 's
             attachments: attachments
         ])
 
-        sh "curl -s -X POST \${SLACK_WEBHOOK_URL} -H 'Cache-Control: no-cache' -H 'Content-Type: application/json;charset=UTF-8' -d '${payload}'"
+        writeFile file: 'slack-payload.json', text: payload
+        def response = sh(
+            script: "curl -s -w '\\n%{http_code}' -X POST \$SLACK_WEBHOOK_URL -H 'Content-Type: application/json' -d @slack-payload.json",
+            returnStdout: true
+        ).trim()
+        sh 'rm -f slack-payload.json'
+        echo "Slack webhook response: ${response}"
     }
 }
 
