@@ -455,10 +455,13 @@ services:
       dockerfile: jenkins-agent.Dockerfile
     privileged: true
     user: root
+
     expose:
       - 22
     environment:
       - JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDUdxIWiS10Be+ogwAflQHRjbukGlm0Ws+aeTPpfANWjGtBsSM2ELUO1Gt7Vhwbsp7x2nO8Yj/4nTZahhvCdGFbWg+lpOPr72bFY3RX63bY+Px0rJs4d+vlrl4LqsehiVxYlzfsjKQsS1924k4w960FLwqLRAbvuWnCWGdDhgaciU4vCdFnHnyIR21I98MFpJOPC7Sg0I//oou6rZQMcAU9irIwgiFkNQq1l0SWz68uoWtRU/uNBhyWnM3DNjSGs6oZYZNwjroL+uSfX68vzlBzrUTc6YurF/Q9gx/RKGJY8DgXlSqDLkEOiUen/h4OOAVrN7cSgel2OWa4MPAdJHy8S4G0+DYk2vrQUeSnY8pC18J2rGy9qkuzEbgkkHrxDdxa8YSBX6pn9UtkWrEEcNYUUVny+T8A0oufmqpL4kUBnCKJDgS86JviFTN+ZeXW2ZnKOmAjozPH2gbHmifFWR6Th9dZ8jVkaDA0t4x7sGBSRwHr7O2jupqrYrbCjyE+32c= emrecolak@MacBook-Pro
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - jobber
 networks:

@@ -64,21 +64,21 @@ pipeline {
 
         stage("Build and push") {
             steps {
-                sh 'docker login -u $DOCKER_CREDENTIALS_USR -p $DOCKER_CREDENTIALS_PSW'
+                sh 'sudo docker login -u $DOCKER_CREDENTIALS_USR -p $DOCKER_CREDENTIALS_PSW'
                 dir("server/review-service") {
-                    sh 'docker build -t $IMAGE_NAME .'
+                    sh 'sudo docker build -t $IMAGE_NAME .'
                 }
-                sh 'docker tag $IMAGE_NAME $IMAGE_NAME:$IMAGE_TAG'
-                sh 'docker tag $IMAGE_NAME $IMAGE_NAME:stable'
-                sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
-                sh 'docker push $IMAGE_NAME:stable'
+                sh 'sudo docker tag $IMAGE_NAME $IMAGE_NAME:$IMAGE_TAG'
+                sh 'sudo docker tag $IMAGE_NAME $IMAGE_NAME:stable'
+                sh 'sudo docker push $IMAGE_NAME:$IMAGE_TAG'
+                sh 'sudo docker push $IMAGE_NAME:stable'
             }
         }
 
         stage("Clean Artifacts") {
             steps {
-                sh 'docker rmi $IMAGE_NAME:$IMAGE_TAG || true'
-                sh 'docker rmi $IMAGE_NAME:stable || true'
+                sh 'sudo docker rmi $IMAGE_NAME:$IMAGE_TAG || true'
+                sh 'sudo docker rmi $IMAGE_NAME:stable || true'
             }
         }
 
