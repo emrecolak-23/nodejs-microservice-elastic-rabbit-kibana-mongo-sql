@@ -1,0 +1,39 @@
+namespace = "production"
+serviceName = "jobber-review"
+service = "Jobber Reviews"
+
+pipeline {
+    agent {
+        label "Jenkins-Agent"
+    }
+    when {
+       changeset "server/review-service/**"
+    }
+    tools {
+        nodejs "Nodejs"
+        dockerTool "Docker" 
+    }
+
+    environment {
+        DOCKER_CREDENTIALS = credentials("dockerhub")
+        IMAGE_NAME = "colakkemree" + "/" + "jobber-review"
+        IMAGE_TAG = "stable-${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage("Cleanup Workspace") {
+            steps {
+                cleanWs()
+            }
+        }
+
+        stage("Prepare Environment") {
+            steps {
+                git branch: "main",
+                credentialsId: "github",
+                url: "https://github.com/emrecolak-23/nodejs-microservice-elastic-rabbit-kibana-mongo-sql",
+                sh 'npm install'
+            }
+        }
+    }
+}
