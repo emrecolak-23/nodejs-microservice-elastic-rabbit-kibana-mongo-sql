@@ -44,13 +44,13 @@ def notifySlack(text, channel, attachments, String slackWebhookCredentialId = 's
 
 
 def findPodsFromName(String namespace, String name) {
-    podsAndImagesRaw = sh(
+    def podsAndImagesRaw = sh(
         script: """
             kubectl get pods -n ${namespace} --selector=app=${name} -o jsonpath='{range .items[*]}{.metadata.name}###'
         """,
         returnStdout: true
     ).trim()
-    wantedPods = podsAndImagesRaw.split('###')
+    def wantedPods = podsAndImagesRaw.split('###')
 
     return wantedPods
 }
