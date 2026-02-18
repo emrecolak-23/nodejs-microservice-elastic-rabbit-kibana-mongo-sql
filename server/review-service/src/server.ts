@@ -1,13 +1,13 @@
-import { IAuthPayload, winstonLogger } from '@emrecolak-23/jobber-share';
+import http from 'http';
+
+import { IAuthPayload, winstonLogger, CustomError, IErrorResponse } from '@emrecolak-23/jobber-share';
 import express, { Application, NextFunction, Request, Response } from 'express';
 import { Logger } from 'winston';
 import hpp from 'hpp';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
-import StatusCodes from 'http-status-codes';
-import http from 'http';
-import { CustomError, IErrorResponse } from '@emrecolak-23/jobber-share';
+import { StatusCodes } from 'http-status-codes';
 import { EnvConfig } from '@review/config';
 import { injectable, singleton } from 'tsyringe';
 import { ElasticSearch } from '@review/loaders';
@@ -83,7 +83,7 @@ export class ReviewServer {
     app.all(/(.*)/, (req: Request, res: Response, next: NextFunction) => {
       const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
       this.log.log('error', `${fullUrl} endpoint does not exists`, '');
-      res.status(StatusCodes.NOT_FOUND).json({ message: `The endpoint called does not exist` });
+      res.status(StatusCodes.NOT_FOUND).json({ message: 'The endpoint called does not exist' });
       next();
     });
 

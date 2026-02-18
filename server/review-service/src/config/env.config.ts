@@ -4,7 +4,7 @@ import { singleton, injectable } from 'tsyringe';
 dotenv.config({});
 
 if (process.env.ENABLE_APM === '1') {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   require('elastic-apm-node').start({
     serviceName: 'jobber-review',
     serverUrl: process.env.ELASTIC_APM_SERVER_URL || '',

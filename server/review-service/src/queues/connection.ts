@@ -44,7 +44,7 @@ export class QueueConnection {
   }
 
   private async ensureConnection(): Promise<void> {
-    if (this.connection) return;
+    if (this.connection) {return;}
 
     if (this.isConnecting) {
       await this.waitForConnection();
@@ -80,7 +80,7 @@ export class QueueConnection {
   }
 
   private setupConnectionEvents(): void {
-    if (!this.connection) return;
+    if (!this.connection) {return;}
 
     this.connection.on('close', async (err) => {
       this.log.warn('RabbitMQ connection closed', err);
@@ -106,14 +106,14 @@ export class QueueConnection {
 
     eventEmitter.on('error', (err) => {
       this.log.error(`${name} error:`, err);
-      if (name === 'Channel') this.channel = null;
-      else this.confirmChannel = null;
+      if (name === 'Channel') {this.channel = null;}
+      else {this.confirmChannel = null;}
     });
 
     eventEmitter.on('close', () => {
       this.log.warn(`${name} closed`);
-      if (name === 'Channel') this.channel = null;
-      else this.confirmChannel = null;
+      if (name === 'Channel') {this.channel = null;}
+      else {this.confirmChannel = null;}
     });
   }
 
@@ -144,14 +144,14 @@ export class QueueConnection {
   }
 
   private handleCloseOnSigint(): void {
-    if (this.isSigintHandlerSet) return;
+    if (this.isSigintHandlerSet) {return;}
 
     process.once('SIGINT', async () => {
       this.log.info('Closing RabbitMQ connection...');
       try {
-        if (this.channel) await this.channel.close();
-        if (this.confirmChannel) await this.confirmChannel.close();
-        if (this.connection) await this.connection.close();
+        if (this.channel) {await this.channel.close();}
+        if (this.confirmChannel) {await this.confirmChannel.close();}
+        if (this.connection) {await this.connection.close();}
         this.log.info('RabbitMQ connection closed gracefully');
       } catch (error) {
         this.log.error('Error closing RabbitMQ connection:', error);

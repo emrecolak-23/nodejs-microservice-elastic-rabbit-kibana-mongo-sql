@@ -1,8 +1,9 @@
 import 'reflect-metadata';
 import express, { Express } from 'express';
 import { container } from 'tsyringe';
-import { ReviewServer } from './server';
 import { Database } from '@review/loaders';
+
+import { ReviewServer } from './server';
 
 const database = container.resolve(Database);
 

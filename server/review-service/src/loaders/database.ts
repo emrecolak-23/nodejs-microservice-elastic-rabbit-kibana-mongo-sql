@@ -87,7 +87,7 @@ export class Database {
     this.pool.on('connect', () => this.log.info('ReviewService Database connected'));
   }
 
-  async query<T extends QueryResultRow = QueryResultRow>(text: string, params?: any[]): Promise<QueryResult<T>> {
+  async query<T extends QueryResultRow = QueryResultRow>(text: string, params?: unknown[]): Promise<QueryResult<T>> {
     return this.pool.query<T>(text, params);
   }
 }

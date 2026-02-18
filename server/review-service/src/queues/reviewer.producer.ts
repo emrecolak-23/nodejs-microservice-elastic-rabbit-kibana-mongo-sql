@@ -1,9 +1,11 @@
+import crypto from 'crypto';
+
 import { winstonLogger } from '@emrecolak-23/jobber-share';
 import { Logger } from 'winston';
 import { EnvConfig } from '@review/config';
 import { ConfirmChannel } from 'amqplib';
 import { injectable, singleton } from 'tsyringe';
-import crypto from 'crypto';
+
 import { QueueConnection } from './connection';
 
 interface PublishOptions {
@@ -99,8 +101,8 @@ export class ReviewerProducer {
         },
         (err) => {
           clearTimeout(confirmTimer);
-          if (err) reject(err);
-          else resolve();
+          if (err) {reject(err);}
+          else {resolve();}
         }
       );
 
