@@ -101,8 +101,11 @@ export class ReviewerProducer {
         },
         (err) => {
           clearTimeout(confirmTimer);
-          if (err) {reject(err);}
-          else {resolve();}
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
         }
       );
 
