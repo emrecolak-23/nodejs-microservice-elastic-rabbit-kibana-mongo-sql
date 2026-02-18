@@ -41,7 +41,7 @@ pipeline {
         stage("Lint Check") {
             steps {
                 dir("server/review-service") {
-                    sh 'pnpm exec eslint "src/**/*.ts"'
+                    sh 'pnpm run lint:check'
                 }
             }
         }
@@ -49,7 +49,7 @@ pipeline {
         stage("Code Format Check") {
             steps {
                 dir("server/review-service") {
-                    sh 'pnpm exec prettier --check "src/**/*.{ts,json}"'
+                    sh 'pnpm run prettier:check'
                 }
             }
         }
@@ -57,7 +57,7 @@ pipeline {
         stage("Unit Test") {
             steps {
                 dir("server/review-service") {
-                    sh 'pnpm exec jest --coverage=true -w=1 --forceExit --detectOpenHandles --watchAll=false'
+                    sh 'pnpm run test'
                 }
             }
         }
