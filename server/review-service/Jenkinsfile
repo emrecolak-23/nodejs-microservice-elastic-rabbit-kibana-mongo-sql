@@ -64,7 +64,7 @@ pipeline {
 
         stage("Build and push") {
             steps {
-                sh 'echo $DOCKER_CREDENTIALS_PSW | docker login -u $DOCKER_CREDENTIALS_USR --password-stdin'
+                sh 'docker login -u $DOCKER_CREDENTIALS_USR -p $DOCKER_CREDENTIALS_PSW'
                 dir("server/review-service") {
                     sh 'docker build -t $IMAGE_NAME .'
                 }
