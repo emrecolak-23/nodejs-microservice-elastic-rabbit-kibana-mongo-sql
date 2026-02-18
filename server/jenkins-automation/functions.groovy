@@ -20,19 +20,20 @@ def durationTime(m1, m2) {
 }
 
 
-def notifySlack(text, channel, attachments) {
-    def slackURL = ''
+def notifySlack(text, channel, attachments, String slackWebhookCredentialId = 'slack-webhook-url') {
     def jenkinsIcon = 'https://a.slack-edge.com/205a/img/services/jenkins-ci_72.png'
 
-    def payload = JsonOutput.toJson([
-        text: text,
-        channel: channel,
-        username: "jenkins",
-        icon_url: jenkinsIcon,
-        attachments: attachments
-    ])
+    withCredentials([string(credentialsId: slackWebhookCredentialId, variable: 'SLACK_WEBHOOK_URL')]) {
+        def payload = JsonOutput.toJson([
+            text: text,
+            channel: channel,
+            username: "jenkins",
+            icon_url: jenkinsIcon,
+            attachments: attachments
+        ])
 
-    sh "curl -s -X POST ${slackURL} -H 'Cache-Control: no-cache' -H 'Content-Type: application/json;charset=UTF-8' -d '${payload}'"
+        sh "curl -s -X POST \${SLACK_WEBHOOK_URL} -H 'Cache-Control: no-cache' -H 'Content-Type: application/json;charset=UTF-8' -d '${payload}'"
+    }
 }
 
 
