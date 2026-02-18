@@ -6,13 +6,6 @@ pipeline {
     agent {
         label "Jenkins-Agent"
     }
-    when {
-        anyOf {
-            changeset "server/review-service/**"
-            changeset "server/jobber-share/**"
-            triggeredBy 'UserIdCause'  // Manuel build'de de çalışsın
-        }
-    }
     tools {
         nodejs "Nodejs"
         dockerTool "Docker" 
@@ -33,9 +26,7 @@ pipeline {
 
         stage("Prepare Environment") {
             steps {
-                git branch: "main",
-                credentialsId: "github",
-                url: "https://github.com/emrecolak-23/nodejs-microservice-elastic-rabbit-kibana-mongo-sql",
+                git branch: "main", credentialsId: "github", url: "https://github.com/emrecolak-23/nodejs-microservice-elastic-rabbit-kibana-mongo-sql"
                 sh 'npm install'
             }
         }
