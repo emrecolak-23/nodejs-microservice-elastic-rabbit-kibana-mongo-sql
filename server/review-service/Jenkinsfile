@@ -88,6 +88,23 @@ pipeline {
             }
         }
 
+        stage("Create New Pods") {
+            steps {
+                kubeconfig(credentialsId: 'jenkins-k8s-token', serverUrl: 'https://192.168.105.3:8443') {
+                    script {
+                        def pods = groovyMethods.findPodsFromName('${namespace}', '${serviceName}')
+                       
+                        for (podName in pods) {
+                            sh """
+                                kubectl delete -n ${namespace} pod ${podName}
+                                sleep 10s
+                            """
+                        }
+                    }   
+                }
+            }
+        }
+
 
         
     }
