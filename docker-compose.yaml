@@ -450,7 +450,9 @@ services:
 
   jenkins_agent:
     container_name: jenkins_agent_container
-    image: jenkins/ssh-agent:jdk17
+    build:
+      context: .
+      dockerfile: jenkins-agent.Dockerfile
     privileged: true
     user: root
     expose:

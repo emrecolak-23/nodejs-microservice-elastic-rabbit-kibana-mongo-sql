@@ -7,8 +7,7 @@ pipeline {
         label "Jenkins-Agent"
     }
     tools {
-        nodejs "Nodejs"
-        dockerTool "Docker" 
+        dockerTool "Docker"
     }
 
     environment {
@@ -27,7 +26,9 @@ pipeline {
         stage("Prepare Environment") {
             steps {
                 git branch: "main", credentialsId: "github", url: "https://github.com/emrecolak-23/nodejs-microservice-elastic-rabbit-kibana-mongo-sql"
-                sh 'npm install'
+                dir("server/review-service") {
+                    sh 'pnpm install'
+                }
             }
         }
     }
