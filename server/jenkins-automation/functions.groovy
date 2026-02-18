@@ -20,6 +20,22 @@ def durationTime(m1, m2) {
 }
 
 
+def notifySlack(text, channel, attachments) {
+    def slackURL = ''
+    def jenkinsIcon = 'https://a.slack-edge.com/205a/img/services/jenkins-ci_72.png'
+
+    def payload = JsonOutput.toJson([
+        text: text,
+        channel: channel,
+        username: "jenkins",
+        icon_url: jenkinsIcon,
+        attachments: attachments
+    ])
+
+    sh "curl -s -X POST ${slackURL} -H 'Cache-Control: no-cache' -H 'Content-Type: application/json;charset=UTF-8' -d '${payload}'"
+}
+
+
 def findPodsFromName(String namespace, String name) {
     podsAndImagesRaw = sh(
         script: """
