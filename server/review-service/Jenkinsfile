@@ -2,6 +2,9 @@ namespace = "production"
 serviceName = "jobber-review"
 service = "Jobber Reviews"
 
+def groovyMethods
+def m1 = System.currentTimeMillis()
+
 pipeline {
     agent {
         label "Jenkins-Agent"
@@ -26,6 +29,9 @@ pipeline {
         stage("Prepare Environment") {
             steps {
                 git branch: "main", credentialsId: "github", url: "https://github.com/emrecolak-23/nodejs-microservice-elastic-rabbit-kibana-mongo-sql"
+                script {
+                    groovyMethods = load "server/jenkins-automation/functions.groovy"
+                }
                 withCredentials([string(credentialsId: "github-npm-token", variable: "GITHUB_NPM_TOKEN")]) {
                     dir("server/review-service") {
                         sh """
@@ -84,5 +90,70 @@ pipeline {
 
 
         
+    }
+
+    post {
+        success {
+            script {
+                if (groovyMethods) {
+                    def m2 = System.currentTimeMillis()
+                    def durTime = groovyMethods.durationTime(m1, m2)
+                    def author = groovyMethods.readCommitAuthor()
+                    groovyMethods.notifySlack("", "jobber-jenkins", [
+        				[
+        					title: "BUILD SUCCEEDED: ${service} Service with build number ${env.BUILD_NUMBER}",
+        					title_link: "${env.BUILD_URL}",
+        					color: "good",
+        					text: "Created by: ${author}",
+        					"mrkdwn_in": ["fields"],
+        					fields: [
+        						[
+        							title: "Duration Time",
+        							value: "${durTime}",
+        							short: true
+        						],
+        						[
+        							title: "Stage Name",
+        							value: "Production",
+        							short: true
+        						],
+        					]
+        				]
+        		]
+                    )
+                }
+            }
+        }
+        failure {
+            script {
+                if (groovyMethods) {
+                    def m2 = System.currentTimeMillis()
+                    def durTime = groovyMethods.durationTime(m1, m2)
+                    def author = groovyMethods.readCommitAuthor()
+                    groovyMethods.notifySlack("", "jobber-jenkins", [
+        				[
+        					title: "BUILD FAILED: ${service} Service with build number ${env.BUILD_NUMBER}",
+        					title_link: "${env.BUILD_URL}",
+        					color: "error",
+        					text: "Created by: ${author}",
+        					"mrkdwn_in": ["fields"],
+        					fields: [
+        						[
+        							title: "Duration Time",
+        							value: "${durTime}",
+        							short: true
+        						],
+        						[
+        							title: "Stage Name",
+        							value: "Production",
+        							short: true
+        						],
+        					]
+        				]
+        		]
+                    )
+                }
+            }
+        }
     }
 }
