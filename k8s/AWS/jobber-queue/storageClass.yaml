@@ -2,7 +2,9 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: jobber-queue-storage
-provisioner: kubernetes.io/no-provisioner
+provisioner: kubernetes.io/aws-ebs
 volumeBindingMode: WaitForFirstConsumer
 allowVolumeExpansion: true
-reclaimPolicy: Delete
+reclaimPolicy: Retain
+parameters:
+  type: gp3
