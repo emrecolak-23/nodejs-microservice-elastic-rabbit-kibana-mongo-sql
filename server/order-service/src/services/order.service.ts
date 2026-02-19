@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import { injectable, singleton } from 'tsyringe';
 import { OrderRepository } from '@order/repositories/order.repository';
 import {
@@ -7,17 +9,17 @@ import {
   IReviewMessageDetails,
   lowerCase,
   NotFoundError,
-  uploads
+  uploads,
+  IOrderDocument
 } from '@emrecolak-23/jobber-share';
 import { IDeliveredWork, IOrderAttributes } from '@order/models/order.schema';
-import { IOrderDocument } from '@emrecolak-23/jobber-share';
 import { OrderProducer } from '@order/queues/order.producer';
 import { MESSAGE_TYPES, ORDER_QUEUE_CONFIG } from '@order/queues/types/producer.types';
 import { EnvConfig } from '@order/config';
-import { NotificationService } from './notification.service';
-import crypto from 'crypto';
 import { UploadApiResponse } from 'cloudinary';
 import { socketIOOrderObject } from '@order/server';
+
+import { NotificationService } from './notification.service';
 @injectable()
 @singleton()
 export class OrderService {

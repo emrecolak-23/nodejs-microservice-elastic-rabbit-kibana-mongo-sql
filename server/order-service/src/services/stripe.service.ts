@@ -1,9 +1,11 @@
+import { randomUUID } from 'crypto';
+
 import Stripe from 'stripe';
 import { EnvConfig } from '@order/config';
 import { winstonLogger } from '@emrecolak-23/jobber-share';
 import { Logger } from 'winston';
-import { randomUUID } from 'crypto';
 import { injectable, singleton } from 'tsyringe';
+
 import { IdempotencyService } from './idempotency.service';
 
 @injectable()
@@ -22,6 +24,7 @@ export class StripeService {
   }
 
   private sanitizeEmail(email: string): string {
+    // eslint-disable-next-line quotes -- Prettier uses double quotes for strings containing single quotes
     return email.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
   }
 

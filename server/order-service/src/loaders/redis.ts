@@ -37,7 +37,9 @@ export class Redis {
   }
 
   public async connect(): Promise<void> {
-    if (this.client.isReady) return;
+    if (this.client.isReady) {
+      return;
+    }
 
     if (!this.connectionPromise) {
       this.connectionPromise = this.client
@@ -56,7 +58,9 @@ export class Redis {
   }
 
   private async ensureConnected(): Promise<boolean> {
-    if (this.client.isReady) return true;
+    if (this.client.isReady) {
+      return true;
+    }
 
     try {
       await this.connect();

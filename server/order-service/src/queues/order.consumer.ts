@@ -5,8 +5,9 @@ import { winstonLogger } from '@emrecolak-23/jobber-share';
 import { EnvConfig } from '@order/config';
 import { QueueConnection } from '@order/queues/connection';
 import { Channel, ConsumeMessage, Replies } from 'amqplib';
-import { QueueConfig, EXCHANGE_TYPE, QUEUE_CONFIG } from './types/consumer.types';
 import { IdempotencyService } from '@order/services/idempotency.service';
+
+import { QueueConfig, EXCHANGE_TYPE, QUEUE_CONFIG } from './types/consumer.types';
 
 @injectable()
 @singleton()
@@ -38,7 +39,9 @@ export class OrderConsumer {
   }
 
   private async setupDLQ(channel: Channel, config: QueueConfig): Promise<void> {
-    if (!config.dlq) return;
+    if (!config.dlq) {
+      return;
+    }
 
     await channel.assertExchange(config.dlq.exchangeName, EXCHANGE_TYPE.FANOUT, { durable: true });
     await channel.assertQueue(config.dlq.queueName, { durable: true });
@@ -88,7 +91,9 @@ export class OrderConsumer {
       channel.prefetch(10);
 
       channel.consume(queue.queue, async (msg: ConsumeMessage | null) => {
-        if (!msg) return;
+        if (!msg) {
+          return;
+        }
 
         const messageId = this.getMessageId(msg);
         const retryCount = this.getRetryCount(msg);

@@ -1,10 +1,12 @@
+import crypto from 'crypto';
+
 import { winstonLogger } from '@emrecolak-23/jobber-share';
 import { Logger } from 'winston';
 import { EnvConfig } from '@order/config';
 import { ConfirmChannel } from 'amqplib';
-import { QueueConnection } from './connection';
 import { injectable, singleton } from 'tsyringe';
-import crypto from 'crypto';
+
+import { QueueConnection } from './connection';
 
 interface PublishOptions {
   exchangeName: string;
@@ -87,10 +89,7 @@ export class OrderProducer {
     let confirmTimer: NodeJS.Timeout | undefined;
 
     const confirmPromise = new Promise<void>((resolve, reject) => {
-      confirmTimer = setTimeout(
-        () => reject(new Error(`Confirm timeout after ${this.CONFIRM_TIMEOUT}ms`)),
-        this.CONFIRM_TIMEOUT
-      );
+      confirmTimer = setTimeout(() => reject(new Error(`Confirm timeout after ${this.CONFIRM_TIMEOUT}ms`)), this.CONFIRM_TIMEOUT);
 
       const bufferNotFull = channel.publish(
         exchangeName,
@@ -104,8 +103,11 @@ export class OrderProducer {
         },
         (err) => {
           clearTimeout(confirmTimer);
-          if (err) reject(err);
-          else resolve();
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
         }
       );
 
@@ -123,10 +125,7 @@ export class OrderProducer {
 
   private async waitForDrain(channel: ConfirmChannel): Promise<void> {
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(
-        () => reject(new Error(`Drain timeout after ${this.DRAIN_TIMEOUT}ms`)),
-        this.DRAIN_TIMEOUT
-      );
+      const timer = setTimeout(() => reject(new Error(`Drain timeout after ${this.DRAIN_TIMEOUT}ms`)), this.DRAIN_TIMEOUT);
       channel.once('drain', () => {
         clearTimeout(timer);
         this.log.debug('Buffer drained');

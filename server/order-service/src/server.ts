@@ -1,13 +1,13 @@
-import { IAuthPayload, winstonLogger } from '@emrecolak-23/jobber-share';
+import http from 'http';
+
+import { IAuthPayload, winstonLogger, CustomError, IErrorResponse } from '@emrecolak-23/jobber-share';
 import express, { Application, NextFunction, Request, Response } from 'express';
 import { Logger } from 'winston';
 import hpp from 'hpp';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
-import StatusCodes from 'http-status-codes';
-import http from 'http';
-import { CustomError, IErrorResponse } from '@emrecolak-23/jobber-share';
+import { StatusCodes } from 'http-status-codes';
 import { EnvConfig } from '@order/config';
 import { injectable, singleton } from 'tsyringe';
 import { ElasticSearch } from '@order/loaders';
@@ -15,6 +15,7 @@ import { verify } from 'jsonwebtoken';
 import { appRoutes } from '@order/routes';
 import { Channel } from 'amqplib';
 import { Server } from 'socket.io';
+
 import { QueueConnection } from './queues/connection';
 import { OrderConsumer } from './queues/order.consumer';
 
@@ -88,7 +89,7 @@ export class OrderServer {
     app.all(/(.*)/, (req: Request, res: Response, next: NextFunction) => {
       const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
       this.log.log('error', `${fullUrl} endpoint does not exists`, '');
-      res.status(StatusCodes.NOT_FOUND).json({ message: `The endpoint called does not exist` });
+      res.status(StatusCodes.NOT_FOUND).json({ message: 'The endpoint called does not exist' });
       next();
     });
 
@@ -125,7 +126,7 @@ export class OrderServer {
   async createSocketIO(httpServer: http.Server): Promise<Server> {
     const io = new Server(httpServer, {
       cors: {
-        origin: `*`,
+        origin: '*',
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
       }
     });
