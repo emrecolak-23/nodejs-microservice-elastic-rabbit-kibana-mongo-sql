@@ -1,0 +1,176 @@
+namespace = "production"
+serviceName = "jobber-order"
+service = "Jobber Order"
+
+def groovyMethods
+def m1 = System.currentTimeMillis()
+
+pipeline {
+    agent {
+        label "Jenkins-Agent"
+    }
+    tools {
+        dockerTool "Docker"
+    }
+
+    environment {
+        DOCKER_CREDENTIALS = credentials("dockerhub")
+        IMAGE_NAME = "colakkemree" + "/" + "jobber-order"
+        IMAGE_TAG = "stable-${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage("Cleanup Workspace") {
+            steps {
+                cleanWs()
+            }
+        }
+
+        stage("Prepare Environment") {
+            steps {
+                git branch: "main", credentialsId: "github", url: "https://github.com/emrecolak-23/nodejs-microservice-elastic-rabbit-kibana-mongo-sql"
+                script {
+                    groovyMethods = load "server/jenkins-automation/functions.groovy"
+                }
+                withCredentials([string(credentialsId: "github-npm-token", variable: "GITHUB_NPM_TOKEN")]) {
+                    dir("server/order-service") {
+                        sh """
+                            echo '@emrecolak-23:registry=https://npm.pkg.github.com/emrecolak-23' > .npmrc
+                            echo '//npm.pkg.github.com/:_authToken='\${GITHUB_NPM_TOKEN} >> .npmrc
+                            pnpm install
+                        """
+                    }
+                }
+            }
+        }
+
+        stage("Lint Check") {
+            steps {
+                dir("server/order-service") {
+                    sh 'pnpm run lint:check'
+                }
+            }
+        }
+
+        stage("Code Format Check") {
+            steps {
+                dir("server/order-service") {
+                    sh 'pnpm run prettier:check'
+                }
+            }
+        }
+
+        stage("Unit Test") {
+            steps {
+                dir("server/order-service") {
+                    sh 'pnpm run test'
+                }
+            }
+        }
+
+        stage("Build and push") {
+            steps {
+                sh 'docker login -u $DOCKER_CREDENTIALS_USR -p $DOCKER_CREDENTIALS_PSW'
+                dir("server/order-service") {
+                    sh 'docker build -t $IMAGE_NAME .'
+                }
+                sh 'docker tag $IMAGE_NAME $IMAGE_NAME:$IMAGE_TAG'
+                sh 'docker tag $IMAGE_NAME $IMAGE_NAME:stable'
+                sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
+                sh 'docker push $IMAGE_NAME:stable'
+            }
+        }
+
+        stage("Clean Artifacts") {
+            steps {
+                sh 'docker rmi $IMAGE_NAME:$IMAGE_TAG || true'
+                sh 'docker rmi $IMAGE_NAME:stable || true'
+            }
+        }
+
+        stage("Create New Pods") {
+            steps {
+                kubeconfig(credentialsId: 'jenkins-k8s-token', serverUrl: 'https://192.168.105.3:8443', caCertificate: '') {
+                    script {
+                        def pods = groovyMethods.findPodsFromName(namespace, serviceName)
+                       
+                        for (podName in pods) {
+                            sh """
+                                kubectl delete -n ${namespace} pod ${podName}
+                                sleep 10s
+                            """
+                        }
+                    }   
+                }
+            }
+        }
+
+
+        
+    }
+
+    post {
+        success {
+            script {
+                if (groovyMethods) {
+                    def m2 = System.currentTimeMillis()
+                    def durTime = groovyMethods.durationTime(m1, m2)
+                    def author = groovyMethods.readCommitAuthor()
+                    groovyMethods.notifySlack("", "jobber-jenkins", [
+        				[
+        					title: "BUILD SUCCEEDED: ${service} Service with build number ${env.BUILD_NUMBER}",
+        					title_link: "${env.BUILD_URL}",
+        					color: "good",
+        					text: "Created by: ${author}",
+        					"mrkdwn_in": ["fields"],
+        					fields: [
+        						[
+        							title: "Duration Time",
+        							value: "${durTime}",
+        							short: true
+        						],
+        						[
+        							title: "Stage Name",
+        							value: "Production",
+        							short: true
+        						],
+        					]
+        				]
+        		]
+                    )
+                }
+            }
+        }
+        failure {
+            script {
+                if (groovyMethods) {
+                    def m2 = System.currentTimeMillis()
+                    def durTime = groovyMethods.durationTime(m1, m2)
+                    def author = groovyMethods.readCommitAuthor()
+                    groovyMethods.notifySlack("", "jobber-jenkins", [
+        				[
+        					title: "BUILD FAILED: ${service} Service with build number ${env.BUILD_NUMBER}",
+        					title_link: "${env.BUILD_URL}",
+        					color: "error",
+        					text: "Created by: ${author}",
+        					"mrkdwn_in": ["fields"],
+        					fields: [
+        						[
+        							title: "Duration Time",
+        							value: "${durTime}",
+        							short: true
+        						],
+        						[
+        							title: "Stage Name",
+        							value: "Production",
+        							short: true
+        						],
+        					]
+        				]
+        		]
+                    )
+                }
+            }
+        }
+    }
+}
