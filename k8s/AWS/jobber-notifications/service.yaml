@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jobber-notifications
+  namespace: production
+spec:
+  type: ClusterIP
+  selector:
+    app: jobber-notifications
+  ports:
+    - name: notifications
+      port: 4001
+      targetPort: 4001
+      protocol: TCP
