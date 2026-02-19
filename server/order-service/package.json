@@ -47,6 +47,7 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
+    "eslint": "^8.57.0",
     "@jest/types": "^30.2.0",
     "@types/amqplib": "^0.10.8",
     "@types/bcryptjs": "^3.0.0",
