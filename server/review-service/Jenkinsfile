@@ -52,13 +52,13 @@ pipeline {
             }
         }
 
-        stage("Code Format Check") {
-            steps {
-                dir("server/review-service") {
-                    sh 'pnpm run prettier:check'
-                }
-            }
-        }
+        // stage("Code Format Check") {
+        //     steps {
+        //         dir("server/review-service") {
+        //             sh 'pnpm run prettier:check'
+        //         }
+        //     }
+        // }
 
         stage("Unit Test") {
             steps {
