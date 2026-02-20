@@ -35,7 +35,9 @@ export class ReviewServer {
     this.standartMiddleware(app);
     this.routesMiddleware(app);
     this.startsElasticSearch();
-    this.startQueues();
+    this.startQueues().catch((err) => {
+      this.log.error('ReviewService failed to connect to RabbitMQ:', err);
+    });
     this.errorHandler(app);
     this.startServer(app);
   }

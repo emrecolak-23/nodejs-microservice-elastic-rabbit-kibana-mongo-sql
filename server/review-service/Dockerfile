@@ -1,4 +1,5 @@
-FROM node:25-alpine3.22 AS builder
+# Build for linux/amd64 (AWS EKS) - prevents "exec format error" when building on Apple Silicon
+FROM --platform=linux/amd64 node:25-alpine3.22 AS builder
 
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
@@ -8,7 +9,7 @@ COPY src ./src
 RUN npm install -g pnpm && pnpm install --frozen-lockfile
 RUN pnpm run build
 
-FROM node:25-alpine3.22 AS runner
+FROM --platform=linux/amd64 node:25-alpine3.22 AS runner
 
 WORKDIR /app
 RUN apk add --no-cache curl
