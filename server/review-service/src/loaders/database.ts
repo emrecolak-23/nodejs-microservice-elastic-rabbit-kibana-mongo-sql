@@ -21,7 +21,8 @@ export class Database {
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
       ...(this.config.NODE_ENV === 'production' &&
-        this.config.CLUSTER_TYPE !== 'local' && {
+        this.config.CLUSTER_TYPE !== 'local' &&
+        this.config.CLUSTER_TYPE !== 'minikube' && {
           ssl: { rejectUnauthorized: false }
         })
     });
