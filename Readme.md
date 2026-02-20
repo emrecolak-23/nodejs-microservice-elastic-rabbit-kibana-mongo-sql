@@ -114,7 +114,133 @@ kubectl get pods -n <NAMESPACE> | grep -E "ContainerCreating|Terminating" | awk 
   xargs kubectl delete pod -n <NAMESPACE> --force --grace-period=0
 ```
 
-## 8. Delete Node Group
+## 8. Configure Domain with Route 53 & ACM
+
+### 8.1 Create Hosted Zone in Route 53
+
+```
+AWS Console → Route 53
+→ Hosted Zones → Create Hosted Zone
+→ Domain name: yourdomain.com
+→ Type: Public hosted zone
+→ Create
+```
+
+Copy the 4 NS records provided by Route 53 (without trailing dots):
+
+```
+ns-xxx.awsdns-xx.com
+ns-xxx.awsdns-xx.net
+ns-xxx.awsdns-xx.org
+ns-xxx.awsdns-xx.co.uk
+```
+
+### 8.2 Update Nameservers on Your Domain Registrar (e.g. GoDaddy)
+
+```
+GoDaddy → My Products → Domains
+→ Click your domain
+→ DNS → Nameservers → Change Nameservers
+→ Enter my own nameservers
+→ Paste the 4 NS records from Route 53 (remove trailing dots)
+→ Save
+```
+
+> Propagation can take 24-48 hours.
+
+### 8.3 Request SSL Certificate via AWS Certificate Manager (ACM)
+
+```
+AWS Console → Certificate Manager
+→ Request a certificate
+→ Request a public certificate
+→ Add domain names:
+     yourdomain.com          ← main domain
+     *.yourdomain.com        ← wildcard for subdomains
+→ Validation method: DNS validation
+→ Request
+```
+
+### 8.4 Validate Certificate via DNS (CNAME)
+
+After requesting, ACM will show a CNAME record to validate ownership:
+
+```
+AWS Console → Certificate Manager → Your certificate
+→ Click "Create records in Route 53"
+→ AWS will automatically add the CNAME record to your Hosted Zone
+```
+
+Wait for the certificate status to change from **Pending validation** to **Issued** (usually 5-30 minutes).
+
+### 8.5 Verify DNS Propagation
+
+```bash
+# Check NS records
+dig yourdomain.com NS
+
+# Check CNAME validation record
+dig _xxxxx.yourdomain.com CNAME
+```
+
+---
+
+## 9. AWS Load Balancer Controller - IAM Setup
+
+### 9.1 Download and Create IAM Policy
+
+```bash
+curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.14.1/docs/install/iam_policy.json
+
+aws iam create-policy \
+  --policy-name AWSLoadBalancerControllerIAMPolicy \
+  --policy-document file://iam_policy.json
+```
+
+### 9.2 Create IAM Service Account
+
+```bash
+eksctl create iamserviceaccount \
+  --cluster=<CLUSTER_NAME> \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --role-name AmazonEKSLoadBalancerControllerRole \
+  --attach-policy-arn=arn:aws:iam::<AWS_ACCOUNT_ID>:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve
+```
+
+### 9.3 Install AWS Load Balancer Controller via Helm
+
+```bash
+helm repo add eks https://aws.github.io/eks-charts
+helm repo update
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=<CLUSTER_NAME> \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=<REGION> \
+  --set vpcId=<VPC_ID> \
+  --set image.repository=<AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/amazon/aws-load-balancer-controller
+```
+
+### 9.4 Verify Installation
+
+```bash
+kubectl get deployment -n kube-system aws-load-balancer-controller
+```
+
+Expected output:
+
+```
+NAME                           READY   UP-TO-DATE   AVAILABLE
+aws-load-balancer-controller   2/2     2            2
+```
+
+---
+
+## 10. Delete Node Group
 
 ```bash
 eksctl delete nodegroup \
@@ -123,13 +249,13 @@ eksctl delete nodegroup \
   --name=<NODEGROUP_NAME>
 ```
 
-## 9. Delete EKS Cluster
+## 11. Delete EKS Cluster
 
 ```bash
 eksctl delete cluster <CLUSTER_NAME> --region=<REGION>
 ```
 
-## 10. Other resources to delete (manual)
+## 12. Other resources to delete (manual)
 
 - NAT Gateway
 - Elastic IP
@@ -199,3 +325,5 @@ eksctl utils describe-stacks --region=<REGION> --cluster=<CLUSTER_NAME>
 | `<DESIRED_COUNT>`          | Desired number of nodes/replicas                     |
 | `<MIN_COUNT>`              | Minimum number of nodes                              |
 | `<MAX_COUNT>`              | Maximum number of nodes                              |
+| `<AWS_ACCOUNT_ID>`         | AWS account ID (e.g. 111122223333)                   |
+| `<VPC_ID>`                 | VPC ID (e.g. vpc-0d9ffd34b915637be)                  |
