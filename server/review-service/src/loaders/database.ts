@@ -20,9 +20,10 @@ export class Database {
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
-      ...(this.config.NODE_ENV === 'production' && {
-        ssl: { rejectUnauthorized: false }
-      })
+      ...(this.config.NODE_ENV === 'production' &&
+        this.config.CLUSTER_TYPE !== 'local' && {
+          ssl: { rejectUnauthorized: false }
+        })
     });
 
     this.registerEventHandlers();

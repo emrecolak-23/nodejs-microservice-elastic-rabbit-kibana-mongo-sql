@@ -27,6 +27,7 @@ export class EnvConfig {
   public DATABASE_USER: string;
   public DATABASE_PASSWORD: string;
   public DATABASE_PORT: string;
+  public CLUSTER_TYPE: string;
   public DATABASE_NAME: string;
   public JWT_TOKEN: string;
   public NODE_ENV: string;
@@ -47,6 +48,7 @@ export class EnvConfig {
     this.DATABASE_USER = process.env.DATABASE_USER || '';
     this.DATABASE_PASSWORD = process.env.DATABASE_PASSWORD || '';
     this.DATABASE_NAME = process.env.DATABASE_NAME || '';
+    this.CLUSTER_TYPE = process.env.CLUSTER_TYPE || '';
     this.GATEWAY_JWT_TOKEN = process.env.GATEWAY_JWT_TOKEN || '';
     this.JWT_TOKEN = process.env.JWT_TOKEN || '';
     this.NODE_ENV = process.env.NODE_ENV || 'development';
