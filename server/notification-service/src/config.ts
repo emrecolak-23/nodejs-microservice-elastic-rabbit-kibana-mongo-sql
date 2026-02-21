@@ -7,7 +7,7 @@ if (process.env.ENABLE_APM === '1') {
   require('elastic-apm-node').start({
     serviceName: 'jobber-notifications',
     serverUrl: process.env.ELASTIC_APM_SERVER_URL || '',
-    apiKey: process.env.ELASTIC_APM_SECRET_TOKEN || '',
+    secretToken: process.env.ELASTIC_APM_SECRET_TOKEN || '',
     environment: process.env.NODE_ENV || 'development',
     active: true,
     captureBody: 'all',
