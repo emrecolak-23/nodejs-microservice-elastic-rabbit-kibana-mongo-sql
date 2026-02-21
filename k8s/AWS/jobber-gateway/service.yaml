@@ -3,6 +3,9 @@ kind: Service
 metadata:
   name: jobber-gateway
   namespace: production
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: api.mjoelak03.online
+    external-dns.alpha.kubernetes.io/ttl: '60'
 spec:
   type: ClusterIP
   selector:

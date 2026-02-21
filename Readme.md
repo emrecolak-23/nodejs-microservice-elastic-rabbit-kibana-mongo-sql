@@ -240,7 +240,83 @@ aws-load-balancer-controller   2/2     2            2
 
 ---
 
-## 10. Delete Node Group
+## 10. External DNS - IAM Setup (Route 53)
+
+External DNS is used to automatically create DNS records in Route 53 for hostnames defined in the Gateway Ingress. First, create an IAM policy in AWS, then attach it to a service account using the policy ARN.
+
+### 10.1 Create IAM Policy (AllowExternalDNSUpdates)
+
+First, create an IAM policy named `AllowExternalDNSUpdates` in AWS. This policy allows External DNS to update DNS records in Route 53 hosted zones.
+
+Create a `policy.json` file:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["route53:ChangeResourceRecordSets", "route53:ListResourceRecordSets", "route53:ListTagsForResources"],
+      "Resource": ["arn:aws:route53:::hostedzone/*"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["route53:ListHostedZones"],
+      "Resource": ["*"]
+    }
+  ]
+}
+```
+
+Create the policy with AWS CLI:
+
+```bash
+aws iam create-policy \
+  --policy-name AllowExternalDNSUpdates \
+  --policy-document file://policy.json
+```
+
+You will see the policy ARN in the output: `arn:aws:iam::<AWS_ACCOUNT_ID>:policy/AllowExternalDNSUpdates`
+
+### 10.2 Create IAM Service Account for External DNS
+
+Create the service account using the ARN of the policy you created:
+
+```bash
+eksctl create iamserviceaccount \
+  --name gateway-external-dns \
+  --namespace production \
+  --cluster <CLUSTER_NAME> \
+  --attach-policy-arn arn:aws:iam::<AWS_ACCOUNT_ID>:policy/AllowExternalDNSUpdates \
+  --approve \
+  --override-existing-serviceaccounts
+```
+
+### 10.3 Apply External DNS Manifest
+
+After creating the IAM service account, get the role ARN and update the manifest:
+
+```bash
+kubectl get sa gateway-external-dns -n production -o yaml
+```
+
+Replace `<GATEWAY_EXTERNAL_DNS_IAM_ROLE_ARN>` in `k8s/AWS/jobber-gateway/gateway-external-dns.yaml` with the `eks.amazonaws.com/role-arn` value from the output, then apply:
+
+```bash
+kubectl apply -f k8s/AWS/jobber-gateway/gateway-external-dns.yaml
+```
+
+To delete the service account:
+
+```bash
+eksctl delete iamserviceaccount \
+  --cluster <CLUSTER_NAME> \
+  --name gateway-external-dns
+```
+
+---
+
+## 11. Delete Node Group
 
 ```bash
 eksctl delete nodegroup \
@@ -249,13 +325,13 @@ eksctl delete nodegroup \
   --name=<NODEGROUP_NAME>
 ```
 
-## 11. Delete EKS Cluster
+## 12. Delete EKS Cluster
 
 ```bash
 eksctl delete cluster <CLUSTER_NAME> --region=<REGION>
 ```
 
-## 12. Other resources to delete (manual)
+## 13. Other resources to delete (manual)
 
 - NAT Gateway
 - Elastic IP
@@ -326,4 +402,5 @@ eksctl utils describe-stacks --region=<REGION> --cluster=<CLUSTER_NAME>
 | `<MIN_COUNT>`              | Minimum number of nodes                              |
 | `<MAX_COUNT>`              | Maximum number of nodes                              |
 | `<AWS_ACCOUNT_ID>`         | AWS account ID (e.g. 111122223333)                   |
+| `<GATEWAY_EXTERNAL_DNS_IAM_ROLE_ARN>` | IAM role ARN for gateway-external-dns SA (from `kubectl get sa gateway-external-dns -n production -o yaml` after eksctl create iamserviceaccount) |
 | `<VPC_ID>`                 | VPC ID (e.g. vpc-0d9ffd34b915637be)                  |
