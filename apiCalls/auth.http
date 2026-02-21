@@ -1,4 +1,4 @@
-@baseUrl = https://jobberemre.com
+@baseUrl = https://api.mjoelak03.online
 @urlPath = api/gateway/v1/auth
 
 ### Signup
@@ -27,6 +27,11 @@ withCredentials: true
     "password": "Pass123."
 }
 
+### Current User
+GET {{baseUrl}}/{{urlPath}}/current-user
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
 
 ### Gateway Health
 GET {{baseUrl}}/gateway-health

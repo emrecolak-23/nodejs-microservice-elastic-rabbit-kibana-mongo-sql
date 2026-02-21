@@ -49,7 +49,7 @@ export class AuthRoutes {
       this.authController.changePassword.bind(this.authController)
     );
 
-    this.router.get('/current-user', this.authController.currentUser.bind(this.authController));
+    this.router.get('/currentuser', this.authController.currentUser.bind(this.authController));
 
     this.router.post(
       '/resent-email-verification',
