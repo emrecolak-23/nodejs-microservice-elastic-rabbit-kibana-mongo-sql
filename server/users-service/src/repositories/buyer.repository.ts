@@ -1,11 +1,15 @@
 import { injectable, singleton, inject } from 'tsyringe';
 import { ClientSession } from 'mongoose';
 import { IBuyerAttributes, IBuyerModel, IBuyerDocument } from '@users/models/buyer.schema';
+import { BuyerBuilder } from '@users/builders/buyer.builder';
 
 @injectable()
 @singleton()
 export class BuyerRepository {
-  constructor(@inject('BuyerModel') private readonly buyerModel: IBuyerModel) {}
+  constructor(
+    @inject('BuyerModel') private readonly buyerModel: IBuyerModel,
+    private readonly buyerBuilder: BuyerBuilder
+  ) {}
 
   async getBuyerByEmail(email: string): Promise<IBuyerDocument | null> {
     return this.buyerModel.findOne({ email }).lean() as Promise<IBuyerDocument | null>;
@@ -20,7 +24,13 @@ export class BuyerRepository {
   }
 
   async createBuyer(buyer: IBuyerAttributes, session?: ClientSession): Promise<IBuyerDocument> {
-    const newBuyer = this.buyerModel.build(buyer);
+    const newBuyer: IBuyerDocument = this.buyerBuilder
+      .withUsername(buyer.username)
+      .withEmail(buyer.email)
+      .withProfilePicture(buyer.profilePicture)
+      .withCountry(buyer.country)
+      .withPurchasedGigs(buyer.purchasedGigs)
+      .build();
     await newBuyer.save({ session });
     return newBuyer;
   }

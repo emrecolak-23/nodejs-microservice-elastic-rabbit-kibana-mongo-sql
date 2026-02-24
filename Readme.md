@@ -387,20 +387,20 @@ eksctl utils describe-stacks --region=<REGION> --cluster=<CLUSTER_NAME>
 
 ## Placeholders
 
-| Placeholder                | Description                                          |
-| -------------------------- | ---------------------------------------------------- |
-| `<CLUSTER_NAME>`           | EKS cluster name (e.g. jobberapp)                    |
-| `<REGION>`                 | AWS region (e.g. eu-north-1)                         |
-| `<NODEGROUP_NAME>`         | Node group name (e.g. jobber-nodes)                  |
-| `<PRIVATE_SUBNET_1>`       | VPC private subnet ID                                |
-| `<PRIVATE_SUBNET_2>`       | VPC private subnet ID                                |
-| `<YOUR_EC2_KEY_PAIR_NAME>` | EC2 key pair name for SSH access (must exist in AWS) |
-| `<NAMESPACE>`              | Kubernetes namespace (e.g. production)               |
-| `<POD_NAME>`               | Kubernetes pod name                                  |
-| `<DEPLOYMENT_NAME>`        | Kubernetes deployment name                           |
-| `<DESIRED_COUNT>`          | Desired number of nodes/replicas                     |
-| `<MIN_COUNT>`              | Minimum number of nodes                              |
-| `<MAX_COUNT>`              | Maximum number of nodes                              |
-| `<AWS_ACCOUNT_ID>`         | AWS account ID (e.g. 111122223333)                   |
+| Placeholder                           | Description                                                                                                                                       |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<CLUSTER_NAME>`                      | EKS cluster name (e.g. jobberapp)                                                                                                                 |
+| `<REGION>`                            | AWS region (e.g. eu-north-1)                                                                                                                      |
+| `<NODEGROUP_NAME>`                    | Node group name (e.g. jobber-nodes)                                                                                                               |
+| `<PRIVATE_SUBNET_1>`                  | VPC private subnet ID                                                                                                                             |
+| `<PRIVATE_SUBNET_2>`                  | VPC private subnet ID                                                                                                                             |
+| `<YOUR_EC2_KEY_PAIR_NAME>`            | EC2 key pair name for SSH access (must exist in AWS)                                                                                              |
+| `<NAMESPACE>`                         | Kubernetes namespace (e.g. production)                                                                                                            |
+| `<POD_NAME>`                          | Kubernetes pod name                                                                                                                               |
+| `<DEPLOYMENT_NAME>`                   | Kubernetes deployment name                                                                                                                        |
+| `<DESIRED_COUNT>`                     | Desired number of nodes/replicas                                                                                                                  |
+| `<MIN_COUNT>`                         | Minimum number of nodes                                                                                                                           |
+| `<MAX_COUNT>`                         | Maximum number of nodes                                                                                                                           |
+| `<AWS_ACCOUNT_ID>`                    | AWS account ID (e.g. 111122223333)                                                                                                                |
 | `<GATEWAY_EXTERNAL_DNS_IAM_ROLE_ARN>` | IAM role ARN for gateway-external-dns SA (from `kubectl get sa gateway-external-dns -n production -o yaml` after eksctl create iamserviceaccount) |
-| `<VPC_ID>`                 | VPC ID (e.g. vpc-0d9ffd34b915637be)                  |
+| `<VPC_ID>`                            | VPC ID (e.g. vpc-0d9ffd34b915637be)                                                                                                               |
