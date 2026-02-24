@@ -1,4 +1,5 @@
 import { FC, ReactElement, useState } from 'react';
+import { cn } from 'src/shared/utils/cn';
 import { categories, replaceSpacesWithDash } from 'src/shared/utils/utils.service';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -18,7 +19,7 @@ const GigTabs: FC = (): ReactElement => {
               <li
                 key={uuidv4()}
                 onClick={() => setActiveTab(category)}
-                className={`cursor-pointer font-bold py-2 lg:py-0 ${activeTab === category ? 'text-black' : 'text-gray-400'}`}
+                className={cn('cursor-pointer font-bold py-2 lg:py-0', activeTab === category ? 'text-black' : 'text-gray-400')}
               >
                 {category}
               </li>
