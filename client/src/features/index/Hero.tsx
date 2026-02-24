@@ -1,20 +1,22 @@
-import { ChangeEvent, FC, ReactElement, RefObject, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, FC, FormEvent, ReactElement, RefObject, useEffect, useRef, useState } from 'react';
 import Button from '../../shared/button/Button';
 import { v4 as uuidv4 } from 'uuid';
 import Typed from 'typed.js';
 import TextInput from '../../shared/inputs/TextInput';
 import { FaSearch } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { createSearchParams, NavigateFunction, useNavigate } from 'react-router-dom';
+import { replaceSpacesWithDash } from 'src/shared/utils/utils.service';
 
 const categories: string[] = ['Graphics & Design', 'Digital Marketing', 'Writing & Translation', 'Programming & Tech'];
 
 const Hero: FC = (): ReactElement => {
-  const navigate = useNavigate();
   const typedElement: RefObject<HTMLSpanElement | null> = useRef<HTMLSpanElement | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const navigate: NavigateFunction = useNavigate();
 
-  const navigateToSearchPage = () => {
-    navigate(`/search?q=${searchTerm}`);
+  const navigateToSearchPage = (): void => {
+    const url = `/gigs/search?${createSearchParams({ query: searchTerm.trim() })}`;
+    navigate(url);
   };
 
   useEffect(() => {
@@ -49,7 +51,13 @@ const Hero: FC = (): ReactElement => {
             <p className="text-gray-700 dark:text-gray-300 sm:text-lg lg:w-full">Find the right freelance service for your next project.</p>
 
             <div className="flex w-full justify-between gap-6 lg:gap-12">
-              <form className="mx-auto flex w-full items-center bg-white">
+              <form
+                className="mx-auto flex w-full items-center bg-white"
+                onSubmit={(event: FormEvent) => {
+                  event.preventDefault();
+                  navigateToSearchPage();
+                }}
+              >
                 <div className="w-full">
                   <TextInput
                     type="search"
@@ -78,7 +86,7 @@ const Hero: FC = (): ReactElement => {
                   >
                     <div className="flex justify-center">
                       <span className="block truncate text-sm font-medium dark:text-white">
-                        <a href={`/search/categories/${category}`}>{category}</a>
+                        <a href={`/search/categories/${replaceSpacesWithDash(category)}`}>{category}</a>
                       </span>
                     </div>
                   </div>
