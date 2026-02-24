@@ -3,8 +3,11 @@ import { combineReducers, configureStore, EnhancedStore } from '@reduxjs/toolkit
 import { AnyAction, Reducer } from 'redux';
 import { FLUSH, PAUSE, PERSIST, persistReducer, PURGE, REGISTER, REHYDRATE } from 'redux-persist';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import { api } from './api';
 
-export const combineReducer = combineReducers({});
+export const combineReducer = combineReducers({
+  [api.reducerPath]: api.reducer
+});
 
 export const rootReducer: Reducer<RootState, AnyAction> = (state, action) => {
   // this is to reset the state to default when user logout
