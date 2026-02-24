@@ -1,66 +1,47 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { ChangeEvent, CSSProperties, Dispatch, KeyboardEvent, ReactNode, SetStateAction } from 'react';
-import {
-  IAuthResponse,
-  IResetPassword,
-  ISignInPayload,
-  ISignUpPayload,
-  ICreateGig,
-  IExperience,
-  IEducation,
-  ILanguage,
-  ISellerGig,
-  IConversationDocument,
-  IMessageDocument,
-  IOrderDocument,
-  IOrderNotifcation,
-  IReviewDocument,
-  ISellerDocument,
-  IBuyerDocument,
-  IAuthDocument
-} from '@emrecolak-23/jobber-share';
 
-export type validationErrorsType =
-  | ISignInPayload
-  | ISignUpPayload
-  | IResetPassword
-  | ICreateGig
-  //   | IPersonalInfoData
-  | IExperience
-  | IEducation
-  | ILanguage;
+// export type validationErrorsType =
+//   | ISignInPayload
+//   | ISignUpPayload
+//   | IResetPassword
+//   | ICreateGig
+//   //   | IPersonalInfoData
+//   | IExperience
+//   | IEducation
+//   | ILanguage;
 
-export interface IQueryResponse {
-  data: IAuthResponse;
-  error: FetchBaseQueryError | SerializedError;
-}
+// export interface IQueryResponse {
+//   data: IAuthResponse;
+//   error: FetchBaseQueryError | SerializedError;
+// }
 
-export interface IResponse {
-  message?: string;
-  token?: string;
-  user?: IAuthDocument;
-  buyer?: IBuyerDocument;
-  seller?: ISellerDocument;
-  sellers?: ISellerDocument[];
-  gig?: ISellerGig;
-  gigs?: ISellerGig[];
-  total?: number;
-  sortItems?: string[];
-  conversations?: IConversationDocument[] | IMessageDocument[];
-  messages?: IMessageDocument[];
-  messageData?: IMessageDocument;
-  conversationId?: string;
-  clientSecret?: string;
-  paymentIntentId?: string;
-  order?: IOrderDocument;
-  orders?: IOrderDocument[];
-  review?: IReviewDocument;
-  reviews?: IReviewDocument[];
-  notifications?: IOrderNotifcation[];
-  browserName?: string;
-  deviceType?: string;
-}
+// export interface IResponse {
+//   message?: string;
+//   token?: string;
+//   user?: IAuthDocument;
+//   buyer?: IBuyerDocument;
+//   seller?: ISellerDocument;
+//   sellers?: ISellerDocument[];
+//   gig?: ISellerGig;
+//   gigs?: ISellerGig[];
+//   total?: number;
+//   sortItems?: string[];
+//   conversations?: IConversationDocument[] | IMessageDocument[];
+//   messages?: IMessageDocument[];
+//   messageData?: IMessageDocument;
+//   conversationId?: string;
+//   clientSecret?: string;
+//   paymentIntentId?: string;
+//   order?: IOrderDocument;
+//   orders?: IOrderDocument[];
+//   review?: IReviewDocument;
+//   reviews?: IReviewDocument[];
+//   notifications?: IOrderNotifcation[];
+//   browserName?: string;
+//   deviceType?: string;
+// }
 
 export interface IBannerProps {
   bgColor: string;
