@@ -1,12 +1,21 @@
-import { FC, ReactElement, RefObject, useEffect, useRef } from 'react';
+import { ChangeEvent, FC, ReactElement, RefObject, useEffect, useRef, useState } from 'react';
 import Button from '../../shared/button/Button';
 import { v4 as uuidv4 } from 'uuid';
 import Typed from 'typed.js';
+import TextInput from '../../shared/inputs/TextInput';
+import { FaSearch } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const categories: string[] = ['Graphics & Design', 'Digital Marketing', 'Writing & Translation', 'Programming & Tech'];
 
 const Hero: FC = (): ReactElement => {
+  const navigate = useNavigate();
   const typedElement: RefObject<HTMLSpanElement | null> = useRef<HTMLSpanElement | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  const navigateToSearchPage = () => {
+    navigate(`/search?q=${searchTerm}`);
+  };
 
   useEffect(() => {
     const typed = new Typed(typedElement.current, {
@@ -42,15 +51,20 @@ const Hero: FC = (): ReactElement => {
             <div className="flex w-full justify-between gap-6 lg:gap-12">
               <form className="mx-auto flex w-full items-center bg-white">
                 <div className="w-full">
-                  <input
+                  <TextInput
                     type="search"
                     className="w-full rounded-full px-4 py-1 text-gray-800 focus:outline-none"
                     placeholder="Search"
-                    value=""
+                    value={searchTerm}
+                    onChange={(event: ChangeEvent) => setSearchTerm((event.target as HTMLInputElement).value)}
                   />
                 </div>
                 <div className="bg-sky-500">
-                  <Button type="submit" className="flex h-12 w-12 items-center justify-center text-white" label="Search" />
+                  <Button
+                    type="submit"
+                    className="flex h-12 w-12 items-center justify-center text-white"
+                    label={<FaSearch className="h-5 w-5" onClick={navigateToSearchPage} />}
+                  />
                 </div>
               </form>
             </div>
