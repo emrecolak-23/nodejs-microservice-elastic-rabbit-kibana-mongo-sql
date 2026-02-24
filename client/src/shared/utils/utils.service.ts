@@ -1,3 +1,17 @@
+export const categories = (): string[] => {
+  return [
+    'Graphics & Design',
+    'Digital Marketing',
+    'Writing & Translation',
+    'Programming & Tech',
+    'Video & Animation',
+    'Music & Audio',
+    'Photography',
+    'Data',
+    'Business'
+  ];
+};
+
 export const lowerCase = (str: string): string => {
   return str.toLowerCase();
 };
