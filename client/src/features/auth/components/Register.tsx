@@ -14,6 +14,8 @@ import { useAuthSchema } from '../hooks/useAuthSchema';
 import { registerUserSchema } from '../schemes/auth.schema';
 import { useSignUpMutation } from '../services/auth.service';
 import { IResponse } from 'src/shared/shared.interface';
+import { useAppDispatch } from 'src/store/store';
+import { addAuthUser } from '../reducers/auth.reducer';
 
 const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
   const [step, setStep] = useState<number>(1);
@@ -33,6 +35,7 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [schemaValidation, validationErrors] = useAuthSchema({ schema: registerUserSchema, userInfo });
   const [signUp, { isLoading }] = useSignUpMutation();
+  const dispatch = useAppDispatch();
 
   const onRegisterUser = async (): Promise<void> => {
     try {
@@ -40,6 +43,7 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
       if (isValid) {
         const result: IResponse = await signUp(userInfo).unwrap();
         console.log(result);
+        dispatch(addAuthUser({ authInfo: result.user }));
         setAlertMessage('');
       }
     } catch (error) {

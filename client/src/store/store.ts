@@ -5,9 +5,11 @@ import { FLUSH, PAUSE, PERSIST, persistReducer, PURGE, REGISTER, REHYDRATE } fro
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { api } from './api';
 import { setupListeners } from '@reduxjs/toolkit/query';
+import authReducer from 'src/features/auth/reducers/auth.reducer';
 
 export const combineReducer = combineReducers({
-  [api.reducerPath]: api.reducer
+  [api.reducerPath]: api.reducer,
+  authUser: authReducer
 });
 
 export const rootReducer: Reducer<RootState, AnyAction> = (state, action) => {

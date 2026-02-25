@@ -1,7 +1,7 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { ChangeEvent, CSSProperties, Dispatch, KeyboardEvent, ReactNode, SetStateAction } from 'react';
-import { IAuthResponse } from 'src/features/auth/interfaces/auth.interface';
+import { IAuthDocument, IAuthResponse } from 'src/features/auth/interfaces/auth.interface';
 import { ISignInPayload, ISignUpPayload, IResetPassword } from 'src/features/auth/interfaces/auth.interface';
 
 export type validationErrorsType = ISignInPayload | ISignUpPayload | IResetPassword;
@@ -19,7 +19,7 @@ export interface IQueryResponse {
 export interface IResponse {
   message?: string;
   token?: string;
-  // user?: IAuthDocument;
+  user?: IAuthDocument;
   // buyer?: IBuyerDocument;
   // seller?: ISellerDocument;
   // sellers?: ISellerDocument[];
