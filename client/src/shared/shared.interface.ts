@@ -2,16 +2,14 @@ import { SerializedError } from '@reduxjs/toolkit';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import { ChangeEvent, CSSProperties, Dispatch, KeyboardEvent, ReactNode, SetStateAction } from 'react';
 import { IAuthResponse } from 'src/features/auth/interfaces/auth.interface';
+import { ISignInPayload, ISignUpPayload, IResetPassword } from 'src/features/auth/interfaces/auth.interface';
 
-// export type validationErrorsType =
-//   | ISignInPayload
-//   | ISignUpPayload
-//   | IResetPassword
-//   | ICreateGig
-//   //   | IPersonalInfoData
-//   | IExperience
-//   | IEducation
-//   | ILanguage;
+export type validationErrorsType = ISignInPayload | ISignUpPayload | IResetPassword;
+// | ICreateGig
+// | IPersonalInfoData
+// | IExperience
+// | IEducation
+// | ILanguage;
 
 export interface IQueryResponse {
   data: IAuthResponse;

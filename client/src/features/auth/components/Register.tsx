@@ -10,6 +10,8 @@ import ModalBg from 'src/shared/modals/modalBg';
 import Dropdown from 'src/shared/dropdown/Dropdown';
 import { countriesList } from 'src/shared/utils/utils.service';
 import { checkImage, readAsBase64 } from 'src/shared/utils/image-utils.service';
+import { useAuthSchema } from '../hooks/useAuthSchema';
+import { registerUserSchema } from '../schemes/auth.schema';
 
 const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
   const [step, setStep] = useState<number>(1);
@@ -26,6 +28,18 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
   } as ISignUpPayload);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [schemaValidation, validationErrors] = useAuthSchema({ schema: registerUserSchema, userInfo });
+
+  const onRegisterUser = async (): Promise<void> => {
+    try {
+      const isValid = await schemaValidation();
+      if (isValid) {
+        console.log('User registered successfully');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleFileChange = async (event: ChangeEvent): Promise<void> => {
     const target = event.target as HTMLInputElement;
@@ -218,7 +232,8 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
               </div>
             </div>
             <Button
-              disabled={false}
+              onClick={onRegisterUser}
+              disabled={!userInfo.username || !userInfo.email || !userInfo.password || !userInfo.country || !userInfo.profilePicture}
               className="text-md block w-full cursor-pointer rounded bg-sky-500 px-8 py-2 text-center font-bold text-white hover:bg-sky-400 focus:outline-none"
               label="SIGNUP"
             />
