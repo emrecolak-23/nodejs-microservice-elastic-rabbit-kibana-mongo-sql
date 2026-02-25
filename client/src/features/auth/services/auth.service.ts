@@ -72,7 +72,7 @@ export const authApi = api.injectEndpoints({
       query(email: string) {
         return {
           url: 'auth/forgot-password',
-          method: 'PUT',
+          method: 'POST',
           body: { email }
         };
       },

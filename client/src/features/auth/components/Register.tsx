@@ -34,7 +34,7 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
   } as ISignUpPayload);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [schemaValidation, validationErrors] = useAuthSchema({ schema: registerUserSchema, userInfo });
+  const [schemaValidation, _] = useAuthSchema({ schema: registerUserSchema, userInfo });
   const [signUp, { isLoading }] = useSignUpMutation();
   const dispatch = useAppDispatch();
 

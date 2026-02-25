@@ -5,6 +5,7 @@ import { IHeader } from '../interfaces/header.interface';
 import Button from 'src/shared/button/Button';
 import LoginModal from 'src/features/auth/components/Login';
 import RegisterModal from 'src/features/auth/components/Register';
+import ForgotPasswordModal from 'src/features/auth/components/ForgotPassword';
 
 const Header: FC<IHeader> = ({ navClass }): ReactElement => {
   const { activeModal, openModal, closeModal, toggleModal } = useAuthModal();
@@ -14,6 +15,7 @@ const Header: FC<IHeader> = ({ navClass }): ReactElement => {
         <LoginModal onClose={closeModal} onToggle={() => toggleModal('register')} onTogglePassword={() => openModal('forgotPassword')} />
       )}
       {activeModal === 'register' && <RegisterModal onClose={closeModal} onToggle={() => toggleModal('login')} />}
+      {activeModal === 'forgotPassword' && <ForgotPasswordModal onClose={closeModal} onToggle={() => toggleModal('login')} />}
       <header>
         <nav className={navClass}>
           <div className="m-auto px-6 xl:container md:px-12 lg:px-6">
