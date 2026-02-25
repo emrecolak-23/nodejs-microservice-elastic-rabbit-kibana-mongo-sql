@@ -36,7 +36,7 @@ const ForgotPassword: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement 
       <div className="relative top-[20%] mx-auto w-11/12 max-w-md rounded-lg bg-white md:w-2/3">
         <div className="relative px-5 py-5">
           <div className="mb-5 flex justify-between text-2xl font-bold text-gray-600">
-            <h1 className="flex w-full justify-center">Reset Password</h1>
+            <h1 className="flex w-full justify-center">Forgot Password</h1>
             <Button
               testId="closeModal"
               className="cursor-pointer rounded text-gray-400 hover:text-gray-600"

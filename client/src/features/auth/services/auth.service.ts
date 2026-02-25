@@ -82,7 +82,7 @@ export const authApi = api.injectEndpoints({
       query(data) {
         return {
           url: `auth/reset-password/${data.token}`,
-          method: 'PUT',
+          method: 'PATCH',
           body: data
         };
       },
