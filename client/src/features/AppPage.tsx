@@ -1,10 +1,12 @@
 import { FC, ReactElement } from 'react';
 import Index from './index/Index';
 
-export const AppPage: FC = (): ReactElement => {
+const AppPage: FC = (): ReactElement => {
   return (
     <div>
       <Index />
     </div>
   );
 };
+
+export default AppPage;
