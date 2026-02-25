@@ -14,7 +14,7 @@ const ConfirmEmail: FC = (): ReactElement => {
   const [searchParams] = useSearchParams();
   const dispatch = useAppDispatch();
 
-  const [verifyEmail, { isLoading }] = useVerifyEmailMutation();
+  const [verifyEmail] = useVerifyEmailMutation();
 
   const onVerifyEmail = useCallback(async () => {
     try {

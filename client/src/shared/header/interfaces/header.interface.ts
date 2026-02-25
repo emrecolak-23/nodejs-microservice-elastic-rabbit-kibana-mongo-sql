@@ -1,4 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
+import { IAuthUser } from 'src/features/auth/interfaces/auth.interface';
+import { IBuyerDocument } from 'src/features/buyer/interfaces/buyer.interface';
+import { ISellerDocument } from 'src/features/sellers/interfaces/seller.interface';
 
 export interface IReduxHeader {
   type: string;
@@ -20,17 +23,17 @@ export interface INotification {
   hasUnreadNotification?: boolean;
 }
 
-// export interface IHomeHeaderProps {
-//   buyer?: IBuyerDocument;
-//   seller?: ISellerDocument;
-//   authUser?: IAuthUser;
-//   type?: string;
-//   showCategoryContainer?: boolean;
-//   setIsDropdownOpen?: Dispatch<SetStateAction<boolean>>;
-//   setIsOrderDropdownOpen?: Dispatch<SetStateAction<boolean>>;
-//   setIsMessageDropdownOpen?: Dispatch<SetStateAction<boolean>>;
-//   setIsNotificationDropdownOpen?: Dispatch<SetStateAction<boolean>>;
-// }
+export interface IHomeHeaderProps {
+  buyer?: IBuyerDocument;
+  seller?: ISellerDocument;
+  authUser?: IAuthUser;
+  type?: string;
+  showCategoryContainer?: boolean;
+  setIsDropdownOpen?: Dispatch<SetStateAction<boolean>>;
+  setIsOrderDropdownOpen?: Dispatch<SetStateAction<boolean>>;
+  setIsMessageDropdownOpen?: Dispatch<SetStateAction<boolean>>;
+  setIsNotificationDropdownOpen?: Dispatch<SetStateAction<boolean>>;
+}
 
 export interface IHeaderSideBarProps {
   setShowRegisterModal?: Dispatch<SetStateAction<IHeaderModalProps>>;
