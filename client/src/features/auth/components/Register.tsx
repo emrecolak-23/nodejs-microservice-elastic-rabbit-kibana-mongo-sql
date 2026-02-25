@@ -12,9 +12,12 @@ import { countriesList } from 'src/shared/utils/utils.service';
 import { checkImage, readAsBase64 } from 'src/shared/utils/image-utils.service';
 import { useAuthSchema } from '../hooks/useAuthSchema';
 import { registerUserSchema } from '../schemes/auth.schema';
+import { useSignUpMutation } from '../services/auth.service';
+import { IResponse } from 'src/shared/shared.interface';
 
 const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
   const [step, setStep] = useState<number>(1);
+  const [alertMessage, setAlertMessage] = useState<string>('');
   const [country, setCountry] = useState<string>('Select Country');
   const [passwordType, setPasswordType] = useState<string>('password');
   const [profileImage, setProfileImage] = useState<string>('https://placehold.co/330x220?text=Profile+Image');
@@ -29,14 +32,18 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [schemaValidation, validationErrors] = useAuthSchema({ schema: registerUserSchema, userInfo });
+  const [signUp, { isLoading }] = useSignUpMutation();
 
   const onRegisterUser = async (): Promise<void> => {
     try {
       const isValid = await schemaValidation();
       if (isValid) {
-        console.log('User registered successfully');
+        const result: IResponse = await signUp(userInfo).unwrap();
+        console.log(result);
+        setAlertMessage('');
       }
     } catch (error) {
+      setAlertMessage(error?.data?.message || 'An error occurred while registering user');
       console.error(error);
     }
   };
@@ -97,9 +104,7 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
             </li>
           </ol>
         </div>
-        <div className="px-5">
-          <Alert type="error" message={'Sample error message'} />
-        </div>
+        <div className="px-5">{alertMessage && <Alert type="error" message={alertMessage} />}</div>
         {step === 1 && (
           <div className="relative px-5 py-5">
             <div>
@@ -235,7 +240,7 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
               onClick={onRegisterUser}
               disabled={!userInfo.username || !userInfo.email || !userInfo.password || !userInfo.country || !userInfo.profilePicture}
               className="text-md block w-full cursor-pointer rounded bg-sky-500 px-8 py-2 text-center font-bold text-white hover:bg-sky-400 focus:outline-none"
-              label="SIGNUP"
+              label={isLoading ? 'SIGNUP IN PROGRESS' : 'SIGNUP'}
             />
           </div>
         )}

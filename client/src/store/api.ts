@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 
-const BASE_ENDPOINT = 'http://localhost:4000';
+const BASE_ENDPOINT = 'https://jobberemre.com';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: `${BASE_ENDPOINT}/api/gateway/v1`,

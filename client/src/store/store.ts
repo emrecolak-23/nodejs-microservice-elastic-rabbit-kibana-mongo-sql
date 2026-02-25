@@ -4,6 +4,7 @@ import { AnyAction, Reducer } from 'redux';
 import { FLUSH, PAUSE, PERSIST, persistReducer, PURGE, REGISTER, REHYDRATE } from 'redux-persist';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { api } from './api';
+import { setupListeners } from '@reduxjs/toolkit/query';
 
 export const combineReducer = combineReducers({
   [api.reducerPath]: api.reducer
@@ -34,8 +35,10 @@ export const store: EnhancedStore = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
       }
-    })
+    }).concat(api.middleware)
 });
+
+setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
