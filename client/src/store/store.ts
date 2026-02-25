@@ -6,10 +6,12 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { api } from './api';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import authReducer from 'src/features/auth/reducers/auth.reducer';
+import logoutReducer from 'src/features/auth/reducers/logout.reducer';
 
 export const combineReducer = combineReducers({
   [api.reducerPath]: api.reducer,
-  authUser: authReducer
+  authUser: authReducer,
+  logout: logoutReducer
 });
 
 export const rootReducer: Reducer<RootState, AnyAction> = (state, action) => {

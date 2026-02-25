@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
+import { getDataFromSessionStorage } from 'src/shared/utils/utils.service';
 
 const BASE_ENDPOINT = 'https://jobberemre.com';
 
@@ -15,8 +16,7 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithReAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extraOptions) => {
   const result = await baseQuery(args, api, extraOptions);
   if (result.error && result.error.status === 401) {
-    // get Username from local storage
-    const loggedInUsername: string = localStorage.getItem('loggedInUsername') || '';
+    const loggedInUsername: string = getDataFromSessionStorage('loggedInuser') || '';
     await baseQuery(`/auth/refresh-token/${loggedInUsername}`, api, extraOptions);
   }
 

@@ -8,7 +8,7 @@ import { ISignUpPayload } from '../interfaces/auth.interface';
 import { cn } from 'src/shared/utils/cn';
 import ModalBg from 'src/shared/modals/modalBg';
 import Dropdown from 'src/shared/dropdown/Dropdown';
-import { countriesList } from 'src/shared/utils/utils.service';
+import { countriesList, saveToSessionStorage } from 'src/shared/utils/utils.service';
 import { checkImage, readAsBase64 } from 'src/shared/utils/image-utils.service';
 import { useAuthSchema } from '../hooks/useAuthSchema';
 import { registerUserSchema } from '../schemes/auth.schema';
@@ -16,6 +16,7 @@ import { useSignUpMutation } from '../services/auth.service';
 import { IResponse } from 'src/shared/shared.interface';
 import { useAppDispatch } from 'src/store/store';
 import { addAuthUser } from '../reducers/auth.reducer';
+import { updateLogout } from '../reducers/logout.reducer';
 
 const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
   const [step, setStep] = useState<number>(1);
@@ -44,6 +45,8 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
         const result: IResponse = await signUp(userInfo).unwrap();
         console.log(result);
         dispatch(addAuthUser({ authInfo: result.user }));
+        dispatch(updateLogout(false));
+        saveToSessionStorage(JSON.stringify(true), JSON.stringify(result.user?.username || ''));
         setAlertMessage('');
       }
     } catch (error) {
