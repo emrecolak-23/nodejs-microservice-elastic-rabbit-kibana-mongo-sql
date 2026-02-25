@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, ReactElement, useState } from 'react';
+import { ChangeEvent, FC, ReactElement, useRef, useState } from 'react';
 import { FaCamera, FaChevronLeft, FaEye, FaEyeSlash, FaTimes } from 'react-icons/fa';
 import Alert from 'src/shared/alert/Alert';
 import Button from 'src/shared/button/Button';
@@ -9,11 +9,14 @@ import { cn } from 'src/shared/utils/cn';
 import ModalBg from 'src/shared/modals/modalBg';
 import Dropdown from 'src/shared/dropdown/Dropdown';
 import { countriesList } from 'src/shared/utils/utils.service';
+import { checkImage, readAsBase64 } from 'src/shared/utils/image-utils.service';
 
 const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
   const [step, setStep] = useState<number>(1);
   const [country, setCountry] = useState<string>('Select Country');
   const [passwordType, setPasswordType] = useState<string>('password');
+  const [profileImage, setProfileImage] = useState<string>('https://placehold.co/330x220?text=Profile+Image');
+  const [showImageSelect, setShowImageSelect] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<ISignUpPayload>({
     username: '',
     password: '',
@@ -21,6 +24,23 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
     country: '',
     profilePicture: ''
   } as ISignUpPayload);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (event: ChangeEvent): Promise<void> => {
+    const target = event.target as HTMLInputElement;
+    if (target.files?.length) {
+      const file: File = target.files[0];
+      const isValid = checkImage(file, 'image');
+      if (isValid) {
+        const dataImage: string | ArrayBuffer | null = await readAsBase64(file);
+        setProfileImage(dataImage as string);
+        setUserInfo({ ...userInfo, profilePicture: dataImage as string });
+      }
+
+      setShowImageSelect(false);
+    }
+  };
 
   return (
     <ModalBg>
@@ -158,13 +178,43 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
               <label htmlFor="profilePicture" className="text-sm font-bold leading-tight tracking-normal text-gray-800">
                 Profile Picture
               </label>
-              <div className="relative mb-5 mt-2 w-[20%] cursor-pointer">
-                <img id="profilePicture" src="" alt="Profile Picture" className="" />
-                <div className="left-0 top-0 flex h-20 w-20 cursor-pointer justify-center rounded-full bg-[#dee1e7]"></div>
-                <div className="absolute left-0 top-0 flex h-20 w-20 cursor-pointer justify-center rounded-full bg-[#dee1e7]">
-                  <FaCamera className="flex self-center" />
-                </div>
-                <TextInput name="image" type="file" />
+              <div
+                onMouseEnter={() => setShowImageSelect(true)}
+                onMouseLeave={() => setShowImageSelect(false)}
+                className="relative mb-5 mt-2 w-[20%] cursor-pointer"
+              >
+                {profileImage && (
+                  <img
+                    id="profilePicture"
+                    src={profileImage}
+                    alt="Profile Picture"
+                    className="left-0 top-0 h-20 w-20 rounded-full bg-white object-cover"
+                  />
+                )}
+                {!profileImage && (
+                  <div className="left-0 top-0 flex h-20 w-20 cursor-pointer justify-center rounded-full bg-[#dee1e7]"></div>
+                )}
+                {showImageSelect && (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute left-0 top-0 flex h-20 w-20 cursor-pointer justify-center rounded-full bg-[#dee1e7]"
+                  >
+                    <FaCamera className="flex self-center" />
+                  </div>
+                )}
+                <TextInput
+                  ref={fileInputRef}
+                  name="image"
+                  type="file"
+                  style={{ display: 'none' }}
+                  onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = '';
+                    }
+                    setShowImageSelect(true);
+                  }}
+                  onChange={handleFileChange}
+                />
               </div>
             </div>
             <Button
