@@ -1,12 +1,15 @@
 import { FC, ReactElement, useState } from 'react';
 import { cn } from 'src/shared/utils/cn';
+import BuyerTable from './BuyerTable';
+import { orderTypes } from 'src/shared/utils/utils.service';
+import { IOrderDocument } from 'src/features/order/interfaces/order.interface';
 // import { useParams } from 'react-router-dom';
 
-const BUYER_GIG_STATUS = {
+export const BUYER_GIG_STATUS = {
   ACTIVE: 'active',
   COMPLETED: 'completed',
   CANCELLED: 'cancelled',
-  IN_PROGRESS: 'in_progress',
+  IN_PROGRESS: 'in progress',
   DELIVERED: 'delivered'
 };
 
@@ -14,7 +17,7 @@ const BuyerDashboard: FC = (): ReactElement => {
   const [type, setType] = useState<string>(BUYER_GIG_STATUS.ACTIVE);
   //   const { buyerId } = useParams<string>();
 
-  const orders = [];
+  const orders: IOrderDocument[] = [];
 
   const typeClass = (status: string) => {
     return cn('px-4 py-3 text-xs text-[#555555] no-underline sm:text-sm md:text-base', {
@@ -45,6 +48,15 @@ const BuyerDashboard: FC = (): ReactElement => {
             </li>
           </ul>
         </div>
+        {type === BUYER_GIG_STATUS.ACTIVE && (
+          <BuyerTable orders={[]} type={type} orderTypes={orderTypes(BUYER_GIG_STATUS.IN_PROGRESS, orders)} />
+        )}
+        {type === BUYER_GIG_STATUS.COMPLETED && (
+          <BuyerTable orders={[]} type={type} orderTypes={orderTypes(BUYER_GIG_STATUS.COMPLETED, orders)} />
+        )}
+        {type === BUYER_GIG_STATUS.CANCELLED && (
+          <BuyerTable orders={[]} type={type} orderTypes={orderTypes(BUYER_GIG_STATUS.CANCELLED, orders)} />
+        )}
       </div>
     </div>
   );
