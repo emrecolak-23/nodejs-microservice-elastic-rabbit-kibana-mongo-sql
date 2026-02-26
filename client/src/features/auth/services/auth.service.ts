@@ -23,7 +23,7 @@ export const authApi = api.injectEndpoints({
           body
         };
       },
-      invalidatesTags: ['Auth']
+      invalidatesTags: ['Auth', 'Currentuser']
     }),
     logout: build.mutation<IResponse, void>({
       query() {

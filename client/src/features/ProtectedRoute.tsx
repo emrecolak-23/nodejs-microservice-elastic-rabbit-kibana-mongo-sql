@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import { useCheckCurrentUserQuery } from './auth/services/auth.service';
 import { addAuthUser } from './auth/reducers/auth.reducer';
-import { applicationLogout, saveToSessionStorage } from 'src/shared/utils/utils.service';
+import { applicationLogout, getDataFromSessionStorage, saveToSessionStorage } from 'src/shared/utils/utils.service';
 import HomeHeader from 'src/shared/header/components/HomeHeader';
 
 export interface IProtectedRouteProps {
@@ -29,6 +29,7 @@ const ProtectedRoute: FC<IProtectedRouteProps> = ({ children }): ReactElement =>
     }
 
     if (isError) {
+      if (getDataFromSessionStorage('isLoggedIn') === false) return;
       setTokenIsValid(false);
       applicationLogout(dispatch, navigate);
     }

@@ -4,8 +4,17 @@ import Home from './features/home/Home';
 import ResetPassword from './features/auth/components/ResetPassword';
 import ConfirmEmail from './features/auth/components/ConfirmEmail';
 import ProtectedRoute from './features/ProtectedRoute';
-import { Suspense } from 'react';
+import { JSX, Suspense } from 'react';
 import Error from './features/error/Error';
+import BuyerDashboard from './features/buyer/components/Dashboard';
+
+const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
+  return (
+    <div style={{ backgroundColor }} className="flex flex-grow">
+      {children}
+    </div>
+  );
+};
 
 const AppRouter = () => {
   const routes: RouteObject[] = [
@@ -26,7 +35,21 @@ const AppRouter = () => {
       element: (
         <Suspense>
           <ProtectedRoute>
-            <Home />
+            <Layout backgroundColor="#fffff">
+              <Home />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: '/users/:username/:buyerId/orders',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#fffff">
+              <BuyerDashboard />
+            </Layout>
           </ProtectedRoute>
         </Suspense>
       )
