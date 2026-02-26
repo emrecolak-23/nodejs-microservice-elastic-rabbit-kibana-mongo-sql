@@ -114,8 +114,8 @@ export const initialAuthUserValues: IAuthUser = {
 // };
 
 export const sliderImages: string[] = [
-  'https://fiverr-res.cloudinary.com/q_auto,f_auto,w_1400,dpr_1.0/v1/attachments/generic_asset/asset/50218c41d277f7d85feeaf3efb4549bd-1599072608122/bg-signup-1400-x1.png',
-  'https://fiverr-res.cloudinary.com/q_auto,f_auto,w_1160,dpr_1.0/v1/attachments/generic_asset/asset/b49b1963f5f9008f5ff88bd449ec18f7-1608035772453/logo-maker-banner-wide-desktop-1352-2x.png',
+  'https://res.cloudinary.com/demo/image/upload/w_1400,q_auto,f_auto,dpr_1.0/v1664903773/pm/mountains_autumn.jpg',
+  'https://res.cloudinary.com/demo/image/upload/w_1160,q_auto,f_auto,dpr_1.0/v1664906306/pm/hikers_mts.jpg',
   'https://fiverr-res.cloudinary.com/image/upload/w_430/q_auto,f_auto/v1/attachments/generic_asset/asset/10f680cb84a2f3ef4473ecfdede3a1ba-1593438129320/business%20logo%20design-fiverr%20guide.jpg',
   'https://fiverr-res.cloudinary.com/image/upload/w_430/f_auto,q_auto/v1/attachments/generic_asset/asset/b9495125dbb3432bf13275690d91a4f8-1656002118855/how%20to%20make%20a%20logo.jpg'
 ];
