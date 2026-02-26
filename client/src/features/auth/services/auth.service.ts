@@ -89,7 +89,7 @@ export const authApi = api.injectEndpoints({
       invalidatesTags: ['Auth']
     }),
     checkCurrentUser: build.query<IResponse, void>({
-      query: () => 'auth/currentuser',
+      query: () => 'auth/current-user',
       providesTags: ['Currentuser']
     }),
     getLoggedInUser: build.query<IResponse, void>({

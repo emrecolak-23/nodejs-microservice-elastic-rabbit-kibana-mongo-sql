@@ -1,11 +1,9 @@
-
 import { winstonLogger } from '@emrecolak-23/jobber-share';
 import { Sequelize } from 'sequelize';
 import { EnvConfig } from '@auth/config';
 
-
 const config = new EnvConfig();
-console.log(config.ELASTIC_SEARCH_URL, "elastic search url")
+console.log(config.ELASTIC_SEARCH_URL, 'elastic search url');
 const log = winstonLogger(`${config.ELASTIC_SEARCH_URL}`, 'authServiceDatabaseServer', 'debug');
 export const sequelize = new Sequelize(config.MYSQL_DB, {
   dialect: 'mysql',
@@ -24,4 +22,3 @@ export const dbConnection = async (): Promise<void> => {
     log.log('error', 'AuthService databaseConnection() method error: ', error);
   }
 };
-

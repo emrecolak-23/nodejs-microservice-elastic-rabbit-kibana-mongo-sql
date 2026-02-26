@@ -19,9 +19,12 @@ import crypto from 'crypto';
 import { authChannel } from '@auth/server';
 import { sign } from 'jsonwebtoken';
 import { IAuthUserResponse } from '@auth/interfaces';
+import { winstonLogger } from '@emrecolak-23/jobber-share';
+import { Logger } from 'winston';
 @injectable()
 @singleton()
 export class AuthService {
+  private log: Logger = winstonLogger(`${this.config.ELASTIC_SEARCH_URL}`, 'authService', 'debug');
   constructor(
     private readonly authProducer: AuthProducer,
     private readonly authRepository: AuthRepository,
@@ -38,6 +41,7 @@ export class AuthService {
 
     const profilePublicId = uuidv4();
     const uploadResult: UploadApiResponse = (await uploads(profilePicture!, profilePublicId, true, true)) as UploadApiResponse;
+    this.log.info(`Profile picture uploaded successfully ${JSON.stringify(uploadResult)}`);
     if (!uploadResult.public_id) {
       throw new BadRequestError('Profile picture upload failed. Please try again.', 'AuthService createAuthUser() method error');
     }
