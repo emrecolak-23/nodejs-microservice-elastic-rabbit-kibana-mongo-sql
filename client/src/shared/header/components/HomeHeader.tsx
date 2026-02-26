@@ -8,9 +8,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { categories, replaceSpacesWithDash } from 'src/shared/utils/utils.service';
 import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
+import Banner from 'src/shared/banner/Banner';
+import { useResendEmailMutation } from 'src/features/auth/services/auth.service';
+import { IResponse } from 'src/shared/shared.interface';
+import { useAppDispatch } from 'src/store/store';
+import { addAuthUser } from 'src/features/auth/reducers/auth.reducer';
 
 const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
+  const logout = useAppSelector((state: IReduxState) => state.logout);
 
   const settingsDropdownRef = useRef<HTMLDivElement>(null);
   const messageDropdownRef = useRef<HTMLDivElement>(null);
@@ -23,10 +29,29 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
   const isNotificationDropdownOpen = false;
   const isOrderDropdownOpen = false;
 
+  const [resendEmail] = useResendEmailMutation();
+  const dispatch = useAppDispatch();
+  const handleVerifyEmail = async (): Promise<void> => {
+    try {
+      const result: IResponse = await resendEmail({ userId: authUser.id!, email: authUser.email! }).unwrap();
+      dispatch(addAuthUser({ authInfo: result.user }));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <header>
       <nav className="navbar peer-checked:navbar-active relative z-[120] w-full border-b bg-white shadow-2xl shadow-gray-600/5 backdrop-blur dark:shadow-none">
-        {/* <!-- Add Banner component here --> */}
+        {!logout && !authUser.emailVerified && (
+          <Banner
+            text="Please verify your email to continue"
+            bgColor="bg-warning"
+            showLink={true}
+            linkText="Verify Email"
+            onClick={handleVerifyEmail}
+          />
+        )}
         <div className="m-auto px-6 xl:container md:px-12 lg:px-6">
           <div className="flex flex-wrap items-center justify-between gap-6 md:gap-0 md:py-3 lg:py-5">
             <div className="flex w-full gap-x-4 lg:w-6/12">
@@ -58,7 +83,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                       label={
                         <>
                           <FaRegBell />
-                          <span className="absolute -top-0 right-0 mr-3 inline-flex h-[6px] w-[6px] items-center justify-center rounded-full bg-[#ff62ab]"></span>
+                          {/* <span className="absolute -top-0 right-0 mr-3 inline-flex h-[6px] w-[6px] items-center justify-center rounded-full bg-[#ff62ab]"></span> */}
                         </>
                       }
                     />
@@ -81,7 +106,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                       label={
                         <>
                           <FaRegEnvelope />
-                          <span className="absolute -top-1 right-0 mr-2 inline-flex h-[6px] w-[6px] items-center justify-center rounded-full bg-[#ff62ab]"></span>
+                          {/* <span className="absolute -top-1 right-0 mr-2 inline-flex h-[6px] w-[6px] items-center justify-center rounded-full bg-[#ff62ab]"></span> */}
                         </>
                       }
                     />
@@ -133,7 +158,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                       className="relative flex gap-2 px-3 text-base font-medium"
                       label={
                         <>
-                          <img src="" alt="profile" className="h-7 w-7 rounded-full object-cover" />
+                          <img src={`${authUser.profilePicture}`} alt="profile" className="h-7 w-7 rounded-full object-cover" />
                           <span className="flex self-center">{authUser.username}</span>
                         </>
                       }

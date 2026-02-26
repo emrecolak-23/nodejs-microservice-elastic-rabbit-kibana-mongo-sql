@@ -17,7 +17,7 @@ const AppPage: FC = (): ReactElement => {
 
   const dispatch = useAppDispatch();
   const navigate: NavigateFunction = useNavigate();
-  const { data, isError, isSuccess, isLoading } = useCheckCurrentUserQuery();
+  const { data, isError } = useCheckCurrentUserQuery();
 
   const checkUser = useCallback(async () => {
     try {
