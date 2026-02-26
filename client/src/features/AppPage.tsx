@@ -8,6 +8,8 @@ import { applicationLogout, getDataFromSessionStorage, saveToSessionStorage } fr
 import Home from './home/Home';
 import HomeHeader from 'src/shared/header/components/HomeHeader';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
+import { useGetCurrentBuyerByUsernameQuery } from './buyer/services/buyer.service';
+import { addBuyer } from './buyer/reducers/buyer.reducer';
 
 const AppPage: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -17,21 +19,22 @@ const AppPage: FC = (): ReactElement => {
 
   const dispatch = useAppDispatch();
   const navigate: NavigateFunction = useNavigate();
-  const { data, isError, isLoading } = useCheckCurrentUserQuery();
+  const { data: currentUserData, isError, isLoading } = useCheckCurrentUserQuery();
+  const { data: buyerData } = useGetCurrentBuyerByUsernameQuery();
 
   const checkUser = useCallback(async () => {
     try {
-      if (data && data.user && !appLogout) {
+      if (currentUserData && currentUserData.user && !appLogout) {
         setTokenIsValid(true);
-        dispatch(addAuthUser({ authInfo: data.user }));
-        // dispatch buyer info
+        dispatch(addAuthUser({ authInfo: currentUserData.user }));
+        dispatch(addBuyer(buyerData?.buyer));
         // dispatch seller info
         saveToSessionStorage(JSON.stringify(true), JSON.stringify(authUser.username));
       }
     } catch (error) {
       console.log(error, 'error');
     }
-  }, [data, dispatch, appLogout, authUser.username]);
+  }, [currentUserData, dispatch, appLogout, authUser.username, buyerData]);
 
   const logoutUser = useCallback(() => {
     if (isLoading) return;
@@ -40,11 +43,11 @@ const AppPage: FC = (): ReactElement => {
     } catch {
       return;
     }
-    if ((!data && appLogout) || isError) {
+    if ((!currentUserData && appLogout) || isError) {
       setTokenIsValid(false);
       applicationLogout(dispatch, navigate);
     }
-  }, [data, dispatch, navigate, appLogout, isError, isLoading]);
+  }, [currentUserData, dispatch, navigate, appLogout, isError, isLoading]);
 
   useEffect(() => {
     checkUser();

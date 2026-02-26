@@ -1,4 +1,4 @@
-import { injectable } from 'tsyringe';
+import { injectable, inject } from 'tsyringe';
 import { IBuyerDocument, IBuyerModel } from '@users/models/buyer.schema';
 
 @injectable()
@@ -10,7 +10,7 @@ export class BuyerBuilder {
   isSeller?: boolean;
   purchasedGigs?: string[];
 
-  constructor(private readonly buyerModel: IBuyerModel) {}
+  constructor(@inject('BuyerModel') private readonly buyerModel: IBuyerModel) {}
 
   withUsername(username: string): this {
     this.username = username;

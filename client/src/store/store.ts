@@ -7,11 +7,13 @@ import { api } from './api';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import authReducer from 'src/features/auth/reducers/auth.reducer';
 import logoutReducer from 'src/features/auth/reducers/logout.reducer';
+import buyerReducer from 'src/features/buyer/reducers/buyer.reducer';
 
 export const combineReducer = combineReducers({
   [api.reducerPath]: api.reducer,
   authUser: authReducer,
-  logout: logoutReducer
+  logout: logoutReducer,
+  buyer: buyerReducer
 });
 
 export const rootReducer: Reducer<RootState, AnyAction> = (state, action) => {
