@@ -1,6 +1,7 @@
 import { FC, ReactElement } from 'react';
 import HomeSlider from './components/HomeSlider';
 import HomeGigsView from './components/HomeGigsView';
+import FeatureExperts from './components/FeatureExperts';
 
 const Home: FC = (): ReactElement => {
   return (
@@ -12,6 +13,7 @@ const Home: FC = (): ReactElement => {
         subTitle="These are the top gigs on the platform"
         category="Programming & Tech"
       />
+      <FeatureExperts sellers={[]} />
     </div>
   );
 };
