@@ -9,7 +9,7 @@ import { categories, replaceSpacesWithDash } from 'src/shared/utils/utils.servic
 import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 
-const HomeHeader: FC<IHomeHeaderProps> = (): ReactElement => {
+const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
 
   const settingsDropdownRef = useRef<HTMLDivElement>(null);
@@ -157,26 +157,28 @@ const HomeHeader: FC<IHomeHeaderProps> = (): ReactElement => {
           </div>
         </div>
 
-        <div className="border-grey z-40 hidden w-full border border-x-0 border-b-0 sm:flex">
-          <div className="justify-left md:justify-left container mx-auto flex px-6 lg:justify-center">
-            <span className="flex w-auto cursor-pointer self-center pr-1 xl:hidden">
-              <FaAngleLeft size={20} />
-            </span>
-            <div
-              ref={navElement}
-              className="relative inline-block h-full w-full items-center gap-6 overflow-x-auto scroll-smooth whitespace-nowrap py-2 text-sm font-medium lg:flex lg:justify-between"
-            >
-              {categories().map((category: string) => (
-                <span key={uuidv4()} className="mx-4 cursor-pointer first:ml-0 hover:text-sky-400 lg:mx-0">
-                  <Link to={`/categories/${replaceSpacesWithDash(category)}`}>{category}</Link>
-                </span>
-              ))}
+        {showCategoryContainer && (
+          <div className="border-grey z-40 hidden w-full border border-x-0 border-b-0 sm:flex">
+            <div className="justify-left md:justify-left container mx-auto flex px-6 lg:justify-center">
+              <span className="flex w-auto cursor-pointer self-center pr-1 xl:hidden">
+                <FaAngleLeft size={20} />
+              </span>
+              <div
+                ref={navElement}
+                className="relative inline-block h-full w-full items-center gap-6 overflow-x-auto scroll-smooth whitespace-nowrap py-2 text-sm font-medium lg:flex lg:justify-between"
+              >
+                {categories().map((category: string) => (
+                  <span key={uuidv4()} className="mx-4 cursor-pointer first:ml-0 hover:text-sky-400 lg:mx-0">
+                    <Link to={`/categories/${replaceSpacesWithDash(category)}`}>{category}</Link>
+                  </span>
+                ))}
+              </div>
+              <span className="flex w-auto cursor-pointer self-center pl-1 xl:hidden">
+                <FaAngleRight size={20} />
+              </span>
             </div>
-            <span className="flex w-auto cursor-pointer self-center pl-1 xl:hidden">
-              <FaAngleRight size={20} />
-            </span>
           </div>
-        </div>
+        )}
       </nav>
     </header>
   );

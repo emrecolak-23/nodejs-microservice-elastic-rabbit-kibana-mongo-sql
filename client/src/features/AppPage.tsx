@@ -50,7 +50,7 @@ const AppPage: FC = (): ReactElement => {
       <Index />
     ) : (
       <>
-        <HomeHeader />
+        <HomeHeader showCategoryContainer={showCategoryContainer} />
         <Home />
       </>
     );

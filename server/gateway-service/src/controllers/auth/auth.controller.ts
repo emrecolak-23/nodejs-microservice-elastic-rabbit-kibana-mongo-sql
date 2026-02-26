@@ -34,6 +34,11 @@ export class AuthController {
     res.status(StatusCodes.OK).json({ message: response.data.message, user: response.data.user });
   }
 
+  async signOut(req: Request, res: Response): Promise<void> {
+    req.session = null;
+    res.status(StatusCodes.OK).json({ message: 'Signed out successfully', user: {} });
+  }
+
   async verifyEmail(req: Request, res: Response): Promise<void> {
     const { token } = req.body;
     const response: AxiosResponse = await this.authService.verifyEmail(token);
