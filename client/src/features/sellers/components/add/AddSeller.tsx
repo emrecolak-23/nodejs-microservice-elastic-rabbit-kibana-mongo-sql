@@ -88,6 +88,8 @@ const AddSeller: FC = (): ReactElement => {
 
   const [createSeller, { isLoading: isCreatingSeller }] = useCreateSellerMutation();
 
+  const errors = [...personalInfoErrors, ...experienceErrors, ...educationErrors, ...skillsErrors, ...languageErrors];
+
   const onCreateSeller = async (event: FormEvent): Promise<void> => {
     event.preventDefault();
     try {
@@ -143,6 +145,7 @@ const AddSeller: FC = (): ReactElement => {
         )}
 
         <div className="left-0 top-0 z-10 mt-4 block h-full bg-white">
+          {errors.length > 0 ? <div className="text-red-400">You have {errors.length} errors in your form. Please fix them.</div> : <></>}
           <PersonalInfo personalInfoErrors={personalInfoErrors} personalInfo={personalInfo} setPersonalInfo={setPersonalInfo} />
           <SellerExperience experienceErrors={experienceErrors} experienceFields={experience} setExperienceFields={setExperience} />
           <SellerEducation educationErrors={educationErrors} educationFields={educationFields} setEducationFields={setEducationFields} />

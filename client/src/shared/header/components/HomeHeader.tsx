@@ -33,8 +33,6 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
   const isNotificationDropdownOpen = false;
   const isOrderDropdownOpen = false;
 
-  console.log(isSettingsDropdown, 'isSettingsDropdown');
-
   const [resendEmail] = useResendEmailMutation();
   const dispatch = useAppDispatch();
   const handleVerifyEmail = async (): Promise<void> => {

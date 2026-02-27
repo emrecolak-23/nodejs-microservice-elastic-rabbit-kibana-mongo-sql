@@ -3,7 +3,7 @@ import { IPersonalInfoProps } from 'src/features/sellers/interfaces/seller.inter
 import TextInput from 'src/shared/inputs/TextInput';
 import TextAreaInput from 'src/shared/inputs/TextAreaInput';
 
-const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo }): ReactElement => {
+const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo, personalInfoErrors }): ReactElement => {
   const [allowedInfoLength, setAllowedInfoLength] = useState<{ oneliner: string; description: string }>({
     oneliner: '70/70',
     description: '600/600'
@@ -23,6 +23,9 @@ const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo })
             className="border-grey mb-1 w-full rounded border p-2.5 text-sm font-normal text-gray-600 focus:outline-none"
             type="text"
             name="fullname"
+            style={{
+              borderColor: personalInfoErrors.find((error) => error.fullName !== '') ? 'red' : 'grey'
+            }}
             value={personalInfo.fullName}
             onChange={(e: ChangeEvent) => {
               setPersonalInfo({ ...personalInfo, fullName: (e.target as HTMLInputElement).value });
@@ -39,6 +42,9 @@ const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo })
             className="w-full rounded border border-grey p-2.5 mb-1 text-sm font-normal text-gray-600 focus:outline-none"
             type="text"
             rows={5}
+            style={{
+              borderColor: personalInfoErrors.find((error) => error.oneliner !== '') ? 'red' : 'grey'
+            }}
             name="oneliner"
             value={personalInfo.oneliner}
             onChange={(event: ChangeEvent) => {
@@ -67,6 +73,9 @@ const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo })
           <TextAreaInput
             className="w-full rounded border border-grey p-2.5 mb-1 text-sm font-normal text-gray-600 focus:outline-none"
             name="description"
+            style={{
+              borderColor: personalInfoErrors.find((error) => error.description !== '') ? 'red' : 'grey'
+            }}
             value={personalInfo.description}
             onChange={(event: ChangeEvent) => {
               const rawValue: string = (event.target as HTMLInputElement).value;
@@ -94,6 +103,9 @@ const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo })
           <TextInput
             className="w-full rounded border border-grey p-2.5 mb-1 text-sm font-normal text-gray-600 focus:outline-none"
             type="number"
+            style={{
+              borderColor: personalInfoErrors.find((error) => error.responseTime !== '') ? 'red' : 'grey'
+            }}
             name="responseTime"
             value={personalInfo.responseTime}
             onChange={(e: ChangeEvent) => {
