@@ -13,10 +13,14 @@ import { useResendEmailMutation } from 'src/features/auth/services/auth.service'
 import { IResponse } from 'src/shared/shared.interface';
 import { useAppDispatch } from 'src/store/store';
 import { addAuthUser } from 'src/features/auth/reducers/auth.reducer';
+import useDetectOutsideClick from 'src/shared/hooks/useDetectOutsideClick';
+import SettingsDropdown from './SettingsDropdown';
+import { ISellerDocument } from 'src/features/sellers/interfaces/seller.interface';
 
 const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
   const logout = useAppSelector((state: IReduxState) => state.logout);
+  const buyer = useAppSelector((state: IReduxState) => state.buyer);
 
   const settingsDropdownRef = useRef<HTMLDivElement>(null);
   const messageDropdownRef = useRef<HTMLDivElement>(null);
@@ -24,10 +28,12 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
   const orderDropdownRef = useRef<HTMLDivElement>(null);
   const navElement = useRef<HTMLDivElement>(null);
 
-  const isSettingsDropdown = false;
+  const [isSettingsDropdown, setIsSettingsDropdown] = useDetectOutsideClick(settingsDropdownRef, false);
   const isMessageDropdownOpen = false;
   const isNotificationDropdownOpen = false;
   const isOrderDropdownOpen = false;
+
+  console.log(isSettingsDropdown, 'isSettingsDropdown');
 
   const [resendEmail] = useResendEmailMutation();
   const dispatch = useAppDispatch();
@@ -38,6 +44,10 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const toggleDropdown = (): void => {
+    setIsSettingsDropdown(!isSettingsDropdown);
   };
 
   return (
@@ -154,27 +164,37 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                     </Link>
                   </li>
                   <li className="relative z-50 flex cursor-pointer items-center">
-                    <Button
-                      className="relative flex gap-2 px-3 text-base font-medium"
-                      label={
-                        <>
-                          <img src={`${authUser.profilePicture}`} alt="profile" className="h-7 w-7 rounded-full object-cover" />
-                          <span className="flex self-center">{authUser.username}</span>
-                        </>
-                      }
-                    />
-                    <Transition
-                      ref={settingsDropdownRef}
-                      show={isSettingsDropdown}
-                      enter="transition ease-out duration-200"
-                      enterFrom="opacity-0 translate-y-1"
-                      enterTo="opacity-100 translate-y-0"
-                      leave="transition ease-in duration-150"
-                      leaveFrom="opacity-100 translate-y-0"
-                      leaveTo="opacity-0 translate-y-1"
-                    >
-                      <div className="absolute -right-48 z-50 mt-5 w-96">{/* <!-- SettingsDropdown --> */}</div>
-                    </Transition>
+                    <div ref={settingsDropdownRef} className="relative">
+                      <Button
+                        onClick={toggleDropdown}
+                        className="relative flex gap-2 px-3 text-base font-medium"
+                        label={
+                          <>
+                            <img src={`${authUser.profilePicture}`} alt="profile" className="h-7 w-7 rounded-full object-cover" />
+                            <span className="flex self-center">{authUser.username}</span>
+                          </>
+                        }
+                      />
+                      <Transition
+                        show={isSettingsDropdown}
+                        enter="transition ease-out duration-200"
+                        enterFrom="opacity-0 translate-y-1"
+                        enterTo="opacity-100 translate-y-0"
+                        leave="transition ease-in duration-150"
+                        leaveFrom="opacity-100 translate-y-0"
+                        leaveTo="opacity-0 translate-y-1"
+                      >
+                        <div className="absolute -right-48 z-50 mt-1 w-96">
+                          <SettingsDropdown
+                            seller={{} as ISellerDocument}
+                            buyer={buyer}
+                            authUser={authUser}
+                            type="buyer"
+                            setIsDropdownOpen={setIsSettingsDropdown}
+                          />
+                        </div>
+                      </Transition>
+                    </div>
                   </li>
                 </ul>
               </div>
