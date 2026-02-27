@@ -5,8 +5,12 @@ import { IReduxState } from 'src/store/store.interface';
 import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
 import PersonalInfo from './components/PersonalInfo';
 import SellerExperience from './components/SellerExperience';
-import { IEducation, IExperience, IPersonalInfoData } from '../../interfaces/seller.interface';
+import { ICertificate, IEducation, IExperience, ILanguage, IPersonalInfoData } from '../../interfaces/seller.interface';
 import SellerEducation from './components/SellerEducation';
+import SellerSkill from './components/SellerSkill';
+import SellerLanguage from './components/SellerLanguage';
+import SellerCertificate from './components/SellerCertificate';
+import SellerSocialLinks from './components/SellerSocialLinks';
 
 const AddSeller: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -41,6 +45,25 @@ const AddSeller: FC = (): ReactElement => {
     }
   ]);
 
+  const [skillsFields, setSkillsFields] = useState<string[]>(['']);
+
+  const [languageFields, setLanguageFields] = useState<ILanguage[]>([
+    {
+      language: '',
+      level: 'Level'
+    }
+  ]);
+
+  const [certificateFields, setCertificateFields] = useState<ICertificate[]>([
+    {
+      name: '',
+      from: '',
+      year: 'Year'
+    }
+  ]);
+
+  const [socialLinksFields, setSocialLinksFields] = useState<string[]>(['']);
+
   return (
     <div className="relative w-full">
       <Breadcrumb breadCrumbItems={['Sellers', 'Create Profile']} />
@@ -57,6 +80,10 @@ const AddSeller: FC = (): ReactElement => {
           <PersonalInfo personalInfoErrors={[]} personalInfo={personalInfo} setPersonalInfo={setPersonalInfo} />
           <SellerExperience experienceErrors={[]} experienceFields={experience} setExperienceFields={setExperience} />
           <SellerEducation educationFields={educationFields} setEducationFields={setEducationFields} />
+          <SellerSkill skillsFields={skillsFields} setSkillsFields={setSkillsFields} />
+          <SellerLanguage languageFields={languageFields} setLanguageFields={setLanguageFields} />
+          <SellerCertificate certificatesFields={certificateFields} setCertificatesFields={setCertificateFields} />
+          <SellerSocialLinks socialFields={socialLinksFields} setSocialFields={setSocialLinksFields} />
         </div>
       </div>
     </div>
