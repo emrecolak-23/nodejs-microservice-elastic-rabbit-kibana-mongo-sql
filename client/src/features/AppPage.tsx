@@ -10,6 +10,8 @@ import HomeHeader from 'src/shared/header/components/HomeHeader';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { useGetCurrentBuyerByUsernameQuery } from './buyer/services/buyer.service';
 import { addBuyer } from './buyer/reducers/buyer.reducer';
+import { useGetSellerByUsernameQuery } from './sellers/services/seller.service';
+import { addSeller } from './sellers/reducers/seller.reducer';
 
 const AppPage: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -19,8 +21,19 @@ const AppPage: FC = (): ReactElement => {
 
   const dispatch = useAppDispatch();
   const navigate: NavigateFunction = useNavigate();
-  const { data: currentUserData, isError, isLoading } = useCheckCurrentUserQuery();
-  const { data: buyerData } = useGetCurrentBuyerByUsernameQuery();
+  const {
+    data: currentUserData,
+    isError,
+    isLoading
+  } = useCheckCurrentUserQuery(undefined, {
+    skip: authUser?.id === null
+  });
+  const { data: buyerData } = useGetCurrentBuyerByUsernameQuery(undefined, {
+    skip: authUser?.id === null
+  });
+  const { data: sellerData } = useGetSellerByUsernameQuery(`${authUser.username}`, {
+    skip: authUser?.id === null
+  });
 
   const checkUser = useCallback(async () => {
     try {
@@ -28,7 +41,7 @@ const AppPage: FC = (): ReactElement => {
         setTokenIsValid(true);
         dispatch(addAuthUser({ authInfo: currentUserData.user }));
         dispatch(addBuyer(buyerData?.buyer));
-        // dispatch seller info
+        dispatch(addSeller(sellerData?.seller));
         saveToSessionStorage(JSON.stringify(true), JSON.stringify(authUser.username));
       }
     } catch (error) {

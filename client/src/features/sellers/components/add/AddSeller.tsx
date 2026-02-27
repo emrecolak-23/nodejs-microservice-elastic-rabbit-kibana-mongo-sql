@@ -20,6 +20,7 @@ import { useAppDispatch } from 'src/store/store';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { addSeller } from '../../reducers/seller.reducer';
 import { addBuyer } from 'src/features/buyer/reducers/buyer.reducer';
+import { lowerCase } from 'src/shared/utils/utils.service';
 
 const AddSeller: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -122,7 +123,7 @@ const AddSeller: FC = (): ReactElement => {
         const response: IResponse = await createSeller(sellerData).unwrap();
         dispatch(addSeller(response.seller));
         dispatch(addBuyer(updateBuyer));
-        navigate('/');
+        navigate(`/seller-profile/${lowerCase(authUser.username as string)}/${response.seller?._id as string}/edit`);
       }
     } catch (error) {
       console.log(error);

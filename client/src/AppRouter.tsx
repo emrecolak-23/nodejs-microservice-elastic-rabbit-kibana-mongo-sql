@@ -8,6 +8,7 @@ import { JSX, Suspense } from 'react';
 import Error from './features/error/Error';
 import BuyerDashboard from './features/buyer/components/Dashboard';
 import AddSeller from './features/sellers/components/add/AddSeller';
+import CurrentSellerProfile from './features/sellers/components/profile/CurrentSellerProfile';
 
 const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
   return (
@@ -62,6 +63,18 @@ const AppRouter = () => {
           <ProtectedRoute>
             <Layout backgroundColor="#fffff">
               <AddSeller />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: '/seller-profile/:username/:sellerId/edit',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#fffff">
+              <CurrentSellerProfile />
             </Layout>
           </ProtectedRoute>
         </Suspense>
