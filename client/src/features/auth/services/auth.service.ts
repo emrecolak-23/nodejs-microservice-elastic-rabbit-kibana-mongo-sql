@@ -49,7 +49,7 @@ export const authApi = api.injectEndpoints({
       query(token: string) {
         return {
           url: 'auth/verify-email',
-          method: 'PUT',
+          method: 'PATCH',
           body: { token }
         };
       },

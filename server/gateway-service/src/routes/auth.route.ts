@@ -19,6 +19,7 @@ export class AuthRoute {
     this.router.post('/forgot-password', this.authController.forgotPassword.bind(this.authController));
     this.router.patch('/reset-password/:token', this.authController.resetPassword.bind(this.authController));
     this.router.patch('/change-password', this.authController.changePassword.bind(this.authController));
+    this.router.post('/resend-email', this.authController.resentEmailVerification.bind(this.authController));
 
     return this.router;
   }
