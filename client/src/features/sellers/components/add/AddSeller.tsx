@@ -5,7 +5,8 @@ import { IReduxState } from 'src/store/store.interface';
 import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
 import PersonalInfo from './components/PersonalInfo';
 import SellerExperience from './components/SellerExperience';
-import { IExperience, IPersonalInfoData } from '../../interfaces/seller.interface';
+import { IEducation, IExperience, IPersonalInfoData } from '../../interfaces/seller.interface';
+import SellerEducation from './components/SellerEducation';
 
 const AddSeller: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -30,6 +31,16 @@ const AddSeller: FC = (): ReactElement => {
     }
   ]);
 
+  const [educationFields, setEducationFields] = useState<IEducation[]>([
+    {
+      country: 'Country',
+      university: '',
+      title: 'Title',
+      major: '',
+      year: 'Year'
+    }
+  ]);
+
   return (
     <div className="relative w-full">
       <Breadcrumb breadCrumbItems={['Sellers', 'Create Profile']} />
@@ -45,6 +56,7 @@ const AddSeller: FC = (): ReactElement => {
         <div className="left-0 top-0 z-10 mt-4 block h-full bg-white">
           <PersonalInfo personalInfoErrors={[]} personalInfo={personalInfo} setPersonalInfo={setPersonalInfo} />
           <SellerExperience experienceErrors={[]} experienceFields={experience} setExperienceFields={setExperience} />
+          <SellerEducation educationFields={educationFields} setEducationFields={setEducationFields} />
         </div>
       </div>
     </div>
