@@ -1,19 +1,15 @@
 import { createSlice, Slice } from '@reduxjs/toolkit';
 import { emptySellerData } from 'src/shared/utils/static-data';
+import { IReduxSeller, ISellerDocument } from 'src/features/sellers/interfaces/seller.interface';
 
-import { IReduxSeller, ISellerDocument } from '../interfaces/seller.interface';
-
-const initialValue: ISellerDocument = emptySellerData;
+const initialState: ISellerDocument = emptySellerData;
 
 const sellerSlice: Slice = createSlice({
   name: 'seller',
-  initialState: initialValue,
+  initialState,
   reducers: {
     addSeller: (state: ISellerDocument, action: IReduxSeller): ISellerDocument => {
-      if (!action.payload) {
-        return state;
-      }
-
+      if (!action.payload) return state;
       state = { ...action.payload };
       return state;
     },
@@ -23,5 +19,5 @@ const sellerSlice: Slice = createSlice({
   }
 });
 
-export const { addSeller, emptySeller } = sellerSlice.actions;
+export const { emptySeller } = sellerSlice.actions;
 export default sellerSlice.reducer;
