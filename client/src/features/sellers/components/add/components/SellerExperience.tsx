@@ -9,7 +9,61 @@ import { v4 as uuidv4 } from 'uuid';
 
 const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienceFields }): ReactElement => {
   const handleExperienceFieldChange = (event: ChangeEvent, index: number): void => {
-    console.log(event, index);
+    const target = event.target as HTMLInputElement;
+    if (experienceFields && setExperienceFields) {
+      const data: IExperience[] = [...experienceFields];
+      if (target.name === 'currentlyWorkingHere') {
+        data[index]['currentlyWorkingHere'] = target.checked;
+        data[index]['endDate'] = target.checked ? '' : data[index]['endDate'];
+        updatePresentEndDate(data, index);
+      } else {
+        data[index][target.name] = target.value;
+      }
+
+      setExperienceFields([...data]);
+    }
+  };
+
+  const addExperienceFields = (): void => {
+    const newField: IExperience = {
+      title: '',
+      company: '',
+      startDate: 'Start Year',
+      endDate: 'End Year',
+      description: '',
+      currentlyWorkingHere: false
+    };
+
+    if (setExperienceFields && experienceFields) {
+      setExperienceFields([...experienceFields, newField]);
+    }
+  };
+
+  const removeExperienceField = (index: number): void => {
+    if (experienceFields && experienceFields.length > 1 && setExperienceFields) {
+      const data: IExperience[] = [...experienceFields];
+      data.splice(index, 1);
+      setExperienceFields([...data]);
+    }
+  };
+
+  const updatePresentEndDate = (data: IExperience[], index: number): void => {
+    if (setExperienceFields) {
+      if (!data[index]['currentlyWorkingHere']) {
+        if (data[index]['endDate'] === 'Present') {
+          data[index]['endDate'] = 'End Year';
+          setExperienceFields([...data]);
+        } else {
+          data[index]['endDate'] = `${data[index]['endDate'] ?? 'End Year'}`;
+          setExperienceFields([...data]);
+        }
+      } else {
+        if (setExperienceFields && experienceFields) {
+          data[index]['endDate'] = 'Present';
+          setExperienceFields([...data]);
+        }
+      }
+    }
   };
 
   return (
@@ -17,6 +71,7 @@ const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienc
       <div className="flex justify-between">
         <h2 className="pb-4 text-xl font-bold">Experience</h2>
         <Button
+          onClick={() => addExperienceFields()}
           className="md:text-md h-7 rounded bg-sky-500 px-6 text-center text-sm font-bold text-white hover:bg-sky-400 focus:outline-none md:px-8"
           label="Add More"
         />
@@ -44,7 +99,14 @@ const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienc
                 <Dropdown
                   onClick={(item: string) => {
                     const data: IExperience[] = [...experienceFields];
-                    data[index].startDate = item;
+
+                    const endDate = data[index].endDate;
+                    if (endDate < item) {
+                      data[index].startDate = 'Start Year';
+                    } else {
+                      data[index].startDate = item;
+                    }
+
                     if (setExperienceFields) {
                       setExperienceFields(data);
                     }
@@ -102,10 +164,13 @@ const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienc
               />
             </div>
             <div className="mt-2">
-              <Button
-                className="md:text-md h-7 rounded bg-red-500 px-6 text-center text-sm font-bold text-white hover:bg-red-400 focus:outline-none md:px-8"
-                label="Delete"
-              />
+              {experienceFields.length > 1 && index > 0 && (
+                <Button
+                  onClick={() => removeExperienceField(index)}
+                  className="md:text-md h-7 rounded bg-red-500 px-6 text-center text-sm font-bold text-white hover:bg-red-400 focus:outline-none md:px-8"
+                  label="Delete"
+                />
+              )}
             </div>
           </div>
         );
