@@ -155,14 +155,16 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                       <div className="absolute right-0 mt-5 w-96">{/* <!-- OrderDropdown --> */}</div>
                     </Transition>
                   </li>
-                  <li className="relative flex items-center">
-                    <Link
-                      to="/seller_onboarding"
-                      className="relative ml-auto flex h-9 items-center justify-center rounded-full bg-sky-500 text-white font-bold sm:px-6 hover:bg-sky-400"
-                    >
-                      <span>Become a Seller</span>
-                    </Link>
-                  </li>
+                  {buyer && !buyer.isSeller && (
+                    <li className="relative flex items-center">
+                      <Link
+                        to="/seller-onboarding"
+                        className="relative ml-auto flex h-9 items-center justify-center rounded-full bg-sky-500 text-white font-bold sm:px-6 hover:bg-sky-400"
+                      >
+                        <span>Become a Seller</span>
+                      </Link>
+                    </li>
+                  )}
                   <li className="relative z-50 flex cursor-pointer items-center">
                     <div ref={settingsDropdownRef} className="relative">
                       <Button

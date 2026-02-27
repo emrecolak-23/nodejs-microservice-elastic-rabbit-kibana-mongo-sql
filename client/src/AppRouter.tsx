@@ -7,6 +7,7 @@ import ProtectedRoute from './features/ProtectedRoute';
 import { JSX, Suspense } from 'react';
 import Error from './features/error/Error';
 import BuyerDashboard from './features/buyer/components/Dashboard';
+import AddSeller from './features/sellers/components/add/AddSeller';
 
 const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
   return (
@@ -49,6 +50,18 @@ const AppRouter = () => {
           <ProtectedRoute>
             <Layout backgroundColor="#fffff">
               <BuyerDashboard />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: '/seller-onboarding',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#fffff">
+              <AddSeller />
             </Layout>
           </ProtectedRoute>
         </Suspense>
