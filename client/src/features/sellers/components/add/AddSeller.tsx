@@ -4,7 +4,8 @@ import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
 import PersonalInfo from './components/PersonalInfo';
-import { IPersonalInfoData } from '../../interfaces/seller.interface';
+import SellerExperience from './components/SellerExperience';
+import { IExperience, IPersonalInfoData } from '../../interfaces/seller.interface';
 
 const AddSeller: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -17,6 +18,17 @@ const AddSeller: FC = (): ReactElement => {
     responseTime: '',
     oneliner: ''
   });
+
+  const [experience, setExperience] = useState<IExperience[]>([
+    {
+      title: '',
+      company: '',
+      startDate: 'Start Year',
+      endDate: 'End Year',
+      description: '',
+      currentlyWorkingHere: false
+    }
+  ]);
 
   return (
     <div className="relative w-full">
@@ -32,6 +44,7 @@ const AddSeller: FC = (): ReactElement => {
 
         <div className="left-0 top-0 z-10 mt-4 block h-full bg-white">
           <PersonalInfo personalInfoErrors={[]} personalInfo={personalInfo} setPersonalInfo={setPersonalInfo} />
+          <SellerExperience experienceErrors={[]} experienceFields={experience} setExperienceFields={setExperience} />
         </div>
       </div>
     </div>
