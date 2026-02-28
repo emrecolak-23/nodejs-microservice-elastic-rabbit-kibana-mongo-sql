@@ -17,6 +17,7 @@
     "@reduxjs/toolkit": "^2.11.2",
     "@tailwindcss/vite": "^4.2.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "i18n-iso-countries": "^7.14.0",
     "millify": "^6.1.0",
     "react": "^19.2.0",

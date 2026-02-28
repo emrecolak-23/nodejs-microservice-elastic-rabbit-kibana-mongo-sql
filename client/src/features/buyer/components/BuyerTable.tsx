@@ -4,6 +4,7 @@ import { IOrderTableProps } from 'src/features/order/interfaces/order.interface'
 import { BUYER_GIG_STATUS } from './Dashboard';
 import { cn } from 'src/shared/utils/cn';
 import { lowerCase } from 'src/shared/utils/utils.service';
+import { TimeAgo } from 'src/shared/utils/timeago.utils';
 
 const BuyerTable: FC<IOrderTableProps> = ({ orders, type, orderTypes }): ReactElement => {
   return (
@@ -45,8 +46,12 @@ const BuyerTable: FC<IOrderTableProps> = ({ orders, type, orderTypes }): ReactEl
                         </Link>
                       </div>
                     </td>
-                    <td className="p-3 text-left lg:text-center">20/20/2027</td>
-                    <td className="p-3 text-left lg:text-center">20/20/2028</td>
+                    <td className="p-3 text-left lg:text-center">{TimeAgo.dayMonthYear(`${order.dateOrdered}`)}</td>
+                    <td className="p-3 text-left lg:text-center">
+                      {TimeAgo.dayMonthYear(
+                        `${type === 'cancelled' ? TimeAgo.dayMonthYear(`${order.approvedAt}`) : TimeAgo.dayMonthYear(`${order.offer.newDeliveryDate}`)}`
+                      )}
+                    </td>
                     <td className="p-3 text-left lg:text-center">${order.price}</td>
                     <td className="px-3 py-1 text-left lg:p-3 lg:text-center">
                       <span
