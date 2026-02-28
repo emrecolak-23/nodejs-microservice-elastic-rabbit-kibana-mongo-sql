@@ -7,11 +7,13 @@ import ProfileHeader from './components/ProfileHeader';
 import { ISellerDocument } from '../../interfaces/seller.interface';
 import equal from 'react-fast-compare';
 import { addSeller } from '../../reducers/seller.reducer';
+import ProfileTabs from './components/ProfileTabs';
 
 const CurrentSellerProfile: FC = (): ReactElement => {
   const seller = useAppSelector((state: IReduxState) => state.seller);
   const [sellerProfile, setSellerProfile] = useState<ISellerDocument>(seller);
   const [showEdit, setShowEdit] = useState<boolean>(true);
+  const [type, setType] = useState<string>('Overview');
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -45,9 +47,15 @@ const CurrentSellerProfile: FC = (): ReactElement => {
           )}
         </div>
         <ProfileHeader sellerProfile={sellerProfile} setSellerProfile={setSellerProfile} showHeaderInfo={true} showEditIcons={true} />
-        <div className="my-4 cursor-pointer">{/* <!-- Tabs component --> */}</div>
+        <div className="my-4 cursor-pointer">
+          <ProfileTabs type={type} setType={setType} />
+        </div>
 
-        <div className="flex flex-wrap bg-white"></div>
+        <div className="flex flex-wrap bg-white">
+          {type === 'Overview' && <div>Seller Overview</div>}
+          {type === 'Active Gigs' && <div>Seller Active Gigs</div>}
+          {type === 'Ratings & Reviews' && <div>Seller Ratings & Reviews</div>}
+        </div>
       </div>
     </div>
   );
