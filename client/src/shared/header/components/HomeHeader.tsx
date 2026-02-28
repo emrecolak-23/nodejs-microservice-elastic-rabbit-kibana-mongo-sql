@@ -21,7 +21,10 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
   const logout = useAppSelector((state: IReduxState) => state.logout);
   const buyer = useAppSelector((state: IReduxState) => state.buyer);
+  const seller = useAppSelector((state: IReduxState) => state.seller);
 
+  console.log(authUser, 'authUser');
+  console.log(buyer, 'buyer');
   const settingsDropdownRef = useRef<HTMLDivElement>(null);
   const messageDropdownRef = useRef<HTMLDivElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
@@ -186,7 +189,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                       >
                         <div className="absolute -right-48 z-50 mt-1 w-96">
                           <SettingsDropdown
-                            seller={{} as ISellerDocument}
+                            seller={seller}
                             buyer={buyer}
                             authUser={authUser}
                             type="buyer"

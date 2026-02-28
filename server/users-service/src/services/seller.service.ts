@@ -1,5 +1,6 @@
 import { injectable, singleton } from 'tsyringe';
 import { SellerRepository } from '@users/repositories/seller.repository';
+import { BuyerService } from '@users/services/buyer.service';
 import { ISellerAttributes, ISellerDocument } from '@users/models/seller.schema';
 import { BadRequestError } from '@emrecolak-23/jobber-share';
 import { faker } from '@faker-js/faker';
@@ -11,7 +12,10 @@ import { IBuyerDocument } from '@users/models/buyer.schema';
 @injectable()
 @singleton()
 export class SellerService {
-  constructor(private readonly sellerRepository: SellerRepository) {}
+  constructor(
+    private readonly sellerRepository: SellerRepository,
+    private readonly buyerService: BuyerService
+  ) {}
 
   async getSellerByEmail(email: string): Promise<ISellerDocument | null> {
     return this.sellerRepository.getSellerByEmail(email);
@@ -25,6 +29,8 @@ export class SellerService {
     }
 
     const createdSeller: ISellerDocument = await this.sellerRepository.createSeller(sellerData);
+
+    await this.buyerService.updateBuyerIsSeller(sellerData.email!);
 
     return createdSeller;
   }
@@ -133,6 +139,7 @@ export class SellerService {
       };
 
       await this.sellerRepository.createSeller(sellerData);
+      await this.buyerService.updateBuyerIsSeller(buyer.email!);
     }
   }
 }

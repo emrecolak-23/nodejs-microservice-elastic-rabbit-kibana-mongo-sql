@@ -29,4 +29,8 @@ export class BuyerService {
   async getBuyerByUsername(username: string): Promise<IBuyerDocument | null> {
     return this.buyerRepository.getBuyerByUsername(username);
   }
+
+  async updateBuyerIsSeller(email: string): Promise<void> {
+    await this.buyerRepository.updateBuyerIsSellerProp(email);
+  }
 }

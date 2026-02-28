@@ -18,7 +18,12 @@ export class SellerController {
     const checkIfSellerExists: ISellerDocument | null = await this.sellerService.getSellerByEmail(req.body.email);
 
     if (checkIfSellerExists) {
-      throw new BadRequestError('Seller already exists', 'UserSerive getSellerByEmail() method error');
+      await this.buyerService.updateBuyerIsSeller(req.body.email);
+      res.status(StatusCodes.OK).json({
+        message: 'Seller profile already exists',
+        seller: checkIfSellerExists
+      });
+      return;
     }
 
     const seller: ISellerAttributes = {
