@@ -4,11 +4,12 @@ import { IProfileHeaderProps } from 'src/features/sellers/interfaces/seller.inte
 import { ISellerDocument } from 'src/features/sellers/interfaces/seller.interface';
 import Language from './overview/language/Language';
 import AboutMe from './overview/aboutme/AboutMe';
-import SocialLinks from './sociallinks/SocialLinks';
+import SocialLinks from './overview/sociallinks/SocialLinks';
 import Certifications from './certifications/Certifications';
 import Description from './overview/description/Description';
 import Experience from './overview/experience/Experience';
 import Education from './overview/education/Education';
+import Skills from './overview/skills/Skills';
 
 const SellerOverview: FC<IProfileHeaderProps> = ({ sellerProfile, setSellerProfile, showEditIcons }): ReactElement => {
   return (
@@ -23,6 +24,7 @@ const SellerOverview: FC<IProfileHeaderProps> = ({ sellerProfile, setSellerProfi
         <Description />
         <Experience />
         <Education />
+        <Skills />
       </div>
     </SellerContext.Provider>
   );
