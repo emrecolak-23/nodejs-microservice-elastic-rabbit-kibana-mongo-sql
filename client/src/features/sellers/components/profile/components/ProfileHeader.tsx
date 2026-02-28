@@ -49,7 +49,7 @@ const ProfileHeader: FC<IProfileHeaderProps> = ({ sellerProfile, showHeaderInfo,
       setSellerProfileItem({
         ...sellerProfile,
         fullname: sellerProfile.fullName as string,
-        oneliner: sellerProfile.oneline as string
+        oneliner: sellerProfile.oneliner as string
       });
     }
   }, [sellerProfile?.fullName, sellerProfile?.oneliner]);
@@ -136,7 +136,7 @@ const ProfileHeader: FC<IProfileHeaderProps> = ({ sellerProfile, showHeaderInfo,
                     onChange={(e: ChangeEvent) =>
                       setSellerProfileItem({ ...sellerProfileItem, oneliner: (e.target as HTMLInputElement).value })
                     }
-                    maxLength={70}
+                    maxLength={100}
                   />
                   <div className="my-2 flex">
                     <Button

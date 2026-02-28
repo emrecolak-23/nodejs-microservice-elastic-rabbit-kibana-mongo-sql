@@ -8,6 +8,7 @@ import { ISellerDocument } from '../../interfaces/seller.interface';
 import equal from 'react-fast-compare';
 import { addSeller } from '../../reducers/seller.reducer';
 import ProfileTabs from './components/ProfileTabs';
+import SellerOverview from './components/SellerOverview';
 
 const CurrentSellerProfile: FC = (): ReactElement => {
   const seller = useAppSelector((state: IReduxState) => state.seller);
@@ -52,7 +53,9 @@ const CurrentSellerProfile: FC = (): ReactElement => {
         </div>
 
         <div className="flex flex-wrap bg-white">
-          {type === 'Overview' && <div>Seller Overview</div>}
+          {type === 'Overview' && (
+            <SellerOverview sellerProfile={sellerProfile} setSellerProfile={setSellerProfile} showEditIcons={showEdit} />
+          )}
           {type === 'Active Gigs' && <div>Seller Active Gigs</div>}
           {type === 'Ratings & Reviews' && <div>Seller Ratings & Reviews</div>}
         </div>
