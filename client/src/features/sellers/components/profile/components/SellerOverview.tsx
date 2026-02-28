@@ -6,6 +6,7 @@ import Language from './overview/language/Language';
 import AboutMe from './overview/aboutme/AboutMe';
 import SocialLinks from './sociallinks/SocialLinks';
 import Certifications from './certifications/Certifications';
+import Description from './overview/description/Description';
 
 const SellerOverview: FC<IProfileHeaderProps> = ({ sellerProfile, setSellerProfile, showEditIcons }): ReactElement => {
   return (
@@ -16,7 +17,9 @@ const SellerOverview: FC<IProfileHeaderProps> = ({ sellerProfile, setSellerProfi
         <SocialLinks />
         <Certifications />
       </div>
-      <div className="w-full p-4 lg:w-2/3">Right hand side</div>
+      <div className="w-full p-4 lg:w-2/3">
+        <Description />
+      </div>
     </SellerContext.Provider>
   );
 };
