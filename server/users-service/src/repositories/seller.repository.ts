@@ -48,7 +48,8 @@ export class SellerRepository {
             responseTime: sellerData.responseTime,
             experience: sellerData.experience,
             education: sellerData.education,
-            socialLinks: sellerData.socialLinks
+            socialLinks: sellerData.socialLinks,
+            certificates: sellerData.certificates
           }
         },
         { new: true }
@@ -64,7 +65,10 @@ export class SellerRepository {
     session?: ClientSession
   ): Promise<ISellerDocument> {
     const options = session ? { new: true, session } : { new: true };
-    return this.sellerModel.findByIdAndUpdate(sellerId, { $inc: { [field]: value } }, options).lean().exec() as Promise<ISellerDocument>;
+    return this.sellerModel
+      .findByIdAndUpdate(sellerId, { $inc: { [field]: value } }, options)
+      .lean()
+      .exec() as Promise<ISellerDocument>;
   }
 
   async updateSellerCancelledJobsCount(sellerId: string, session?: ClientSession): Promise<ISellerDocument> {

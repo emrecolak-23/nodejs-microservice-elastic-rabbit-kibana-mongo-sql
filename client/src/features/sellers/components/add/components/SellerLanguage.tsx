@@ -6,7 +6,7 @@ import { languageLevel } from 'src/shared/utils/utils.service';
 
 import Dropdown from '../../../../../shared/dropdown/Dropdown';
 
-const SellerLanguageFields: FC<ILanguageProps> = ({ languageFields, setLanguageFields }): ReactElement => {
+const SellerLanguageFields: FC<ILanguageProps> = ({ languageFields, setLanguageFields, languagesErrors }): ReactElement => {
   const addLanguageFields = (): void => {
     const newfield: ILanguage = {
       language: '',
@@ -53,6 +53,9 @@ const SellerLanguageFields: FC<ILanguageProps> = ({ languageFields, setLanguageF
                 type="text"
                 name="language"
                 value={input.language}
+                style={{
+                  borderColor: languagesErrors!.find((error) => error.language !== '' && error.language !== undefined) ? 'red' : ''
+                }}
                 placeholder="Language"
                 onChange={(event: ChangeEvent) => handleLanguageFieldsChange(event, index)}
               />
@@ -63,6 +66,9 @@ const SellerLanguageFields: FC<ILanguageProps> = ({ languageFields, setLanguageF
                 maxHeight="300"
                 mainClassNames={`absolute bg-white ${index < languageFields.length - 1 ? 'zIndexDropdown' : ''}`}
                 values={languageLevel()}
+                style={{
+                  borderColor: languagesErrors!.find((error) => error.level !== '' && error.level !== undefined) ? 'red' : ''
+                }}
                 onClick={(item: string) => {
                   const data: ILanguage[] = [...languageFields];
                   data[index]['level'] = `${item}`;

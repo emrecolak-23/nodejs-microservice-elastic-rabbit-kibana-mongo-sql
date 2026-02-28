@@ -1,7 +1,9 @@
 import { ChangeEvent, FC, KeyboardEvent, ReactElement, useState } from 'react';
-import { IPersonalInfoProps } from 'src/features/sellers/interfaces/seller.interface';
+import { IPersonalInfoData, IPersonalInfoProps } from 'src/features/sellers/interfaces/seller.interface';
 import TextInput from 'src/shared/inputs/TextInput';
 import TextAreaInput from 'src/shared/inputs/TextAreaInput';
+import Dropdown from 'src/shared/dropdown/Dropdown';
+import { countriesList } from 'src/shared/utils/utils.service';
 
 const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo, personalInfoErrors }): ReactElement => {
   const [allowedInfoLength, setAllowedInfoLength] = useState<{ oneliner: string; description: string }>({
@@ -11,7 +13,6 @@ const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo, p
 
   const maxDescriptionCharacters = 600;
   const maxOneLinerCharacters = 70;
-
   return (
     <div className="border-b border-grey p-6">
       <div className="mb-6 grid md:grid-cols-5">
@@ -24,7 +25,7 @@ const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo, p
             type="text"
             name="fullname"
             style={{
-              borderColor: personalInfoErrors.find((error) => error.fullName !== '') ? 'red' : 'grey'
+              borderColor: personalInfoErrors.find((error) => error.fullName !== '' && error.fullName !== undefined) ? 'red' : ''
             }}
             value={personalInfo.fullName}
             onChange={(e: ChangeEvent) => {
@@ -43,7 +44,7 @@ const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo, p
             type="text"
             rows={5}
             style={{
-              borderColor: personalInfoErrors.find((error) => error.oneliner !== '') ? 'red' : 'grey'
+              borderColor: personalInfoErrors.find((error) => error.oneliner !== '' && error.oneliner !== undefined) ? 'red' : ''
             }}
             name="oneliner"
             value={personalInfo.oneliner}
@@ -74,7 +75,7 @@ const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo, p
             className="w-full rounded border border-grey p-2.5 mb-1 text-sm font-normal text-gray-600 focus:outline-none"
             name="description"
             style={{
-              borderColor: personalInfoErrors.find((error) => error.description !== '') ? 'red' : 'grey'
+              borderColor: personalInfoErrors.find((error) => error.description !== '' && error.description !== undefined) ? 'red' : ''
             }}
             value={personalInfo.description}
             onChange={(event: ChangeEvent) => {
@@ -97,6 +98,31 @@ const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo, p
       </div>
       <div className="grid md:grid-cols-5 mb-6">
         <div className="text-base font-medium pb-2">
+          Country<sup className="text-red-500 text-base top-[-0.3em]">*</sup>
+        </div>
+        <div className="relative w-full col-span-4">
+          <Dropdown
+            onClick={(item: string) => {
+              if (setPersonalInfo) {
+                setPersonalInfo({
+                  ...personalInfo,
+                  country: item
+                });
+              }
+            }}
+            text={personalInfo.country}
+            maxHeight="300"
+            style={{
+              borderColor: personalInfoErrors!.find((error) => error.country !== '' && error.country !== undefined) ? 'red' : ''
+            }}
+            showSearchInput={true}
+            mainClassNames="absolute w-full bg-white z-40"
+            values={countriesList()}
+          />
+        </div>
+      </div>
+      <div className="grid md:grid-cols-5 mb-6">
+        <div className="text-base font-medium pb-2">
           Response Time<sup className="text-red-500 text-base top-[-0.3em]">*</sup>
         </div>
         <div className="w-full col-span-4">
@@ -104,7 +130,7 @@ const PersonalInfo: FC<IPersonalInfoProps> = ({ personalInfo, setPersonalInfo, p
             className="w-full rounded border border-grey p-2.5 mb-1 text-sm font-normal text-gray-600 focus:outline-none"
             type="number"
             style={{
-              borderColor: personalInfoErrors.find((error) => error.responseTime !== '') ? 'red' : 'grey'
+              borderColor: personalInfoErrors.find((error) => error.responseTime !== '') ? 'red' : ''
             }}
             name="responseTime"
             value={personalInfo.responseTime}

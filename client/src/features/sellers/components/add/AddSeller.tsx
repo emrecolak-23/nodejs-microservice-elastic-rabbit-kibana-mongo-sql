@@ -89,7 +89,6 @@ const AddSeller: FC = (): ReactElement => {
   const [createSeller, { isLoading: isCreatingSeller }] = useCreateSellerMutation();
 
   const errors = [...personalInfoErrors, ...experienceErrors, ...educationErrors, ...skillsErrors, ...languageErrors];
-
   const onCreateSeller = async (event: FormEvent): Promise<void> => {
     event.preventDefault();
     try {
@@ -97,13 +96,17 @@ const AddSeller: FC = (): ReactElement => {
       if (isValid) {
         const skills: string[] = skillsFields.filter((skill) => skill.trim() !== '') as string[];
         const socialLinks: string[] = socialLinksFields.filter((link) => link.trim() !== '') as string[];
-        const certificates: ICertificate[] = certificateFields.map((certificate: ICertificate) => {
-          certificate.year = certificate.year === 'Year' ? '' : (certificate.year as number);
-          return certificate;
-        });
+        // const certificates: ICertificate[] = certificateFields.map((certificate: ICertificate) => {
+        //   certificate.year = certificate.year === 'Year' ? '' : (certificate.year as number);
+        //   return certificate;
+        // });
+        const certificates: ICertificate[] = certificateFields.filter(
+          (certificate: ICertificate) => certificate.name.trim() !== '' && certificate.from.trim() !== '' && certificate.year !== 'Year'
+        );
         const sellerData: ISellerDocument = {
           email: authUser.email as string,
           fullName: personalInfo.fullName,
+          profilePublicId: authUser.profilePublicId as string,
           profilePicture: authUser.profilePicture as string,
           description: personalInfo.description,
           country: personalInfo.country,

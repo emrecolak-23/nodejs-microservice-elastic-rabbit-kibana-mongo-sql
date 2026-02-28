@@ -22,7 +22,7 @@ interface IExperience {
   company?: string;
   title?: string;
   startDate?: Date | null;
-  endDate?: Date | null;
+  endDate?: Date | string | null;
   description?: string;
   currentlyWorkingHere?: boolean;
 }
@@ -215,7 +215,7 @@ const sellerSchema = new Schema<ISellerDocument, ISellerModel>(
           default: null
         },
         endDate: {
-          type: Date,
+          type: Schema.Types.Mixed,
           default: null
         },
         description: {

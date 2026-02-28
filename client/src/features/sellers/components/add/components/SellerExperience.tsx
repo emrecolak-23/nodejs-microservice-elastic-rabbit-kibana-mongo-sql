@@ -5,9 +5,8 @@ import Dropdown from 'src/shared/dropdown/Dropdown';
 import TextAreaInput from 'src/shared/inputs/TextAreaInput';
 import TextInput from 'src/shared/inputs/TextInput';
 import { yearsList } from 'src/shared/utils/utils.service';
-import { v4 as uuidv4 } from 'uuid';
 
-const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienceFields }): ReactElement => {
+const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienceFields, experienceErrors }): ReactElement => {
   const handleExperienceFieldChange = (event: ChangeEvent, index: number): void => {
     const target = event.target as HTMLInputElement;
     if (experienceFields && setExperienceFields) {
@@ -79,11 +78,14 @@ const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienc
 
       {experienceFields?.map((input: IExperience, index: number) => {
         return (
-          <div key={uuidv4()} className="mb-4">
+          <div key={index} className="mb-4">
             <TextInput
               className="border-grey mb-4 w-full rounded border p-2.5 text-sm font-normal text-gray-600 focus:outline-none"
               name="title"
               value={input.title}
+              style={{
+                borderColor: experienceErrors!.find((error) => error.title !== '' && error.title !== undefined) ? 'red' : ''
+              }}
               placeholder="Title (E.g: CEO)"
               onChange={(event: ChangeEvent) => handleExperienceFieldChange(event, index)}
             />
@@ -91,6 +93,9 @@ const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienc
               className="border-grey mb-4 w-full rounded border p-2.5 text-sm font-normal text-gray-600 focus:outline-none"
               placeholder="Company name"
               name="company"
+              style={{
+                borderColor: experienceErrors!.find((error) => error.company !== '' && error.company !== undefined) ? 'red' : ''
+              }}
               value={input.company}
               onChange={(event: ChangeEvent) => handleExperienceFieldChange(event, index)}
             />
@@ -101,7 +106,7 @@ const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienc
                     const data: IExperience[] = [...experienceFields];
 
                     const endDate = data[index].endDate;
-                    if (endDate < item) {
+                    if (endDate !== 'Present' && endDate !== 'End Year' && endDate < item) {
                       data[index].startDate = 'Start Year';
                     } else {
                       data[index].startDate = item;
@@ -112,6 +117,9 @@ const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienc
                     }
                   }}
                   text={input.startDate}
+                  style={{
+                    borderColor: experienceErrors!.find((error) => error.startDate !== '' && error.startDate !== undefined) ? 'red' : ''
+                  }}
                   maxHeight="300"
                   mainClassNames="absolute bg-white"
                   values={yearsList(50)}
@@ -133,6 +141,9 @@ const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienc
                     }
                   }}
                   text={input.endDate}
+                  style={{
+                    borderColor: experienceErrors!.find((error) => error.endDate !== '' && error.endDate !== undefined) ? 'red' : ''
+                  }}
                   maxHeight="300"
                   mainClassNames="absolute bg-white"
                   values={yearsList(50)}
@@ -158,6 +169,9 @@ const SellerExperience: FC<IExperienceProps> = ({ experienceFields, setExperienc
                 className="border-grey focus:border-grey block w-full rounded border p-2.5 text-sm text-gray-900 focus:ring-blue-500"
                 name="description"
                 value={input.description}
+                style={{
+                  borderColor: experienceErrors!.find((error) => error.description !== '' && error.description !== undefined) ? 'red' : ''
+                }}
                 rows={5}
                 placeholder="Write description..."
                 onChange={(event: ChangeEvent) => handleExperienceFieldChange(event, index)}

@@ -4,11 +4,36 @@ import Button from 'src/shared/button/Button';
 import Dropdown from 'src/shared/dropdown/Dropdown';
 import TextInput from 'src/shared/inputs/TextInput';
 import { countriesList, degreeList, yearsList } from 'src/shared/utils/utils.service';
-import { v4 as uuidv4 } from 'uuid';
 
-const SellerEducation: FC<IEducationProps> = ({ educationFields, setEducationFields }): ReactElement => {
+const SellerEducation: FC<IEducationProps> = ({ educationFields, setEducationFields, educationErrors }): ReactElement => {
   const handleEducationFieldChange = (event: ChangeEvent, index: number): void => {
-    console.log(event, index);
+    if (setEducationFields && educationFields) {
+      const target: HTMLInputElement = event.target as HTMLInputElement;
+      const data: IEducation[] = [...educationFields];
+      data[index][target.name] = target.value;
+      setEducationFields([...data]);
+    }
+  };
+
+  const addEducationFields = (): void => {
+    const newfield: IEducation = {
+      country: 'Country',
+      university: '',
+      title: 'Title',
+      major: '',
+      year: 'Year'
+    };
+    if (setEducationFields && educationFields) {
+      setEducationFields([...educationFields, newfield]);
+    }
+  };
+
+  const removeEducationFields = (index: number): void => {
+    if (setEducationFields && educationFields && educationFields.length > 1) {
+      const data: IEducation[] = [...educationFields];
+      data.splice(index, 1);
+      setEducationFields([...data]);
+    }
   };
 
   return (
@@ -18,17 +43,21 @@ const SellerEducation: FC<IEducationProps> = ({ educationFields, setEducationFie
         <Button
           className="md:text-md h-7 rounded bg-sky-500 px-6 text-center text-sm font-bold text-white hover:bg-sky-400 focus:outline-none md:px-8"
           label="Add More"
+          onClick={addEducationFields}
         />
       </div>
       {educationFields?.map((input: IEducation, index: number) => {
         return (
-          <div key={uuidv4()}>
+          <div key={index}>
             <div className="relative">
               <TextInput
                 className="border-grey mb-4 w-full rounded border p-2.5 text-sm font-normal text-gray-600 focus:outline-none"
                 placeholder="University/College Name"
                 type="text"
                 name="university"
+                style={{
+                  borderColor: educationErrors!.find((error) => error.university !== '' && error.university !== undefined) ? 'red' : ''
+                }}
                 value={input.university}
                 onChange={(event: ChangeEvent) => handleEducationFieldChange(event, index)}
               />
@@ -44,6 +73,9 @@ const SellerEducation: FC<IEducationProps> = ({ educationFields, setEducationFie
                 }}
                 text={input.country}
                 maxHeight="300"
+                style={{
+                  borderColor: educationErrors!.find((error) => error.country !== '' && error.country !== undefined) ? 'red' : ''
+                }}
                 showSearchInput={true}
                 mainClassNames="absolute bg-white z-40"
                 values={countriesList()}
@@ -60,6 +92,9 @@ const SellerEducation: FC<IEducationProps> = ({ educationFields, setEducationFie
                     }
                   }}
                   text={input.title}
+                  style={{
+                    borderColor: educationErrors!.find((error) => error.title !== '' && error.title !== undefined) ? 'red' : ''
+                  }}
                   maxHeight="300"
                   mainClassNames="absolute bg-white z-30"
                   values={degreeList()}
@@ -71,6 +106,9 @@ const SellerEducation: FC<IEducationProps> = ({ educationFields, setEducationFie
                   placeholder="Major e.g: Computer Engineering"
                   type="text"
                   name="major"
+                  style={{
+                    borderColor: educationErrors!.find((error) => error.major !== '' && error.major !== undefined) ? 'red' : ''
+                  }}
                   value={input.major}
                   onChange={(event: ChangeEvent) => handleEducationFieldChange(event, index)}
                 />
@@ -85,6 +123,9 @@ const SellerEducation: FC<IEducationProps> = ({ educationFields, setEducationFie
                     }
                   }}
                   text={input.year}
+                  style={{
+                    borderColor: educationErrors!.find((error) => error.year !== '' && error.year !== undefined) ? 'red' : ''
+                  }}
                   maxHeight="300"
                   mainClassNames="absolute bg-white z-30"
                   values={yearsList(50)}
@@ -94,6 +135,7 @@ const SellerEducation: FC<IEducationProps> = ({ educationFields, setEducationFie
                 <Button
                   className="md:text-md h-7 rounded bg-red-500 px-6 text-center text-sm font-bold text-white hover:bg-red-400 focus:outline-none md:px-8"
                   label="Delete"
+                  onClick={() => removeEducationFields(index)}
                 />
               </div>
             </div>
