@@ -4,6 +4,7 @@ import { IProfileHeaderProps } from 'src/features/sellers/interfaces/seller.inte
 import { ISellerDocument } from 'src/features/sellers/interfaces/seller.interface';
 import Language from './overview/language/Language';
 import AboutMe from './overview/aboutme/AboutMe';
+import SocialLinks from './sociallinks/SocialLinks';
 
 const SellerOverview: FC<IProfileHeaderProps> = ({ sellerProfile, setSellerProfile, showEditIcons }): ReactElement => {
   return (
@@ -11,6 +12,7 @@ const SellerOverview: FC<IProfileHeaderProps> = ({ sellerProfile, setSellerProfi
       <div className="w-full p-4 lg:w-1/3">
         <Language />
         <AboutMe />
+        <SocialLinks />
       </div>
       <div className="w-full p-4 lg:w-2/3">Right hand side</div>
     </SellerContext.Provider>

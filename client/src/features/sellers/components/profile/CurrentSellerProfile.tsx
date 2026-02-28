@@ -53,9 +53,7 @@ const CurrentSellerProfile: FC = (): ReactElement => {
         </div>
 
         <div className="flex flex-wrap bg-white">
-          {type === 'Overview' && (
-            <SellerOverview sellerProfile={sellerProfile} setSellerProfile={setSellerProfile} showEditIcons={showEdit} />
-          )}
+          {type === 'Overview' && <SellerOverview sellerProfile={sellerProfile} setSellerProfile={setSellerProfile} showEditIcons={true} />}
           {type === 'Active Gigs' && <div>Seller Active Gigs</div>}
           {type === 'Ratings & Reviews' && <div>Seller Ratings & Reviews</div>}
         </div>
