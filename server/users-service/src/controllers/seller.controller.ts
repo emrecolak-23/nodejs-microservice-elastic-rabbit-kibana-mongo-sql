@@ -3,7 +3,6 @@ import { injectable, singleton } from 'tsyringe';
 import { StatusCodes } from 'http-status-codes';
 import { BuyerService, SellerService } from '@users/services';
 import { ISellerAttributes, ISellerDocument } from '@users/models/seller.schema';
-import { BadRequestError } from '@emrecolak-23/jobber-share';
 import { IBuyerDocument } from '@users/models/buyer.schema';
 
 @injectable()

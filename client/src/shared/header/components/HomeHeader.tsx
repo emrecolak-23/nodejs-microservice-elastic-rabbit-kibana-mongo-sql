@@ -15,7 +15,6 @@ import { useAppDispatch } from 'src/store/store';
 import { addAuthUser } from 'src/features/auth/reducers/auth.reducer';
 import useDetectOutsideClick from 'src/shared/hooks/useDetectOutsideClick';
 import SettingsDropdown from './SettingsDropdown';
-import { ISellerDocument } from 'src/features/sellers/interfaces/seller.interface';
 
 const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
