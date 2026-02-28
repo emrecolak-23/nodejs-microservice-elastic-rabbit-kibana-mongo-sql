@@ -6,6 +6,7 @@ import { logout } from 'src/features/auth/reducers/logout.reducer';
 import { authApi } from 'src/features/auth/services/auth.service';
 import { api } from 'src/store/api';
 import { IOrderDocument } from 'src/features/order/interfaces/order.interface';
+import { millify } from 'millify';
 
 countries.registerLocale(enLocale);
 
@@ -119,4 +120,17 @@ export const yearsList = (maxOffset: number): string[] => {
   }
 
   return years;
+};
+
+export const shortenLargeNumbers = (data: number | undefined): string => {
+  if (data === undefined) return '';
+  return millify(data, { precision: 0 });
+};
+
+export const rating = (num: number): number => {
+  if (num) {
+    return Math.round(num * 10) / 10;
+  }
+
+  return 0.0;
 };
