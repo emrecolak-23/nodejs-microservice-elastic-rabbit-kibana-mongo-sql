@@ -23,7 +23,7 @@ export class SellerRoute {
     );
     this.router.post(
       '/:sellerId',
-      this.validateMiddleware.validateParams(sellerSchema),
+      this.validateMiddleware.validate(sellerSchema),
       this.sellerController.updateSeller.bind(this.sellerController)
     );
 

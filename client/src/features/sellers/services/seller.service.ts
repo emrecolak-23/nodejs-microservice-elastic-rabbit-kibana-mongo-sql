@@ -31,7 +31,7 @@ export const sellerApi = api.injectEndpoints({
       query(body) {
         return {
           url: `seller/${body.sellerId}`,
-          method: 'PUT',
+          method: 'POST',
           body: body.seller
         };
       },
