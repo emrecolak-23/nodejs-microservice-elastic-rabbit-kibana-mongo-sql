@@ -134,3 +134,7 @@ export const rating = (num: number): number => {
 
   return 0.0;
 };
+
+export const cloneDeep = <T>(obj: T): T => {
+  return structuredClone(obj);
+};
