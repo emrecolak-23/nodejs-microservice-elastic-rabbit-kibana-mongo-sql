@@ -7,6 +7,7 @@ import { authApi } from 'src/features/auth/services/auth.service';
 import { api } from 'src/store/api';
 import { IOrderDocument } from 'src/features/order/interfaces/order.interface';
 import { millify } from 'millify';
+import { toast } from 'react-toastify';
 
 countries.registerLocale(enLocale);
 
@@ -137,4 +138,30 @@ export const rating = (num: number): number => {
 
 export const cloneDeep = <T>(obj: T): T => {
   return structuredClone(obj);
+};
+
+export const showSuccessToast = (message: string): void => {
+  toast.success(message, {
+    position: 'bottom-right',
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: false,
+    draggable: false,
+    progress: undefined,
+    theme: 'colored'
+  });
+};
+
+export const showErrorToast = (message: string): void => {
+  toast.error(message, {
+    position: 'bottom-right',
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: false,
+    draggable: false,
+    progress: undefined,
+    theme: 'colored'
+  });
 };

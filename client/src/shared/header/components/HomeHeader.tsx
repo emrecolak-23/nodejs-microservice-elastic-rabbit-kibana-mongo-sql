@@ -5,7 +5,7 @@ import { FaAngleLeft, FaAngleRight, FaBars, FaRegBell, FaRegEnvelope } from 'rea
 import { Link } from 'react-router-dom';
 import { Transition } from '@headlessui/react';
 import { v4 as uuidv4 } from 'uuid';
-import { categories, replaceSpacesWithDash } from 'src/shared/utils/utils.service';
+import { categories, replaceSpacesWithDash, showErrorToast, showSuccessToast } from 'src/shared/utils/utils.service';
 import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import Banner from 'src/shared/banner/Banner';
@@ -22,8 +22,6 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
   const buyer = useAppSelector((state: IReduxState) => state.buyer);
   const seller = useAppSelector((state: IReduxState) => state.seller);
 
-  console.log(authUser, 'authUser');
-  console.log(buyer, 'buyer');
   const settingsDropdownRef = useRef<HTMLDivElement>(null);
   const messageDropdownRef = useRef<HTMLDivElement>(null);
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
@@ -41,8 +39,9 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
     try {
       const result: IResponse = await resendEmail({ userId: authUser.id!, email: authUser.email! }).unwrap();
       dispatch(addAuthUser({ authInfo: result.user }));
+      showSuccessToast('Email sent successfully');
     } catch (error) {
-      console.log(error);
+      showErrorToast('Error sending email');
     }
   };
 
