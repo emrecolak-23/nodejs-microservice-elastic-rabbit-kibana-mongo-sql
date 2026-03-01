@@ -9,7 +9,8 @@ import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import { GIG_MAX_LENGTH, ICreateGig } from '../../interfaces/gig.interface';
 import ReactQuill from 'react-quill-new';
-import { reactQuillUtils } from 'src/shared/utils/utils.service';
+import { categories, expectedGigDelivery, reactQuillUtils } from 'src/shared/utils/utils.service';
+import TagsInput from './components/TagsInput';
 
 type QuillEditor = Parameters<NonNullable<React.ComponentProps<typeof ReactQuill>['onChange']>>[3];
 
@@ -30,6 +31,11 @@ const AddGig: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
 
   const [gigInfo, setGigInfo] = useState<ICreateGig>(defaultGigInfo);
+  const [subCategory, setSubCategory] = useState<string[]>([]);
+  const [subCategoryInput, setSubCategoryInput] = useState<string>('');
+
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagsInput, setTagsInput] = useState<string>('');
 
   const reactQuillRef = useRef<ReactQuill | null>(null);
 
@@ -141,18 +147,50 @@ const AddGig: FC = (): ReactElement => {
               <span className="flex justify-end text-xs text-[#95979d]">120 Characters</span>
             </div>
           </div>
-          <div className="mb-12 grid md:grid-cols-5">
+          <div className="relative zIndexDropdown mb-12 grid md:grid-cols-5">
             <div className="pb-2 text-base font-medium">
               Category<sup className="top-[-0.3em] text-base text-red-500">*</sup>
             </div>
             <div className="relative col-span-4 md:w-11/12 lg:w-8/12">
-              <Dropdown text="" maxHeight="300" mainClassNames="absolute bg-white" values={[]} />
+              <Dropdown
+                onClick={(item: string) => {
+                  setGigInfo({ ...gigInfo, categories: item });
+                }}
+                text={gigInfo.categories}
+                maxHeight="300"
+                mainClassNames="absolute zIndexDropdown bg-white"
+                values={categories()}
+              />
             </div>
           </div>
 
-          {/* <!-- TagsInput --> */}
+          <TagsInput
+            title="SubCategory"
+            placeholder="E.g Website Development, Mobile App."
+            gigInfo={gigInfo}
+            setGigInfo={setGigInfo}
+            itemInput={subCategoryInput}
+            tags={subCategory}
+            itemName="subCategories"
+            counterText="Subcategories"
+            setItem={setSubCategory}
+            setItemInput={setSubCategoryInput}
+            inputErrorMessage={false}
+          />
 
-          {/* <!-- TagsInput --> */}
+          <TagsInput
+            title="Tags"
+            placeholder="Enter search terms for your gig."
+            gigInfo={gigInfo}
+            setGigInfo={setGigInfo}
+            itemInput={tagsInput}
+            tags={tags}
+            itemName="tags"
+            counterText="Tags"
+            setItem={setTags}
+            setItemInput={setTagsInput}
+            inputErrorMessage={false}
+          />
 
           <div className="mb-6 grid md:grid-cols-5">
             <div className="pb-2 text-base font-medium">
@@ -164,7 +202,11 @@ const AddGig: FC = (): ReactElement => {
                 className="border-grey mb-1 w-full rounded border p-3.5 text-sm font-normal text-gray-600 focus:outline-none"
                 placeholder="Enter minimum price"
                 name="price"
-                value=""
+                value={`${gigInfo.price}`}
+                onChange={(event: ChangeEvent) => {
+                  const value: string = (event.target as HTMLInputElement).value;
+                  setGigInfo({ ...gigInfo, price: parseInt(value) > 0 ? parseInt(value) : 0 });
+                }}
               />
             </div>
           </div>
@@ -173,7 +215,15 @@ const AddGig: FC = (): ReactElement => {
               Expected delivery<sup className="top-[-0.3em] text-base text-red-500">*</sup>
             </div>
             <div className="relative col-span-4 md:w-11/12 lg:w-8/12">
-              <Dropdown text="" maxHeight="300" mainClassNames="absolute bg-white z-40" values={[]} />
+              <Dropdown
+                text={gigInfo.expectedDelivery}
+                onClick={(item: string) => {
+                  setGigInfo({ ...gigInfo, expectedDelivery: item });
+                }}
+                maxHeight="300"
+                mainClassNames="absolute bg-white z-40"
+                values={expectedGigDelivery()}
+              />
             </div>
           </div>
           <div className="mb-6 grid md:grid-cols-5">
