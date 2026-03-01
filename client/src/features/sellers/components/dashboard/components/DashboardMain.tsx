@@ -6,10 +6,12 @@ import StarRating from 'src/shared/rating/StarRating';
 import StickyBox from 'react-sticky-box';
 import { useOutletContext } from 'react-router-dom';
 import { SellerContextType } from 'src/features/sellers/interfaces/seller.interface';
-import { ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
-import { rating } from 'src/shared/utils/utils.service';
+// import { ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
+import { rating, sellerOrderList } from 'src/shared/utils/utils.service';
 import { TimeAgo } from 'src/shared/utils/timeago.utils';
 import { cn } from 'src/shared/utils/cn';
+import ActiveOrderTable from './ActiveOrderTables';
+import { SELLER_GIG_STATUS } from '../ManageOrders';
 
 const DASHBOARD_TABS = [
   { id: 'active', label: 'ACTIVE GIGS' },
@@ -20,9 +22,9 @@ const DASHBOARD_TABS = [
 const DashboardMain: FC = (): ReactElement => {
   const [type, setType] = useState<string>('active');
 
-  const { gigs, pausedGigs, orders, seller } = useOutletContext<SellerContextType>();
+  const { /*gigs, pausedGigs,*/ orders, seller } = useOutletContext<SellerContextType>();
 
-  const activeGigs: ISellerGig[] = gigs.filter((gig: ISellerGig) => gig.active);
+  //   const activeGigs: ISellerGig[] = gigs.filter((gig: ISellerGig) => gig.active);
 
   return (
     <div className="flex flex-wrap gap-x-4">
@@ -113,9 +115,9 @@ const DashboardMain: FC = (): ReactElement => {
           </ul>
         </div>
         <div className="my-3">
-          <div className="grid gap-x-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
-          <div className="grid gap-x-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
-          {/* <!-- ActiveOrderTable --> */}
+          {type === 'active' && <div className="grid gap-x-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>}
+          {type === 'paused' && <div className="grid gap-x-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>}
+          {type === 'orders' && <ActiveOrderTable activeOrders={sellerOrderList(SELLER_GIG_STATUS.IN_PROGRESS, orders)} />}
         </div>
       </div>
     </div>
