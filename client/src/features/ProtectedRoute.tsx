@@ -13,9 +13,9 @@ export interface IProtectedRouteProps {
 
 const ProtectedRoute: FC<IProtectedRouteProps> = ({ children }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
-
+  const showCategoryContainer = useAppSelector((state: IReduxState) => state.showCategoryContainer);
+  const header = useAppSelector((state: IReduxState) => state.header);
   const [tokenIsValid, setTokenIsValid] = useState<boolean>(false);
-  const showCategoryContainer = true;
   const dispatch = useAppDispatch();
   const navigate: NavigateFunction = useNavigate();
 
@@ -43,7 +43,7 @@ const ProtectedRoute: FC<IProtectedRouteProps> = ({ children }): ReactElement =>
     if (tokenIsValid) {
       return (
         <>
-          <HomeHeader showCategoryContainer={showCategoryContainer} />
+          {header && header === 'home' && <HomeHeader showCategoryContainer={showCategoryContainer} />}
           {children}
         </>
       );

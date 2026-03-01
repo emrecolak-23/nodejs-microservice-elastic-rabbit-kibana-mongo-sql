@@ -4,6 +4,8 @@ import { IHomeHeaderProps } from '../interfaces/header.interface';
 import { AppDispatch, useAppDispatch } from 'src/store/store';
 import { applicationLogout } from 'src/shared/utils/utils.service';
 import { lowerCase } from 'src/shared/utils/utils.service';
+import { updateContainerCategory } from '../reducers/category.reducer';
+import { updateHeader } from '../reducers/header.reducer';
 
 const SettingsDropdown: FC<IHomeHeaderProps> = ({ seller, authUser, buyer, type, setIsDropdownOpen }): ReactElement => {
   const navigate: NavigateFunction = useNavigate();
@@ -26,6 +28,8 @@ const SettingsDropdown: FC<IHomeHeaderProps> = ({ seller, authUser, buyer, type,
                 if (setIsDropdownOpen) {
                   setIsDropdownOpen(false);
                 }
+
+                dispatch(updateContainerCategory(true));
               }}
               to={`${type === 'buyer' ? `/${lowerCase(`${authUser?.username}`)}/${seller?._id}/seller-dashboard` : '/'}`}
               className="block w-full cursor-pointer rounded bg-sky-500 px-4s py-2 text-center font-bold text-white hover:bg-sky-400 focus:outline-none"
@@ -56,6 +60,8 @@ const SettingsDropdown: FC<IHomeHeaderProps> = ({ seller, authUser, buyer, type,
                 if (setIsDropdownOpen) {
                   setIsDropdownOpen(false);
                 }
+
+                dispatch(updateContainerCategory(true));
               }}
               to={`/users/${buyer?.username}/${buyer?._id}/orders`}
               className="block px-4 py-2 hover:text-sky-400"
@@ -71,6 +77,8 @@ const SettingsDropdown: FC<IHomeHeaderProps> = ({ seller, authUser, buyer, type,
                 if (setIsDropdownOpen) {
                   setIsDropdownOpen(false);
                 }
+
+                dispatch(updateContainerCategory(true));
               }}
               to={`/seller-profile/${lowerCase(`${seller?.username}`)}/${seller?._id}/edit`}
               className="block px-4 py-2 hover:text-sky-400"
@@ -85,6 +93,8 @@ const SettingsDropdown: FC<IHomeHeaderProps> = ({ seller, authUser, buyer, type,
               if (setIsDropdownOpen) {
                 setIsDropdownOpen(false);
               }
+              dispatch(updateContainerCategory(false));
+              dispatch(updateHeader('home'));
             }}
             to={`${lowerCase(`${buyer?.username}`)}/edit`}
             className="block px-4 py-2 hover:text-sky-400"

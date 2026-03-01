@@ -15,6 +15,8 @@ import { useAppDispatch } from 'src/store/store';
 import { addAuthUser } from 'src/features/auth/reducers/auth.reducer';
 import useDetectOutsideClick from 'src/shared/hooks/useDetectOutsideClick';
 import SettingsDropdown from './SettingsDropdown';
+import { updateHeader } from '../reducers/header.reducer';
+import { updateContainerCategory } from '../reducers/category.reducer';
 
 const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -74,6 +76,10 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                 <div className="w-full gap-x-4 md:flex">
                   <Link
                     to="/"
+                    onClick={() => {
+                      dispatch(updateHeader('home'));
+                      dispatch(updateContainerCategory(true));
+                    }}
                     className="relative z-10 flex cursor-pointer justify-center self-center text-2xl font-semibold text-black lg:text-3xl"
                   >
                     Jobber

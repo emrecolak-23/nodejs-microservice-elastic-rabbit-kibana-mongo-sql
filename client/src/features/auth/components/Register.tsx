@@ -17,6 +17,8 @@ import { IResponse } from 'src/shared/shared.interface';
 import { useAppDispatch } from 'src/store/store';
 import { addAuthUser } from '../reducers/auth.reducer';
 import { updateLogout } from '../reducers/logout.reducer';
+import { updateHeader } from 'src/shared/header/reducers/header.reducer';
+import { updateContainerCategory } from 'src/shared/header/reducers/category.reducer';
 
 const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
   const [step, setStep] = useState<number>(1);
@@ -46,6 +48,8 @@ const Register: FC<IModalBgProps> = ({ onClose, onToggle }): ReactElement => {
         console.log(result);
         dispatch(addAuthUser({ authInfo: result.user }));
         dispatch(updateLogout(false));
+        dispatch(updateHeader('home'));
+        dispatch(updateContainerCategory(true));
         saveToSessionStorage(JSON.stringify(true), JSON.stringify(result.user?.username || ''));
         setAlertMessage('');
       }

@@ -11,6 +11,9 @@ import AddSeller from './features/sellers/components/add/AddSeller';
 import CurrentSellerProfile from './features/sellers/components/profile/CurrentSellerProfile';
 import SellerProfile from './features/sellers/components/profile/SellerProfile';
 import Seller from './features/sellers/components/dashboard/Seller';
+import SellerDashboard from './features/sellers/components/dashboard/SellerDashboard';
+import ManageOrders from './features/sellers/components/dashboard/ManageOrders';
+import ManageEarning from './features/sellers/components/dashboard/ManageEarning';
 
 const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
   return (
@@ -108,15 +111,15 @@ const AppRouter = () => {
       children: [
         {
           path: 'seller-dashboard',
-          element: <Seller />
+          element: <SellerDashboard />
         },
         {
           path: 'manage-orders',
-          element: <Seller />
+          element: <ManageOrders />
         },
         {
           path: 'manage-earnings',
-          element: <Seller />
+          element: <ManageEarning />
         }
       ]
     },
