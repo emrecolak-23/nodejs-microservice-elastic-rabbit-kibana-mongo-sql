@@ -77,8 +77,8 @@ const AppPage: FC = (): ReactElement => {
     logoutUser();
   }, [checkUser, logoutUser]);
 
-  if (authUser) {
-    return !tokenIsValid && !authUser.id ? (
+  if (authUser?.id) {
+    return !tokenIsValid ? (
       <Index />
     ) : (
       <>
@@ -92,9 +92,8 @@ const AppPage: FC = (): ReactElement => {
         )}
       </>
     );
-  } else {
-    return <Index />;
   }
+  return <Index />;
 };
 
 export default AppPage;

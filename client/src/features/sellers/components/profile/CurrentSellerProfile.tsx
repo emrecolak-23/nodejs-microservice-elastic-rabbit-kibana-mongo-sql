@@ -21,9 +21,14 @@ const CurrentSellerProfile: FC = (): ReactElement => {
   const [showEdit, setShowEdit] = useState<boolean>(true);
   const [type, setType] = useState<string>('Overview');
   const dispatch = useAppDispatch();
-
   const { sellerId } = useParams();
   const [updateSeller, { isLoading: isUpdatingSeller }] = useUpdateSellerMutation();
+
+  useEffect(() => {
+    if (seller?._id) {
+      setSellerProfile(seller);
+    }
+  }, [seller]);
 
   const onUpdateSeller = async (): Promise<void> => {
     try {

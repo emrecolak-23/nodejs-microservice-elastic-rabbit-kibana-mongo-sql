@@ -1,5 +1,4 @@
 import storage from 'redux-persist/lib/storage';
-import { persistStore } from 'redux-persist';
 import { combineReducers, configureStore, EnhancedStore } from '@reduxjs/toolkit';
 import { AnyAction, Reducer } from 'redux';
 import { FLUSH, PAUSE, PERSIST, persistReducer, PURGE, REGISTER, REHYDRATE } from 'redux-persist';
@@ -53,7 +52,6 @@ export const store: EnhancedStore = configureStore({
 
 setupListeners(store.dispatch);
 
-export const persistor = persistStore(store);
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
