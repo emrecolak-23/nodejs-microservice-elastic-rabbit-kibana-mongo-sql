@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { SellerContextType } from '../../interfaces/seller.interface';
 import { IOrderDocument } from 'src/features/order/interfaces/order.interface';
 import { lowerCase, shortenLargeNumbers } from 'src/shared/utils/utils.service';
+import ManageEarningsTable from './components/ManageEarningsTable';
 
 const ManageEarning: FC = (): ReactElement => {
   const { orders, seller } = useOutletContext<SellerContextType>();
@@ -36,7 +37,7 @@ const ManageEarning: FC = (): ReactElement => {
           </div>
         </div>
 
-        {/* <!-- ManageEarningsTable --> */}
+        <ManageEarningsTable orders={completedOrders} type="active" orderTypes={completedOrders.length} />
       </div>
     </div>
   );
