@@ -103,6 +103,11 @@ export const orderTypes = (status: string, orders: IOrderDocument[]): number => 
   return orders.filter((order) => lowerCase(order?.status) === lowerCase(status)).length;
 };
 
+export const sellerOrderList = (status: string, orders: IOrderDocument[]): IOrderDocument[] => {
+  const orderList: IOrderDocument[] = orders.filter((order) => lowerCase(order?.status) === lowerCase(status));
+  return orderList;
+};
+
 export const degreeList = (): string[] => {
   return ['Associate', 'B.A.', 'B.Sc.', 'M.A.', 'M.B.A.', 'M.Sc.', 'J.D.', 'M.D.', 'Ph.D.', 'LLB', 'Certificate', 'Other'];
 };
