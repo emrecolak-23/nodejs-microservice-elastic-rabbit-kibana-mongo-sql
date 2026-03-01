@@ -83,7 +83,7 @@ const AddGig: FC = (): ReactElement => {
   const navigate: NavigateFunction = useNavigate();
   const { sellerId } = useParams();
 
-  const [schemaValidation, validationErrors] = useGigSchema({ schema: gigInfoSchema, gigInfo });
+  const [schemaValidation] = useGigSchema({ schema: gigInfoSchema, gigInfo });
 
   const [createGig, { isLoading: isCreatingGig }] = useCreateGigMutation();
 
