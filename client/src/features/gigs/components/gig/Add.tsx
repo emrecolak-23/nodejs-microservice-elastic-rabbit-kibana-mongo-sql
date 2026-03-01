@@ -7,7 +7,7 @@ import TextAreaInput from 'src/shared/inputs/TextAreaInput';
 import TextInput from 'src/shared/inputs/TextInput';
 import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
-import { GIG_MAX_LENGTH, ICreateGig } from '../../interfaces/gig.interface';
+import { GIG_MAX_LENGTH, IAllowedGigItem, ICreateGig } from '../../interfaces/gig.interface';
 import ReactQuill from 'react-quill-new';
 import { categories, expectedGigDelivery, reactQuillUtils } from 'src/shared/utils/utils.service';
 import TagsInput from './components/TagsInput';
@@ -38,6 +38,13 @@ const AddGig: FC = (): ReactElement => {
   const [tagsInput, setTagsInput] = useState<string>('');
 
   const reactQuillRef = useRef<ReactQuill | null>(null);
+
+  const [allowedGigItemLength, setAllowedGigItemLength] = useState<IAllowedGigItem>({
+    gigTitle: '80/80',
+    basicTitle: '40/40',
+    basicDescription: '100/100',
+    descriptionCharacters: '1200/1200'
+  });
 
   useEffect(() => {
     let cleanup: (() => void) | undefined;
@@ -87,9 +94,14 @@ const AddGig: FC = (): ReactElement => {
                 value={gigInfo.title}
                 placeholder="I will build something I'm good at."
                 maxLength={80}
-                onChange={(e: ChangeEvent) => setGigInfo({ ...gigInfo, title: (e.target as HTMLInputElement).value })}
+                onChange={(e: ChangeEvent) => {
+                  const gigTitleValue: string = (e.target as HTMLInputElement).value;
+                  setGigInfo({ ...gigInfo, title: gigTitleValue });
+                  const counter: number = GIG_MAX_LENGTH.gigTitle - gigTitleValue.length;
+                  setAllowedGigItemLength({ ...allowedGigItemLength, gigTitle: `${counter}/${GIG_MAX_LENGTH.gigTitle}` });
+                }}
               />
-              <span className="flex justify-end text-xs text-[#95979d]">100 Characters</span>
+              <span className="flex justify-end text-xs text-[#95979d]">{allowedGigItemLength.gigTitle} Characters</span>
             </div>
           </div>
           <div className="mb-6 grid md:grid-cols-5">
@@ -104,9 +116,14 @@ const AddGig: FC = (): ReactElement => {
                 name="basicTitle"
                 value={gigInfo.basicTitle}
                 maxLength={40}
-                onChange={(e: ChangeEvent) => setGigInfo({ ...gigInfo, basicTitle: (e.target as HTMLInputElement).value })}
+                onChange={(e: ChangeEvent) => {
+                  const basicTitleValue: string = (e.target as HTMLInputElement).value;
+                  setGigInfo({ ...gigInfo, basicTitle: basicTitleValue });
+                  const counter: number = GIG_MAX_LENGTH.basicTitle - basicTitleValue.length;
+                  setAllowedGigItemLength({ ...allowedGigItemLength, basicTitle: `${counter}/${GIG_MAX_LENGTH.basicTitle}` });
+                }}
               />
-              <span className="flex justify-end text-xs text-[#95979d]">100 Characters</span>
+              <span className="flex justify-end text-xs text-[#95979d]">{allowedGigItemLength.basicTitle} Characters</span>
             </div>
           </div>
           <div className="mb-6 grid md:grid-cols-5">
@@ -119,11 +136,16 @@ const AddGig: FC = (): ReactElement => {
                 placeholder="Write a brief description..."
                 name="basicDescription"
                 value={gigInfo.basicDescription}
-                onChange={(e: ChangeEvent) => setGigInfo({ ...gigInfo, basicDescription: (e.target as HTMLTextAreaElement).value })}
+                onChange={(e: ChangeEvent) => {
+                  const basicDescriptionValue: string = (e.target as HTMLTextAreaElement).value;
+                  setGigInfo({ ...gigInfo, basicDescription: basicDescriptionValue });
+                  const counter: number = GIG_MAX_LENGTH.basicDescription - basicDescriptionValue.length;
+                  setAllowedGigItemLength({ ...allowedGigItemLength, basicDescription: `${counter}/${GIG_MAX_LENGTH.basicDescription}` });
+                }}
                 rows={5}
                 maxLength={100}
               />
-              <span className="flex justify-end text-xs text-[#95979d]">100 Characters</span>
+              <span className="flex justify-end text-xs text-[#95979d]">{allowedGigItemLength.basicDescription} Characters</span>
             </div>
           </div>
           <div className="mb-6 grid md:grid-cols-5">
@@ -140,11 +162,14 @@ const AddGig: FC = (): ReactElement => {
                 onChange={(event: string, _: unknown, __: unknown, editor: QuillEditor) => {
                   setGigInfo({ ...gigInfo, description: event });
                   const counter: number = GIG_MAX_LENGTH.fullDescription - editor.getText().length;
-                  console.log(counter);
+                  setAllowedGigItemLength({
+                    ...allowedGigItemLength,
+                    descriptionCharacters: `${counter}/${GIG_MAX_LENGTH.fullDescription}`
+                  });
                 }}
                 className="border-grey border rounded"
               />
-              <span className="flex justify-end text-xs text-[#95979d]">120 Characters</span>
+              <span className="flex justify-end text-xs text-[#95979d]">{allowedGigItemLength.descriptionCharacters} Characters</span>
             </div>
           </div>
           <div className="relative zIndexDropdown mb-12 grid md:grid-cols-5">
