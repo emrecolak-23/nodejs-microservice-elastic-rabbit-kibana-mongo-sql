@@ -10,6 +10,7 @@ import BuyerDashboard from './features/buyer/components/Dashboard';
 import AddSeller from './features/sellers/components/add/AddSeller';
 import CurrentSellerProfile from './features/sellers/components/profile/CurrentSellerProfile';
 import SellerProfile from './features/sellers/components/profile/SellerProfile';
+import Seller from './features/sellers/components/dashboard/Seller';
 
 const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
   return (
@@ -92,6 +93,32 @@ const AppRouter = () => {
           </ProtectedRoute>
         </Suspense>
       )
+    },
+    {
+      path: '/:username/:sellerId',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#fffff">
+              <Seller />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      ),
+      children: [
+        {
+          path: 'seller-dashboard',
+          element: <Seller />
+        },
+        {
+          path: 'manage-orders',
+          element: <Seller />
+        },
+        {
+          path: 'manage-earnings',
+          element: <Seller />
+        }
+      ]
     },
     {
       path: '*',
