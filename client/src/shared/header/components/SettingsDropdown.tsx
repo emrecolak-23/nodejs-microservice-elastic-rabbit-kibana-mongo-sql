@@ -28,7 +28,7 @@ const SettingsDropdown: FC<IHomeHeaderProps> = ({ seller, authUser, buyer, type,
                 if (setIsDropdownOpen) {
                   setIsDropdownOpen(false);
                 }
-
+                dispatch(updateHeader('sellerDashboard'));
                 dispatch(updateContainerCategory(true));
               }}
               to={`${type === 'buyer' ? `/${lowerCase(`${authUser?.username}`)}/${seller?._id}/seller-dashboard` : '/'}`}
@@ -45,6 +45,9 @@ const SettingsDropdown: FC<IHomeHeaderProps> = ({ seller, authUser, buyer, type,
                 if (setIsDropdownOpen) {
                   setIsDropdownOpen(false);
                 }
+
+                dispatch(updateHeader('home'));
+                dispatch(updateContainerCategory(true));
               }}
               to={`/manage-gigs/new/${seller?._id}`}
               className="block px-4 py-2 hover:text-sky-400"
@@ -60,7 +63,7 @@ const SettingsDropdown: FC<IHomeHeaderProps> = ({ seller, authUser, buyer, type,
                 if (setIsDropdownOpen) {
                   setIsDropdownOpen(false);
                 }
-
+                dispatch(updateHeader('home'));
                 dispatch(updateContainerCategory(true));
               }}
               to={`/users/${buyer?.username}/${buyer?._id}/orders`}
