@@ -127,7 +127,7 @@ const AddGig: FC = (): ReactElement => {
         const updatedSeller: ISellerDocument = { ...seller, totalGigs: (seller.totalGigs as number) + 1 };
         dispatch(addSeller(updatedSeller));
         const title: string = replaceSpacesWithDash(gig.title);
-        navigate(`/gig/${lowerCase(`${authUser.username}/${title}/${response.gig?.sellerId}`)}/${response.gig?.id}`);
+        navigate(`/gig/${lowerCase(`${authUser.username}/${title}/${response.gig?.sellerId}`)}/${response.gig?.id}/view`);
       }
     } catch (error) {
       showErrorToast('Error while creating gig');
