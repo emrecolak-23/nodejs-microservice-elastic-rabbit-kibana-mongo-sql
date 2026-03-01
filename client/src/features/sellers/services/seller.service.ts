@@ -25,7 +25,7 @@ export const sellerApi = api.injectEndpoints({
           body
         };
       },
-      invalidatesTags: ['Seller']
+      invalidatesTags: ['Seller', 'Buyer']
     }),
     updateSeller: build.mutation<IResponse, { sellerId: string; seller: ISellerDocument }>({
       query(body) {

@@ -18,6 +18,8 @@ const SettingsDropdown: FC<IHomeHeaderProps> = ({ seller, authUser, buyer, type,
     applicationLogout(dispatch, navigate);
   };
 
+  console.log(seller, 'seller');
+
   return (
     <div className="border-grey w-44 divide-y divide-gray-100 rounded border bg-white shadow-md">
       <ul className="text-gray-700s py-2 text-sm" aria-labelledby="avatarButton">
