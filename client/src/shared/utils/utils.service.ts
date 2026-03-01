@@ -170,3 +170,14 @@ export const showErrorToast = (message: string): void => {
     theme: 'colored'
   });
 };
+
+export const reactQuillUtils = () => {
+  const modules = {
+    toolbar: [
+      ['bold', 'italic'],
+      [{ list: 'ordered' }, { list: 'bullet' }]
+    ]
+  };
+  const formats: string[] = ['bold', 'italic', 'list', 'bullet'];
+  return { modules, formats };
+};

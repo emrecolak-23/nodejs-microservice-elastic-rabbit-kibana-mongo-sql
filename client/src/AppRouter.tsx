@@ -14,6 +14,7 @@ import Seller from './features/sellers/components/dashboard/Seller';
 import SellerDashboard from './features/sellers/components/dashboard/SellerDashboard';
 import ManageOrders from './features/sellers/components/dashboard/ManageOrders';
 import ManageEarning from './features/sellers/components/dashboard/ManageEarning';
+import AddGig from './features/gigs/components/gig/Add';
 
 const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
   return (
@@ -122,6 +123,18 @@ const AppRouter = () => {
           element: <ManageEarning />
         }
       ]
+    },
+    {
+      path: '/manage-gigs/new/:sellerId',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#fffff">
+              <AddGig />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      )
     },
     {
       path: '*',
