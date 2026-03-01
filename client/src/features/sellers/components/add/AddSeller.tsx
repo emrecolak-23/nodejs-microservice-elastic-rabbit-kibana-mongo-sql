@@ -1,4 +1,4 @@
-import { FC, FormEvent, ReactElement, useState } from 'react';
+import { FC, FormEvent, ReactElement, useEffect, useState } from 'react';
 import Breadcrumb from 'src/shared/breadcrumb/Breadcrumb';
 import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
@@ -20,7 +20,7 @@ import { useAppDispatch } from 'src/store/store';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { addSeller } from '../../reducers/seller.reducer';
 import { addBuyer } from 'src/features/buyer/reducers/buyer.reducer';
-import { lowerCase } from 'src/shared/utils/utils.service';
+import { deleteFromLocalStorage, lowerCase } from 'src/shared/utils/utils.service';
 
 const AddSeller: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -134,6 +134,13 @@ const AddSeller: FC = (): ReactElement => {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      // delete the becomeASeller from local storage when the component unmounts
+      deleteFromLocalStorage('becomeASeller');
+    };
+  }, []);
 
   return (
     <div className="relative w-full">

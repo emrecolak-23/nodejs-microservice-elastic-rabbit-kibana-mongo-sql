@@ -4,7 +4,12 @@ import { useAppDispatch, useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import { useCheckCurrentUserQuery } from './auth/services/auth.service';
 import { addAuthUser } from './auth/reducers/auth.reducer';
-import { applicationLogout, getDataFromSessionStorage, saveToSessionStorage } from 'src/shared/utils/utils.service';
+import {
+  applicationLogout,
+  getDataFromLocalStorage,
+  getDataFromSessionStorage,
+  saveToSessionStorage
+} from 'src/shared/utils/utils.service';
 import Home from './home/Home';
 import HomeHeader from 'src/shared/header/components/HomeHeader';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
@@ -12,6 +17,7 @@ import { useGetCurrentBuyerByUsernameQuery } from './buyer/services/buyer.servic
 import { addBuyer } from './buyer/reducers/buyer.reducer';
 import { useGetSellerByUsernameQuery } from './sellers/services/seller.service';
 import { addSeller } from './sellers/reducers/seller.reducer';
+import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
 
 const AppPage: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -28,10 +34,10 @@ const AppPage: FC = (): ReactElement => {
   } = useCheckCurrentUserQuery(undefined, {
     skip: authUser?.id === null
   });
-  const { data: buyerData } = useGetCurrentBuyerByUsernameQuery(undefined, {
+  const { data: buyerData, isLoading: isBuyerLoading } = useGetCurrentBuyerByUsernameQuery(undefined, {
     skip: authUser?.id === null
   });
-  const { data: sellerData } = useGetSellerByUsernameQuery(`${authUser.username}`, {
+  const { data: sellerData, isLoading: isSellerLoading } = useGetSellerByUsernameQuery(`${authUser.username}`, {
     skip: authUser?.id === null
   });
 
@@ -43,11 +49,15 @@ const AppPage: FC = (): ReactElement => {
         dispatch(addBuyer(buyerData?.buyer));
         dispatch(addSeller(sellerData?.seller));
         saveToSessionStorage(JSON.stringify(true), JSON.stringify(authUser.username));
+        const becomeASeller = getDataFromLocalStorage('becomeASeller');
+        if (becomeASeller) {
+          navigate('/seller-onboarding');
+        }
       }
     } catch (error) {
       console.log(error, 'error');
     }
-  }, [currentUserData, dispatch, appLogout, authUser.username, buyerData]);
+  }, [currentUserData, dispatch, navigate, appLogout, authUser.username, buyerData]);
 
   const logoutUser = useCallback(() => {
     if (isLoading) return;
@@ -72,8 +82,14 @@ const AppPage: FC = (): ReactElement => {
       <Index />
     ) : (
       <>
-        <HomeHeader showCategoryContainer={showCategoryContainer} />
-        <Home />
+        {isBuyerLoading && isSellerLoading ? (
+          <CircularPageLoader />
+        ) : (
+          <>
+            <HomeHeader showCategoryContainer={showCategoryContainer} />
+            <Home />
+          </>
+        )}
       </>
     );
   } else {

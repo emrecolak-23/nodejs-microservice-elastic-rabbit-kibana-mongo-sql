@@ -5,6 +5,7 @@ import { NavigateFunction } from 'react-router-dom';
 import { logout } from 'src/features/auth/reducers/logout.reducer';
 import { authApi } from 'src/features/auth/services/auth.service';
 import { api } from 'src/store/api';
+import { persistor } from 'src/store/store';
 import { IOrderDocument } from 'src/features/order/interfaces/order.interface';
 import { millify } from 'millify';
 import { toast } from 'react-toastify';
@@ -81,7 +82,7 @@ export const deleteFromLocalStorage = (key: string): void => {
   window.localStorage.removeItem(key);
 };
 
-export const applicationLogout = (dispatch: Dispatch, navigate: NavigateFunction): void => {
+export const applicationLogout = async (dispatch: Dispatch, _navigate: NavigateFunction): Promise<void> => {
   const loggedInUsername: string = getDataFromSessionStorage('loggedInuser');
   dispatch(logout(loggedInUsername));
   if (loggedInUsername) {
@@ -96,7 +97,8 @@ export const applicationLogout = (dispatch: Dispatch, navigate: NavigateFunction
   dispatch(authApi.endpoints.logout.initiate() as never);
   saveToSessionStorage(JSON.stringify(false), JSON.stringify(''));
   deleteFromLocalStorage('becomeASeller');
-  navigate('/');
+  await persistor.purge();
+  window.location.href = '/';
 };
 
 export const orderTypes = (status: string, orders: IOrderDocument[]): number => {

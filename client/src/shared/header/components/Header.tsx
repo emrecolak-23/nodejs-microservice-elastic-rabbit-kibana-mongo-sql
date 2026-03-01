@@ -6,6 +6,7 @@ import Button from 'src/shared/button/Button';
 import LoginModal from 'src/features/auth/components/Login';
 import RegisterModal from 'src/features/auth/components/Register';
 import ForgotPasswordModal from 'src/features/auth/components/ForgotPassword';
+import { saveToLocalStorage } from 'src/shared/utils/utils.service';
 
 const Header: FC<IHeader> = ({ navClass }): ReactElement => {
   const { activeModal, openModal, closeModal, toggleModal } = useAuthModal();
@@ -32,7 +33,13 @@ const Header: FC<IHeader> = ({ navClass }): ReactElement => {
                 <div className="text-gray-600 dark:text-gray-300 lg:pr-4">
                   <ul className="space-y-6 text-base font-medium tracking-wide lg:flex lg:space-y-0 lg:text-sm">
                     <li>
-                      <div className="hover:text-primary dark:hover:text-primaryLight block transition md:px-4">
+                      <div
+                        onClick={() => {
+                          openModal('register');
+                          saveToLocalStorage('becomeASeller', JSON.stringify(true));
+                        }}
+                        className="hover:text-primary dark:hover:text-primaryLight block transition md:px-4"
+                      >
                         <span>Become a Seller</span>
                       </div>
                     </li>
