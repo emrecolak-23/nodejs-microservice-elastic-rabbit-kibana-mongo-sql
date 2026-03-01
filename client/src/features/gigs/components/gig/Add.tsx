@@ -7,10 +7,11 @@ import TextAreaInput from 'src/shared/inputs/TextAreaInput';
 import TextInput from 'src/shared/inputs/TextInput';
 import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
-import { GIG_MAX_LENGTH, IAllowedGigItem, ICreateGig } from '../../interfaces/gig.interface';
+import { GIG_MAX_LENGTH, IAllowedGigItem, ICreateGig, IShowGigModal } from '../../interfaces/gig.interface';
 import ReactQuill from 'react-quill-new';
 import { categories, expectedGigDelivery, reactQuillUtils } from 'src/shared/utils/utils.service';
 import TagsInput from './components/TagsInput';
+import { checkImage, readAsBase64 } from 'src/shared/utils/image-utils.service';
 
 type QuillEditor = Parameters<NonNullable<React.ComponentProps<typeof ReactQuill>['onChange']>>[3];
 
@@ -33,11 +34,16 @@ const AddGig: FC = (): ReactElement => {
   const [gigInfo, setGigInfo] = useState<ICreateGig>(defaultGigInfo);
   const [subCategory, setSubCategory] = useState<string[]>([]);
   const [subCategoryInput, setSubCategoryInput] = useState<string>('');
+  const [showGigModal, setShowGigModal] = useState<IShowGigModal>({
+    image: false,
+    cancel: false
+  });
 
   const [tags, setTags] = useState<string[]>([]);
   const [tagsInput, setTagsInput] = useState<string>('');
 
   const reactQuillRef = useRef<ReactQuill | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
   const [allowedGigItemLength, setAllowedGigItemLength] = useState<IAllowedGigItem>({
     gigTitle: '80/80',
@@ -45,6 +51,20 @@ const AddGig: FC = (): ReactElement => {
     basicDescription: '100/100',
     descriptionCharacters: '1200/1200'
   });
+
+  const handleFileChange = async (event: ChangeEvent): Promise<void> => {
+    const target = event.target as HTMLInputElement;
+    if (target.files?.length) {
+      const file: File = target.files[0];
+      const isValid = checkImage(file, 'image');
+      if (isValid) {
+        const dataImage: string | ArrayBuffer | null = await readAsBase64(file);
+        setGigInfo({ ...gigInfo, coverImage: dataImage as string });
+      }
+
+      setShowGigModal({ ...showGigModal, image: false });
+    }
+  };
 
   useEffect(() => {
     let cleanup: (() => void) | undefined;
@@ -255,17 +275,45 @@ const AddGig: FC = (): ReactElement => {
             <div className="mt-6 pb-2 text-base font-medium lg:mt-0">
               Cover image<sup className="top-[-0.3em] text-base text-red-500">*</sup>
             </div>
-            <div className="relative col-span-4 cursor-pointer md:w-11/12 lg:w-8/12">
-              <img
-                src="https://placehold.co/330x220?text=Profile+Image"
-                alt="Cover Image"
-                className="left-0 top-0 h-[220px] w-[320px] bg-white object-cover"
+            <div
+              className="relative col-span-4 cursor-pointer md:w-11/12 lg:w-8/12"
+              onMouseEnter={() => {
+                setShowGigModal((item) => ({ ...item, image: !item.image }));
+              }}
+              onMouseLeave={() => {
+                setShowGigModal((item) => ({ ...item, image: false }));
+              }}
+            >
+              {gigInfo.coverImage && (
+                <img src={gigInfo.coverImage} alt="Cover Image" className="left-0 top-0 h-[220px] w-[320px] bg-white object-cover" />
+              )}
+              {!gigInfo.coverImage && (
+                <div className="left-0 top-0 flex h-[220px] w-[320px] cursor-pointer justify-center bg-[#dee1e7]"></div>
+              )}
+
+              {showGigModal.image && (
+                <div
+                  onClick={() => {
+                    fileRef.current?.click();
+                  }}
+                  className="absolute left-0 top-0 flex h-[220px] w-[320px] cursor-pointer justify-center bg-[#dee1e7]"
+                >
+                  <FaCamera className="flex self-center" />
+                </div>
+              )}
+
+              <TextInput
+                ref={fileRef}
+                name="image"
+                type="file"
+                style={{ display: 'none' }}
+                onClick={() => {
+                  if (fileRef.current) {
+                    fileRef.current.value = '';
+                  }
+                }}
+                onChange={handleFileChange}
               />
-              <div className="left-0 top-0 flex h-[220px] w-[320px] cursor-pointer justify-center bg-[#dee1e7]"></div>
-              <div className="absolute left-0 top-0 flex h-[220px] w-[320px] cursor-pointer justify-center bg-[#dee1e7]">
-                <FaCamera className="flex self-center" />
-              </div>
-              <TextInput name="image" type="file" />
             </div>
           </div>
           <div className="grid xs:grid-cols-1 md:grid-cols-5">
