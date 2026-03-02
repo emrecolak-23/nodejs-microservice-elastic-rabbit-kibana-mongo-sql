@@ -17,7 +17,7 @@ class Application {
   constructor(private readonly gigServer: GigServer) {}
   public async initialize(): Promise<void> {
     envConfig.cloudinaryConfig();
-    database.databaseConnection();
+    await database.databaseConnection();
     await redis.connect();
     const app: Express = express();
     this.gigServer.start(app);

@@ -84,10 +84,15 @@ export class GigService {
   }
 
   async pauseOrUnpauseGig(gigId: string, gigActive: boolean): Promise<void> {
-    const pausedOrUnpausedGig = await this.gigRepository.pauseOrUnpauseGig(gigId, gigActive);
-    if (pausedOrUnpausedGig && pausedOrUnpausedGig.active === gigActive) {
-      const sellerGig: ISellerGig = this.gigRepository.toSellerGig(pausedOrUnpausedGig);
-      await this.elasticSearch.updateIndexedData('gigs', `${sellerGig.id}`, sellerGig);
+    try {
+      const pausedOrUnpausedGig = await this.gigRepository.pauseOrUnpauseGig(gigId, gigActive);
+      if (pausedOrUnpausedGig && pausedOrUnpausedGig.active === gigActive) {
+        const sellerGig: ISellerGig = this.gigRepository.toSellerGig(pausedOrUnpausedGig);
+        await this.elasticSearch.updateIndexedData('gigs', `${sellerGig.id}`, sellerGig);
+      }
+    } catch (error) {
+      this.log.log('error', 'GigService pauseOrUnpauseGig() method error:', error);
+      throw error;
     }
   }
 
