@@ -26,8 +26,8 @@ export class SearchController {
       `${req.query.query}`,
       paginate,
       `${req.query.delivery_time}`,
-      parseInt(req.query.minPrice as string),
-      parseInt((req.query.maxPrice as string) || '0')
+      parseInt(req.query.minprice as string),
+      parseInt((req.query.maxprice as string) || '0')
     );
     res.status(StatusCodes.OK).json({
       message: 'Gigs search result',
