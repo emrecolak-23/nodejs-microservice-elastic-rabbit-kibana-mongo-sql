@@ -1,4 +1,4 @@
-import { FC, ReactElement, useRef } from 'react';
+import { FC, ReactElement } from 'react';
 import { FaPencilAlt, FaRegStar, FaStar } from 'react-icons/fa';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { Link, NavigateFunction, useNavigate } from 'react-router-dom';
@@ -21,14 +21,17 @@ const GigCardDisplayItem: FC<IGigCardItems> = ({ gig, linkTarget, showEditIcon }
   };
 
   return (
-    <div className="rounded">
-      <div className="mb-8 flex cursor-pointer flex-col gap-2">
-        <Link to={`/gig/${lowerCase(`${gig.username}`)}/${title}/${gig.sellerId}/${gig.id}/view`}>
+    <div className="h-full rounded">
+      <div className="flex h-full w-full min-h-[340px] flex-col gap-2 cursor-pointer">
+        <Link
+          to={`/gig/${lowerCase(`${gig.username}`)}/${title}/${gig.sellerId}/${gig.id}/view`}
+          className="block h-[220px] shrink-0 overflow-hidden rounded-lg"
+        >
           <LazyLoadImage
             src={gig.coverImage}
             alt="Gig cover image"
-            className="w-full rounded-lg"
-            wrapperClassName="bg-center"
+            className="h-full w-full rounded-lg object-cover"
+            wrapperClassName="h-full w-full bg-center"
             placeholderSrc="https://placehold.co/330x220?text=Profile+Image"
             effect="opacity"
           />
@@ -60,7 +63,7 @@ const GigCardDisplayItem: FC<IGigCardItems> = ({ gig, linkTarget, showEditIcon }
             )}{' '}
           </div>
         </div>
-        <div>
+        <div className="min-h-[2.5rem]">
           <Link to={`/gig/${lowerCase(`${gig.username}`)}/${title}/${gig.sellerId}/${gig.id}/view`}>
             <p className="line-clamp-2 text-sm text-[#404145] hover:underline md:text-base">{gig.basicDescription}</p>
           </Link>

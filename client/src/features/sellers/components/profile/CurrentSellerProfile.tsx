@@ -14,6 +14,9 @@ import { useParams } from 'react-router-dom';
 import { useUpdateSellerMutation } from '../../services/seller.service';
 import { IResponse } from 'src/shared/shared.interface';
 import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
+import { useGetGigsBySellerIdQuery } from 'src/features/gigs/services/gigs.service';
+import { ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
+import GigCardDisplayItem from 'src/shared/gigs/GigCardDisplayItem';
 
 const CurrentSellerProfile: FC = (): ReactElement => {
   const seller = useAppSelector((state: IReduxState) => state.seller);
@@ -23,7 +26,9 @@ const CurrentSellerProfile: FC = (): ReactElement => {
   const dispatch = useAppDispatch();
   const { sellerId } = useParams();
   const [updateSeller, { isLoading: isUpdatingSeller }] = useUpdateSellerMutation();
+  const { data, isSuccess: isSellerGigsSuccess, isLoading: isSellerGigsLoading } = useGetGigsBySellerIdQuery(sellerId as string);
 
+  const isLoading: boolean = isUpdatingSeller || isSellerGigsLoading;
   useEffect(() => {
     if (seller?._id) {
       setSellerProfile(seller);
@@ -55,8 +60,8 @@ const CurrentSellerProfile: FC = (): ReactElement => {
   return (
     <div className="relative w-full pb-6">
       <Breadcrumb breadCrumbItems={['Seller', `${seller.username}`]} />
-      {isUpdatingSeller && <CircularPageLoader />}
-      {!isUpdatingSeller && (
+      {isLoading && <CircularPageLoader />}
+      {!isLoading && (
         <div className="container mx-auto px-2 md:px-0">
           <div className="my-2 flex h-8 justify-end md:h-10">
             {!showEdit && (
@@ -88,7 +93,15 @@ const CurrentSellerProfile: FC = (): ReactElement => {
             {type === 'Overview' && (
               <SellerOverview sellerProfile={sellerProfile} setSellerProfile={setSellerProfile} showEditIcons={true} />
             )}
-            {type === 'Active Gigs' && <div>Seller Active Gigs</div>}
+            {type === 'Active Gigs' && (
+              <div className="grid gap-x-6 gap-y-6 pt-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {data &&
+                  data.gigs &&
+                  data.gigs.map((gig: ISellerGig) => {
+                    return <GigCardDisplayItem key={gig._id} gig={gig} linkTarget={false} showEditIcon={true} />;
+                  })}
+              </div>
+            )}
             {type === 'Ratings & Reviews' && <div>Seller Ratings & Reviews</div>}
           </div>
         </div>

@@ -3,7 +3,7 @@ import { IHomeProps } from '../interfaces/home.interface';
 import { Link } from 'react-router-dom';
 import { replaceSpacesWithDash } from 'src/shared/utils/utils.service';
 import { ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
-import { v4 as uuidv4 } from 'uuid';
+import GigCardDisplayItem from 'src/shared/gigs/GigCardDisplayItem';
 
 const HomeGigsView: FC<IHomeProps> = ({ gigs, title, subTitle, category }): ReactElement => {
   return (
@@ -22,16 +22,9 @@ const HomeGigsView: FC<IHomeProps> = ({ gigs, title, subTitle, category }): Reac
         </div>
       </div>
       <div className="flex w-full flex-nowrap items-center justify-center overflow-x-hidden px-6 md:overflow-x-auto lg:overflow-x-hidden">
-        <div className="grid justify-center gap-x-8 pt-3 sm:h-full sm:w-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid justify-center gap-x-8 gap-y-6 pt-3 sm:h-full sm:w-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {[...gigs].map((gig: ISellerGig) => (
-            <div key={uuidv4()} className="rounded">
-              <div className="mb-8 flex cursor-pointer flex-col gap-2">
-                <img src={gig.coverImage} className="w-full rounded-lg" alt="Gig cover image" />
-                <div className="flex items-center gap-2 relative">
-                  <img src={gig.profilePicture} alt="Profile image" className="h-7 w-8 rounded-full object-cover" />
-                </div>
-              </div>
-            </div>
+            <GigCardDisplayItem key={gig._id} gig={gig} linkTarget={false} showEditIcon={false} />
           ))}
         </div>
       </div>

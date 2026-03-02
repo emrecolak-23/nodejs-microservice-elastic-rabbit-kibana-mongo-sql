@@ -18,7 +18,7 @@ import GigCardDisplayItem from 'src/shared/gigs/GigCardDisplayItem';
 import PageMessage from 'src/shared/page-message/PageMessage';
 import GigPaginate from 'src/shared/gigs/GigPaginate';
 
-const ITEMS_PER_PAGE = 1;
+const ITEMS_PER_PAGE = 10;
 
 const Gigs: FC<IGigsProps> = ({ type }): ReactElement => {
   const [itemFrom, setItemFrom] = useState<string>('0');
@@ -83,7 +83,7 @@ const Gigs: FC<IGigsProps> = ({ type }): ReactElement => {
                 {filterApplied ? (
                   <CircularPageLoader />
                 ) : (
-                  <div className="grid gap-x-6 pt-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className="grid gap-x-6 gap-y-6 pt-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {data &&
                       data.gigs &&
                       data?.gigs?.map((gig: ISellerGig) => {
