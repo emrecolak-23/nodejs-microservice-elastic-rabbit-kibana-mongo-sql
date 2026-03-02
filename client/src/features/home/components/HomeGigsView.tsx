@@ -23,16 +23,12 @@ const HomeGigsView: FC<IHomeProps> = ({ gigs, title, subTitle, category }): Reac
       </div>
       <div className="flex w-full flex-nowrap items-center justify-center overflow-x-hidden px-6 md:overflow-x-auto lg:overflow-x-hidden">
         <div className="grid justify-center gap-x-8 pt-3 sm:h-full sm:w-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {[...gigs, 1, 2, 3, 4, 5].map((_: number | ISellerGig) => (
+          {[...gigs].map((gig: ISellerGig) => (
             <div key={uuidv4()} className="rounded">
               <div className="mb-8 flex cursor-pointer flex-col gap-2">
-                <img src="https://placehold.co/330x220?text=Profile+Image" className="w-full rounded-lg" alt="Gig cover image" />
+                <img src={gig.coverImage} className="w-full rounded-lg" alt="Gig cover image" />
                 <div className="flex items-center gap-2 relative">
-                  <img
-                    src="https://placehold.co/330x220?text=Profile+Image"
-                    alt="Profile image"
-                    className="h-7 w-8 rounded-full object-cover"
-                  />
+                  <img src={gig.profilePicture} alt="Profile image" className="h-7 w-8 rounded-full object-cover" />
                 </div>
               </div>
             </div>
