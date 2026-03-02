@@ -103,8 +103,8 @@ const AddGig: FC = (): ReactElement => {
 
   const onCreateGig = async (): Promise<void> => {
     try {
-      const editor: Quill | undefined = reactQuillRef.current?.getEditor();
-      gigInfo.description = editor?.getText().trim() as string;
+      // const editor: Quill | undefined = reactQuillRef.current?.getEditor();
+      // gigInfo.description = editor?.getText().trim() as string;
       const isValid = await schemaValidation();
       console.log(isValid);
       if (isValid) {

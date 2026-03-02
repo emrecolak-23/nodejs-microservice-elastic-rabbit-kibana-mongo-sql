@@ -11,6 +11,7 @@ import { rating, shortenLargeNumbers } from 'src/shared/utils/utils.service';
 import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
 import { GigContext } from '../../context/GigContext';
 import GigViewRight from './components/GigViewRight';
+import GigViewLeft from './components/GigViewLeft';
 
 const GigView: FC = (): ReactElement => {
   const { gigId, sellerId } = useParams<string>();
@@ -68,7 +69,9 @@ const GigView: FC = (): ReactElement => {
             value={{ gig: gig.current, seller: seller.current, isSuccess: isGigDataSuccess && isSellerDataSuccess, isLoading: isLoading }}
           >
             <div className="flex flex-wrap">
-              <div className="order-last w-full p-4 lg:order-first lg:w-2/3">{/* <!-- GigViewLeft --> */}</div>
+              <div className="order-last w-full p-4 lg:order-first lg:w-2/3">
+                <GigViewLeft />
+              </div>
 
               <div className="w-full p-4 lg:w-1/3 ">
                 <StickyBox offsetTop={10} offsetBottom={10}>
