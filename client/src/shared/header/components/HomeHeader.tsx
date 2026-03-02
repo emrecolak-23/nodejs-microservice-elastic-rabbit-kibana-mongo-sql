@@ -17,6 +17,7 @@ import useDetectOutsideClick from 'src/shared/hooks/useDetectOutsideClick';
 import SettingsDropdown from './SettingsDropdown';
 import { updateHeader } from '../reducers/header.reducer';
 import { updateContainerCategory } from '../reducers/category.reducer';
+import HeaderSearchInput from './HeaderSearchInput';
 
 const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -84,7 +85,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                   >
                     Jobber
                   </Link>
-                  {/* <!-- Add HeaderSearchInput component --> */}
+                  <HeaderSearchInput />
                 </div>
               </div>
               {/* <!-- Add MobileHeaderSearchInput component here --> */}

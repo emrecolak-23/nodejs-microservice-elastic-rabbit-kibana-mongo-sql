@@ -16,6 +16,7 @@ import ManageOrders from './features/sellers/components/dashboard/ManageOrders';
 import ManageEarning from './features/sellers/components/dashboard/ManageEarning';
 import AddGig from './features/gigs/components/gig/AddGig';
 import GigView from './features/gigs/components/view/GigView';
+import Gigs from './features/gigs/components/gigs/Gigs';
 
 const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
   return (
@@ -144,6 +145,30 @@ const AppRouter = () => {
           <ProtectedRoute>
             <Layout backgroundColor="#fffff">
               <GigView />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: '/categories/:category',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#fffff">
+              <Gigs type="categories" />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: '/search/gigs',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#fffff">
+              <Gigs type="search" />
             </Layout>
           </ProtectedRoute>
         </Suspense>
