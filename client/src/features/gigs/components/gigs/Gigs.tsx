@@ -1,4 +1,4 @@
-import { FC, ReactElement, useState } from 'react';
+import { FC, ReactElement, useEffect, useRef, useState } from 'react';
 import { IGigsProps, ISellerGig } from '../../interfaces/gig.interface';
 import BudgetDropwdown from './components/BudgetDropwdown';
 import DeliveryTimeDropdown from './components/DeliveryTimeDropdown';
@@ -16,8 +16,9 @@ import { useSearchGigsQuery } from '../../services/search.service';
 import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
 import GigCardDisplayItem from 'src/shared/gigs/GigCardDisplayItem';
 import PageMessage from 'src/shared/page-message/PageMessage';
+import GigPaginate from 'src/shared/gigs/GigPaginate';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 1;
 
 const Gigs: FC<IGigsProps> = ({ type }): ReactElement => {
   const [itemFrom, setItemFrom] = useState<string>('0');
@@ -38,7 +39,19 @@ const Gigs: FC<IGigsProps> = ({ type }): ReactElement => {
     type: paginationType
   });
 
-  console.log(data);
+  const gigs = useRef<ISellerGig[]>([]);
+
+  useEffect(() => {
+    setItemFrom('0');
+    setPaginationType('forward');
+  }, [queryType]);
+
+  let totalGigs = 0;
+
+  if (isSuccess) {
+    gigs.current = data?.gigs as ISellerGig[];
+    totalGigs = data.total ?? 0;
+  }
 
   const filterApplied = getDataFromLocalStorage('filterApplied');
   const categoryName = categories().find((item) => location.pathname.includes(replaceSpacesWithDash(item)));
@@ -84,7 +97,17 @@ const Gigs: FC<IGigsProps> = ({ type }): ReactElement => {
             <PageMessage header="No services found for your search" body="Try a new search or get a free quote for your project" />
           )}
           {isError && <PageMessage header="Error" body="Something went wrong" />}
-          {/* <!-- GigPaginate --> */}
+          {isSuccess && !filterApplied && data && data.gigs && data.gigs.length > 0 && (
+            <GigPaginate
+              key={queryType}
+              gigs={gigs.current}
+              totalGigs={totalGigs}
+              showNumbers={true}
+              itemsPerPage={ITEMS_PER_PAGE}
+              setItemFrom={setItemFrom}
+              setPaginationType={setPaginationType}
+            />
+          )}
         </div>
       )}
     </>
