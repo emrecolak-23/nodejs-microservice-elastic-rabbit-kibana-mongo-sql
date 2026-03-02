@@ -1,11 +1,25 @@
 import { FC, ReactElement, useState } from 'react';
+import { ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
+import TopGigsView from 'src/shared/gigs/TopGigsView';
 import { cn } from 'src/shared/utils/cn';
-import { categories, replaceSpacesWithDash } from 'src/shared/utils/utils.service';
+import { categories, replaceSpacesWithDash, replaceAmpersandAndDashWithSpace } from 'src/shared/utils/utils.service';
 import { v4 as uuidv4 } from 'uuid';
+import { useGetAuthGigsByCategoryQuery } from 'src/features/auth/services/auth.service';
 
 const GigTabs: FC = (): ReactElement => {
   const [activeTab, setActiveTab] = useState<string>('Graphics & Design');
-  const categoryGigs = [];
+  const queryType = `query=${replaceSpacesWithDash(`${activeTab}`)}`;
+  const { data, isSuccess } = useGetAuthGigsByCategoryQuery({
+    query: `${queryType}`,
+    from: '0',
+    size: '10',
+    type: 'forward'
+  });
+  let categoryGigs: ISellerGig[] = [];
+  if (isSuccess) {
+    categoryGigs = data.gigs as ISellerGig[];
+  }
+
   return (
     <div className="relative m-auto mt-8 w-screen px-6 xl:container md:px-12 lg:px-6">
       <div className="mx-auto flex flex-col px-4 py-8 lg:px-6 lg:py-10">
@@ -35,6 +49,13 @@ const GigTabs: FC = (): ReactElement => {
               >
                 Explore
               </a>
+              <TopGigsView
+                gigs={categoryGigs}
+                width="w-72"
+                type="index"
+                title="Top Rated Services"
+                subTitle={`These are the top rated services on the platform for ${activeTab}`}
+              />
             </div>
           ) : (
             <div className="flex h-96 items-center justify-center text-lg">Information not available at the moment.</div>

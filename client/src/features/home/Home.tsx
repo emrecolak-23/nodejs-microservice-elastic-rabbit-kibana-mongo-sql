@@ -4,18 +4,21 @@ import HomeGigsView from './components/HomeGigsView';
 import FeatureExperts from './components/FeatureExperts';
 import { useGetRandomSellersQuery } from '../sellers/services/seller.service';
 import { ISellerDocument } from '../sellers/interfaces/seller.interface';
-import { useGetGigsByCategoryQuery } from '../gigs/services/gigs.service';
+import { useGetGigsByCategoryQuery, useGetTopRatedGigsByCategoryQuery } from '../gigs/services/gigs.service';
 import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import { ISellerGig } from '../gigs/interfaces/gig.interface';
+import TopGigsView from 'src/shared/gigs/TopGigsView';
 
 const Home: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
   const { data, isSuccess } = useGetRandomSellersQuery('10');
   const { data: categoryData, isSuccess: isCategorySuccess } = useGetGigsByCategoryQuery(`${authUser.username}`);
+  const { data: topGigsData, isSuccess: isTopGigsSuccess } = useGetTopRatedGigsByCategoryQuery(`${authUser.username}`);
 
   let sellers: ISellerDocument[] = [];
   let categoryGigs: ISellerGig[] = [];
+  let topGigs: ISellerGig[] = [];
 
   if (isSuccess) {
     sellers = data?.sellers as ISellerDocument[];
@@ -25,9 +28,22 @@ const Home: FC = (): ReactElement => {
     categoryGigs = categoryData?.gigs as ISellerGig[];
   }
 
+  if (isTopGigsSuccess) {
+    topGigs = topGigsData?.gigs as ISellerGig[];
+  }
+
   return (
     <div className="m-auto px-6 w-screen relative min-h-screen xl:container md:px-12 lg:px-6">
       <HomeSlider />
+      {topGigs.length > 0 && (
+        <TopGigsView
+          gigs={topGigs}
+          width="w-72"
+          type="home"
+          title="Top Rated Services"
+          subTitle={`These are the top rated services on the platform for ${topGigs[0].categories}`}
+        />
+      )}
       {categoryGigs.length > 0 && (
         <HomeGigsView
           gigs={categoryGigs}
