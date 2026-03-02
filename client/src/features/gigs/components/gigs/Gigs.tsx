@@ -1,5 +1,7 @@
 import { FC, ReactElement } from 'react';
 import { IGigsProps } from '../../interfaces/gig.interface';
+import BudgetDropwdown from './components/BudgetDropwdown';
+import DeliveryTimeDropdown from './components/DeliveryTimeDropdown';
 
 const Gigs: FC<IGigsProps> = (): ReactElement => {
   return (
@@ -9,8 +11,8 @@ const Gigs: FC<IGigsProps> = (): ReactElement => {
         <strong className="text-black">category</strong>
       </h3>
       <div className="mb-4 flex gap-4">
-        {/* <!-- BudgetDropdown --> */}
-        {/* <!-- DeliveryTimeDropdown --> */}
+        <BudgetDropwdown />
+        <DeliveryTimeDropdown />
       </div>
       <div className="my-5">
         <div className="">
