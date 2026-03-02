@@ -3,7 +3,6 @@ import { IFeaturedExpertProps } from '../interfaces/home.interface';
 import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { lowerCase, rating } from 'src/shared/utils/utils.service';
-import { FaRegStar } from 'react-icons/fa';
 import StarRating from 'src/shared/rating/StarRating';
 import { ISellerDocument } from 'src/features/sellers/interfaces/seller.interface';
 

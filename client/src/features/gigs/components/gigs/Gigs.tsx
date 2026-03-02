@@ -38,6 +38,8 @@ const Gigs: FC<IGigsProps> = ({ type }): ReactElement => {
     type: paginationType
   });
 
+  console.log(data);
+
   const filterApplied = getDataFromLocalStorage('filterApplied');
   const categoryName = categories().find((item) => location.pathname.includes(replaceSpacesWithDash(item)));
   const gigCategories = categoryName ?? searchParams.get('query');

@@ -1,4 +1,4 @@
-@baseUrl = https://api.mjoelak03.online
+@baseUrl = https://jobberemre.com
 @urlPath = api/gateway/v1/auth
 
 ### Signup
@@ -23,7 +23,7 @@ Accept: application/json
 withCredentials: true
 
 {
-    "username": "mjoe003",
+    "username": "mjoelak003",
     "password": "Pass123."
 }
 

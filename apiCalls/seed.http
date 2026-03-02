@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:4000
+@baseUrl = https://jobberemre.com
 @urlPath = api/gateway/v1
 
 
@@ -15,3 +15,10 @@ Accept: application/json
 withCredentials: true
 
 {}
+
+###
+# Gig seed - Auth gerekir (önce login ol)
+GET {{baseUrl}}/{{urlPath}}/gig/seed/10
+Content-Type: application/json
+Accept: application/json
+withCredentials: true

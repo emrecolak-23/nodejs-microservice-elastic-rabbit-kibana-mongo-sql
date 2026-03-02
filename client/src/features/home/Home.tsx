@@ -36,7 +36,7 @@ const Home: FC = (): ReactElement => {
           category={categoryGigs[0].categories}
         />
       )}
-      <FeatureExperts sellers={[]} />
+      <FeatureExperts sellers={sellers} />
     </div>
   );
 };

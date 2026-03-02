@@ -76,7 +76,7 @@ export class SearchRepository {
       }
     ];
 
-    if (deliveryTime !== undefined && deliveryTime !== '') {
+    if (deliveryTime && deliveryTime !== 'undefined') {
       queryList.push({
         query_string: {
           fields: ['expectedDelivery'],
