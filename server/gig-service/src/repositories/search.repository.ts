@@ -153,24 +153,53 @@ export class SearchRepository {
   async getMoreGigsLikeThis(gigId: string): Promise<ISearchResult> {
     const result: SearchResponse = await this.elasticSearch.elasticSearchClient.search({
       index: 'gigs',
-      size: 5,
+      size: 6,
       query: {
-        more_like_this: {
-          fields: ['username', 'title', 'description', 'basicDescription', 'basicTitle', 'categories', 'subCategories', 'tags'],
-          like: [
+        bool: {
+          must: [
             {
-              _index: 'gigs',
-              _id: gigId
+              more_like_this: {
+                fields: ['username', 'title', 'description', 'basicDescription', 'basicTitle', 'categories', 'subCategories', 'tags'],
+                like: [{ _index: 'gigs', _id: gigId }],
+                min_term_freq: 1,
+                min_doc_freq: 1,
+                min_word_length: 2
+              }
             }
-          ]
+          ],
+          must_not: [{ ids: { values: [gigId] } }]
         }
       }
     });
 
-    const total: IHitsTotal = result.hits.total as IHitsTotal;
+    let hits = result.hits.hits;
+
+    if (hits.length === 0) {
+      const gig = await this.elasticSearch.getIndexedData('gigs', gigId);
+      const category = gig?.categories;
+      if (category) {
+        const categoryResult = await this.gigsSearchByCategory(category);
+        hits = categoryResult.hits.filter((h: { _id?: string }) => h._id !== gigId).slice(0, 5);
+      }
+    }
+
+    if (hits.length === 0) {
+      const anyResult: SearchResponse = await this.elasticSearch.elasticSearchClient.search({
+        index: 'gigs',
+        size: 5,
+        query: {
+          bool: {
+            must: [{ term: { active: true } }],
+            must_not: [{ ids: { values: [gigId] } }]
+          }
+        }
+      });
+      hits = anyResult.hits.hits;
+    }
+
     return {
-      total: total.value,
-      hits: result.hits.hits
+      total: hits.length,
+      hits
     };
   }
 

@@ -1,0 +1,66 @@
+import { FC, ReactElement, useRef, useState } from 'react';
+import { FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { IGigTopProps, ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
+import { replaceSpacesWithDash } from '../utils/utils.service';
+import GigCardDisplayItem from './GigCardDisplayItem';
+
+interface IScrollProps {
+  start: boolean;
+  end: boolean;
+}
+
+const TopGigsView: FC<IGigTopProps> = ({ gigs, title, subTitle, category, width, type }): ReactElement => {
+  const navElement = useRef<HTMLDivElement | null>(null);
+  const [scroll, setScroll] = useState<IScrollProps>({
+    start: false,
+    end: false
+  });
+
+  return (
+    <div className="mx-auto my-8 flex flex-col overflow-hidden rounded-lg">
+      {title && (
+        <div className="flex items-start py-6">
+          <div className="flex w-full flex-col justify-between">
+            <div className="flex gap-2">
+              <h2 className="text-base font-bold md:text-lg lg:text-2xl">{title}</h2>
+              {category && (
+                <span className="flex self-center text-base font-bold cursor-pointer text-sky-500 md:text-lg lg:text-2xl hover:text-sky-400 hover:underline">
+                  <Link to={`/categories/${replaceSpacesWithDash(category)}`}>{category}</Link>
+                </span>
+              )}
+            </div>
+            <h4 className="pt-1 text-left text-sm">{subTitle}</h4>
+          </div>
+        </div>
+      )}
+
+      <div className="m-auto flex h-96 w-full overflow-x-auto" ref={navElement}>
+        {scroll.start && gigs.length > 5 && (
+          <span className="absolute left-2 z-50 flex cursor-pointer justify-start self-center rounded-full bg-sky-400 sm:left-3 md:left-7 lg:left-0">
+            <FaAngleLeft className="text-3xl text-white sm:text-3xl md:text-4xl lg:text-4xl" />
+          </span>
+        )}
+        <div className="relative flex gap-x-8 pt-3">
+          {gigs.map((gig: ISellerGig) => {
+            return (
+              <div key={gig._id ?? gig.id} className={`${width}`}>
+                <GigCardDisplayItem gig={gig} linkTarget={type === 'view'} showEditIcon={false} />
+              </div>
+            );
+          })}
+        </div>
+        <span className="absolute right-2 flex max-w-4xl cursor-pointer justify-end self-center rounded-full bg-sky-400 sm:right-3 md:right-7 lg:right-0">
+          <FaAngleRight className="text-3xl text-white sm:text-3xl md:text-4xl lg:text-4xl" />
+        </span>
+        {!scroll.end && gigs.length > 5 && (
+          <span className="absolute right-2 flex max-w-4xl cursor-pointer justify-end self-center rounded-full bg-sky-400 sm:right-3 md:right-7 lg:right-0">
+            <FaAngleRight className="text-3xl text-white sm:text-3xl md:text-4xl lg:text-4xl" />
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default TopGigsView;

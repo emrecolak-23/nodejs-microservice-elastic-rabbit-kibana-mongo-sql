@@ -2,7 +2,7 @@ import { FC, ReactElement, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import StickyBox from 'react-sticky-box';
 import StarRating from 'src/shared/rating/StarRating';
-import { useGetGigByIdQuery } from '../../services/gigs.service';
+import { useGetGigByIdQuery, useGetMoreGigsLikeThisQuery } from '../../services/gigs.service';
 import { useGetSellerByIdQuery } from 'src/features/sellers/services/seller.service';
 import { ISellerGig } from '../../interfaces/gig.interface';
 import { emptyGigData, emptySellerData } from 'src/shared/utils/static-data';
@@ -12,17 +12,26 @@ import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
 import { GigContext } from '../../context/GigContext';
 import GigViewRight from './components/GigViewRight';
 import GigViewLeft from './components/GigViewLeft';
+import TopGigsView from 'src/shared/gigs/TopGigsView';
 
 const GigView: FC = (): ReactElement => {
   const { gigId, sellerId } = useParams<string>();
 
   const { data: gigData, isSuccess: isGigDataSuccess, isLoading: isGigDataLoading } = useGetGigByIdQuery(gigId as string);
   const { data: sellerData, isSuccess: isSellerDataSuccess, isLoading: isSellerDataLoading } = useGetSellerByIdQuery(sellerId as string);
+  const {
+    data: moreGigsData,
+    isSuccess: isMoreGigsDataSuccess,
+    isLoading: isMoreGigsDataLoading
+  } = useGetMoreGigsLikeThisQuery(`${gigId}`);
+
+  console.log(moreGigsData, 'moreGigsData');
 
   const gig = useRef<ISellerGig>(emptyGigData);
   const seller = useRef<ISellerDocument>(emptySellerData);
+  const moreGigs = useRef<ISellerGig[]>([]);
 
-  const isLoading = isGigDataLoading || isSellerDataLoading;
+  const isLoading = isGigDataLoading || isSellerDataLoading || isMoreGigsDataLoading;
 
   if (isGigDataSuccess) {
     gig.current = gigData.gig as ISellerGig;
@@ -30,6 +39,10 @@ const GigView: FC = (): ReactElement => {
 
   if (isSellerDataSuccess) {
     seller.current = sellerData.seller as ISellerDocument;
+  }
+
+  if (isMoreGigsDataSuccess) {
+    moreGigs.current = moreGigsData.gigs as ISellerGig[];
   }
 
   return (
@@ -79,7 +92,20 @@ const GigView: FC = (): ReactElement => {
                 </StickyBox>
               </div>
             </div>
-            <div className="m-auto px-6 xl:container md:px-12 lg:px-6">{/* <!-- TopGigsView --> */}</div>
+            {moreGigs.current.length > 0 ? (
+              <div className="m-auto px-6 xl:container md:px-12 lg:px-6">
+                <TopGigsView
+                  gigs={moreGigs.current}
+                  width="w-60"
+                  type="view"
+                  title="Recommended For You"
+                  category={gig.current.categories}
+                  subTitle="Check out these other gigs that are similar to this one."
+                />
+              </div>
+            ) : (
+              <></>
+            )}
           </GigContext.Provider>
         </main>
       )}
