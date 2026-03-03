@@ -13,13 +13,30 @@ import { lowerCase, rating, shortenLargeNumbers } from 'src/shared/utils/utils.s
 import { cn } from 'src/shared/utils/cn';
 import { TimeAgo } from 'src/shared/utils/timeago.utils';
 import { ILanguage } from 'src/features/sellers/interfaces/seller.interface';
+import { IChatBuyerProps, IChatSellerProps } from 'src/features/chat/interfaces/chat.interface';
+import ChatBox from 'src/features/chat/components/ChatBox/ChatBox';
 
 const GigSeller: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
+  const buyer = useAppSelector((state: IReduxState) => state.buyer);
   const { gig, seller } = useContext(GigContext);
 
   const [approvalModalContent, setApprovalModalContent] = useState<IApprovalModalContent>();
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showChatBox, setShowChatBox] = useState<boolean>(false);
+
+  const chatSeller: IChatSellerProps = {
+    username: `${seller.username}`,
+    _id: `${seller._id}`,
+    profilePicture: `${seller.profilePicture}`,
+    responseTime: parseInt(`${seller.responseTime}`)
+  };
+
+  const chatBuyer: IChatBuyerProps = {
+    username: `${buyer.username}`,
+    _id: `${buyer._id}`,
+    profilePicture: `${buyer.profilePicture}`
+  };
 
   return (
     <>
@@ -106,7 +123,7 @@ const GigSeller: FC = (): ReactElement => {
                   });
                   setShowModal(true);
                 } else {
-                  // navigate to chat box
+                  setShowChatBox((item: boolean) => !item);
                 }
               }}
               label={
@@ -118,7 +135,7 @@ const GigSeller: FC = (): ReactElement => {
             />
           </div>
         </div>
-        {/* <!-- ChatBox --> */}
+        {showChatBox && <ChatBox seller={chatSeller} buyer={chatBuyer} gigId={gig._id as string} onClose={() => setShowChatBox(false)} />}
       </div>
     </>
   );

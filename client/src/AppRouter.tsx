@@ -18,6 +18,7 @@ import AddGig from './features/gigs/components/gig/AddGig';
 import GigView from './features/gigs/components/view/GigView';
 import Gigs from './features/gigs/components/gigs/Gigs';
 import EditGig from './features/gigs/components/gig/Edit.Gig';
+import Chat from './features/chat/components/Chat';
 
 const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
   return (
@@ -182,6 +183,30 @@ const AppRouter = () => {
           <ProtectedRoute>
             <Layout backgroundColor="#fffff">
               <Gigs type="search" />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: '/inbox',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#fffff">
+              <Chat />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: '/inbox/:username/:conversationId',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#fffff">
+              <Chat />
             </Layout>
           </ProtectedRoute>
         </Suspense>
