@@ -39,8 +39,6 @@ export class SearchController {
   async topRatedGigsByCategory(req: Request, res: Response): Promise<void> {
     const category = await this.gigCache.getUserSelectedGigCategory(`selectedCategories:${req.params.username}`);
 
-    console.log(category, 'category');
-
     const gigs = await this.searchService.getTopRatedGigsByCategory(`${category}`);
 
     res.status(StatusCodes.OK).json({

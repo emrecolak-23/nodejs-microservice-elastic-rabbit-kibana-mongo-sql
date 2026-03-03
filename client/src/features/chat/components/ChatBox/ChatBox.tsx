@@ -73,7 +73,7 @@ const ChatBox: FC<IChatBoxProps> = ({ seller, buyer, gigId, onClose }): ReactEle
       };
 
       const response: IResponse = await saveChatMessage(messageBody).unwrap();
-
+      console.log(response, 'response');
       setMessage('');
       conversationIdRef.current = response.conversationId as string;
     } catch (error) {

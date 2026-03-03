@@ -18,6 +18,7 @@ import SettingsDropdown from './SettingsDropdown';
 import { updateHeader } from '../reducers/header.reducer';
 import { updateContainerCategory } from '../reducers/category.reducer';
 import HeaderSearchInput from './HeaderSearchInput';
+import MessageDropdown from './MessageDropdown';
 
 const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -32,9 +33,9 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
   const navElement = useRef<HTMLDivElement>(null);
 
   const [isSettingsDropdown, setIsSettingsDropdown] = useDetectOutsideClick(settingsDropdownRef, false);
-  const isMessageDropdownOpen = false;
-  const isNotificationDropdownOpen = false;
-  const isOrderDropdownOpen = false;
+  const [isMessageDropdown, setIsMessageDropdown] = useDetectOutsideClick(messageDropdownRef, false);
+  const [isNotificationDropdown, setIsNotificationDropdown] = useDetectOutsideClick(notificationDropdownRef, false);
+  const [isOrderDropdown, setIsOrderDropdown] = useDetectOutsideClick(orderDropdownRef, false);
 
   const [resendEmail] = useResendEmailMutation();
   const dispatch = useAppDispatch();
@@ -50,6 +51,16 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
 
   const toggleDropdown = (): void => {
     setIsSettingsDropdown(!isSettingsDropdown);
+    setIsMessageDropdown(false);
+    setIsNotificationDropdown(false);
+    setIsOrderDropdown(false);
+  };
+
+  const toggleMessageDropdown = (): void => {
+    setIsMessageDropdown(!isMessageDropdown);
+    setIsSettingsDropdown(false);
+    setIsNotificationDropdown(false);
+    setIsOrderDropdown(false);
   };
 
   return (
@@ -105,7 +116,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                     />
                     <Transition
                       ref={notificationDropdownRef}
-                      show={isNotificationDropdownOpen}
+                      show={isNotificationDropdown}
                       enter="transition ease-out duration-200"
                       enterFrom="opacity-0 translate-y-1"
                       enterTo="opacity-100 translate-y-0"
@@ -117,18 +128,19 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                     </Transition>
                   </li>
                   <li className="relative z-50 flex cursor-pointer items-center">
-                    <Button
-                      className="relative px-4"
-                      label={
-                        <>
-                          <FaRegEnvelope />
-                          {/* <span className="absolute -top-1 right-0 mr-2 inline-flex h-[6px] w-[6px] items-center justify-center rounded-full bg-[#ff62ab]"></span> */}
-                        </>
-                      }
-                    />
+                    <div ref={messageDropdownRef} className="relative">
+                      <Button
+                        className="relative px-4"
+                        onClick={toggleMessageDropdown}
+                        label={
+                          <>
+                            <FaRegEnvelope />
+                            {/* <span className="absolute -top-1 right-0 mr-2 inline-flex h-[6px] w-[6px] items-center justify-center rounded-full bg-[#ff62ab]"></span> */}
+                          </>
+                        }
+                      />
                     <Transition
-                      ref={messageDropdownRef}
-                      show={isMessageDropdownOpen}
+                      show={isMessageDropdown}
                       enter="transition ease-out duration-200"
                       enterFrom="opacity-0 translate-y-1"
                       enterTo="opacity-100 translate-y-0"
@@ -136,8 +148,11 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                       leaveFrom="opacity-100 translate-y-0"
                       leaveTo="opacity-0 translate-y-1"
                     >
-                      <div className="absolute right-0 mt-5 w-96">{/* <!-- MessageDropdown --> */}</div>
+                      <div className="absolute right-0 mt-5 w-96">
+                        <MessageDropdown setIsMessageDropdownOpen={setIsMessageDropdown} />
+                      </div>
                     </Transition>
+                    </div>
                   </li>
                   <li className="relative z-50 flex cursor-pointer items-center">
                     <Button
@@ -150,7 +165,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                     />
                     <Transition
                       ref={orderDropdownRef}
-                      show={isOrderDropdownOpen}
+                      show={isOrderDropdown}
                       enter="transition ease-out duration-200"
                       enterFrom="opacity-0 translate-y-1"
                       enterTo="opacity-100 translate-y-0"

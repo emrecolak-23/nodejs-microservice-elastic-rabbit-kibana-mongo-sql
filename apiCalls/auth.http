@@ -1,4 +1,4 @@
-@baseUrl = https://jobberemre.com
+@baseUrl = https://192.168.105.5
 @urlPath = api/gateway/v1/auth
 
 ### Signup

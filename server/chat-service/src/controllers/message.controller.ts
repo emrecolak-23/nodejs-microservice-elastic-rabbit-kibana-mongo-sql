@@ -36,10 +36,10 @@ export class MessageController {
       offer: req.body.offer
     };
 
-    const message: IMessageDocument = await this.messageService.addMessage(messageData);
+    await this.messageService.addMessage(messageData);
     res.status(StatusCodes.CREATED).json({
       message: 'Message created successfully',
-      conversationId: message.conversationId
+      conversationId: messageData.conversationId
     });
   }
 
@@ -75,14 +75,14 @@ export class MessageController {
 
   async getConversation(req: Request, res: Response): Promise<void> {
     const { senderUsername, receiverUsername } = req.params;
-    const conversation: IConversationDocument[] = await this.messageService.getConversation(
+    const conversations: IConversationDocument[] = await this.messageService.getConversation(
       senderUsername as string,
       receiverUsername as string
     );
 
     res.status(StatusCodes.OK).json({
       message: 'Chat conversation',
-      conversation
+      conversations
     });
   }
 

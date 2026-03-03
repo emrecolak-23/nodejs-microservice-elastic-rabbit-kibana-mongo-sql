@@ -1,4 +1,6 @@
 {
+  "rest-client.proxyStrictSSL": false,
+  "rest-client.enableTelemetry": false,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "prettier.requireConfig": false,
