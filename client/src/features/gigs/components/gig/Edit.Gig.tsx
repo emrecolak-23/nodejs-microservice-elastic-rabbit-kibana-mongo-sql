@@ -1,0 +1,435 @@
+import { ChangeEvent, FC, ReactElement, useEffect, useState, useRef } from 'react';
+import { FaCamera } from 'react-icons/fa';
+import Breadcrumb from 'src/shared/breadcrumb/Breadcrumb';
+import Button from 'src/shared/button/Button';
+import Dropdown from 'src/shared/dropdown/Dropdown';
+import TextAreaInput from 'src/shared/inputs/TextAreaInput';
+import TextInput from 'src/shared/inputs/TextInput';
+import { useAppSelector } from 'src/store/store';
+import { IReduxState } from 'src/store/store.interface';
+import { GIG_MAX_LENGTH, IAllowedGigItem, ICreateGig, ISellerGig, IShowGigModal } from '../../interfaces/gig.interface';
+import ReactQuill from 'react-quill-new';
+import {
+  categories,
+  expectedGigDelivery,
+  lowerCase,
+  reactQuillUtils,
+  replaceSpacesWithDash,
+  showErrorToast,
+  showSuccessToast
+} from 'src/shared/utils/utils.service';
+import TagsInput from './components/TagsInput';
+import { checkImage, readAsBase64 } from 'src/shared/utils/image-utils.service';
+import { useGigSchema } from '../../hooks/useGigSchema';
+import { gigInfoSchema } from '../../schemes/gig.schema';
+import { IApprovalModalContent } from 'src/shared/modals/interfaces/modal.interface';
+import equal from 'react-fast-compare';
+import { NavigateFunction, useLocation, useNavigate, useParams } from 'react-router-dom';
+import ApprovalModal from 'src/shared/modals/ApprovalModal';
+import { useUpdateGigMutation } from '../../services/gigs.service';
+import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
+import { IResponse } from 'src/shared/shared.interface';
+
+type QuillEditor = Parameters<NonNullable<React.ComponentProps<typeof ReactQuill>['onChange']>>[3];
+
+const EditGig: FC = (): ReactElement => {
+  const authUser = useAppSelector((state: IReduxState) => state.authUser);
+  const { state }: { state: ISellerGig } = useLocation();
+
+  const defaultGigInfo: ICreateGig = {
+    title: state?.title,
+    categories: state?.categories,
+    description: state?.description,
+    subCategories: state?.subCategories,
+    tags: state?.tags,
+    price: state?.price,
+    coverImage: state?.coverImage,
+    expectedDelivery: state?.expectedDelivery,
+    basicTitle: state?.basicTitle,
+    basicDescription: state?.basicDescription
+  };
+
+  const [gigInfo, setGigInfo] = useState<ICreateGig>(defaultGigInfo);
+  const [subCategory, setSubCategory] = useState<string[]>(state?.subCategories);
+  const [subCategoryInput, setSubCategoryInput] = useState<string>('');
+  const [showGigModal, setShowGigModal] = useState<IShowGigModal>({
+    image: false,
+    cancel: false
+  });
+
+  const [tags, setTags] = useState<string[]>(state.tags);
+  const [tagsInput, setTagsInput] = useState<string>('');
+
+  const reactQuillRef = useRef<ReactQuill | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const [allowedGigItemLength, setAllowedGigItemLength] = useState<IAllowedGigItem>({
+    gigTitle: `${GIG_MAX_LENGTH.gigTitle - state?.title.length / GIG_MAX_LENGTH.gigTitle}`,
+    basicTitle: `${GIG_MAX_LENGTH.basicTitle - state?.basicTitle.length || 0}/${GIG_MAX_LENGTH.basicTitle}`,
+    basicDescription: `${GIG_MAX_LENGTH.basicDescription - state?.basicDescription.length || 0}/${GIG_MAX_LENGTH.basicDescription}`,
+    descriptionCharacters: `${GIG_MAX_LENGTH.fullDescription - state?.description.length || 0}/${GIG_MAX_LENGTH.fullDescription}`
+  });
+
+  const gigInfoRef = useRef<ICreateGig>(defaultGigInfo);
+  const [approvalModalContent, setApprovalModalContent] = useState<IApprovalModalContent>({
+    header: 'Create Gig',
+    body: 'Are you sure you want to create this gig?',
+    btnText: 'Create Gig',
+    btnColor: 'bg-sky-500'
+  });
+
+  const navigate: NavigateFunction = useNavigate();
+  const { gigId } = useParams<string>();
+
+  const [schemaValidation] = useGigSchema({ schema: gigInfoSchema, gigInfo });
+
+  const [updateGig, { isLoading: isUpdatingGig }] = useUpdateGigMutation();
+
+  const handleFileChange = async (event: ChangeEvent): Promise<void> => {
+    const target = event.target as HTMLInputElement;
+    if (target.files?.length) {
+      const file: File = target.files[0];
+      const isValid = checkImage(file, 'image');
+      if (isValid) {
+        const dataImage: string | ArrayBuffer | null = await readAsBase64(file);
+        setGigInfo({ ...gigInfo, coverImage: dataImage as string });
+      }
+
+      setShowGigModal({ ...showGigModal, image: false });
+    }
+  };
+
+  const onEditGig = async (): Promise<void> => {
+    try {
+      // const editor: Quill | undefined = reactQuillRef.current?.getEditor();
+      // gigInfo.description = editor?.getText().trim() as string;
+      const isValid = await schemaValidation();
+      console.log(isValid);
+      if (isValid) {
+        const gig: ICreateGig = {
+          title: gigInfo.title,
+          categories: gigInfo.categories,
+          description: gigInfo.description,
+          subCategories: subCategory,
+          tags: tags,
+          price: gigInfo.price,
+          coverImage: gigInfo.coverImage,
+          expectedDelivery: gigInfo.expectedDelivery,
+          basicTitle: gigInfo.basicTitle,
+          basicDescription: gigInfo.basicDescription
+        };
+
+        const response: IResponse = await updateGig({
+          gigId: gigId as string,
+          gig
+        }).unwrap();
+        const title: string = replaceSpacesWithDash(`${gig.title}`);
+        showSuccessToast('Updated gig successfully');
+        navigate(`/gig/${lowerCase(`${authUser.username}/${title}/${response.gig?.sellerId}`)}/${response.gig?.id}/view`);
+      }
+    } catch (error) {
+      showErrorToast('Error updating gig');
+      console.log(error);
+    }
+  };
+
+  const onCancelEdit = (): void => {
+    navigate(`/seller-profile/${lowerCase(`${authUser.username}/${state.sellerId}/edit`)}`);
+  };
+
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+    const timer = setTimeout(() => {
+      const quill = reactQuillRef.current;
+      if (!quill) return;
+      try {
+        const editor = quill.getEditor();
+        const handler = () => {
+          if (editor.getLength() > GIG_MAX_LENGTH.fullDescription) {
+            editor.deleteText(GIG_MAX_LENGTH.fullDescription, editor.getLength());
+          }
+        };
+        editor.on('text-change', handler);
+        cleanup = () => editor.off('text-change', handler);
+      } catch {
+        // Editor not ready yet
+      }
+    }, 100);
+    return () => {
+      clearTimeout(timer);
+      cleanup?.();
+    };
+  }, []);
+
+  return (
+    <>
+      {showGigModal.cancel && (
+        <ApprovalModal
+          approvalModalContent={approvalModalContent}
+          onClose={() => setShowGigModal({ ...showGigModal, cancel: false })}
+          onClick={onCancelEdit}
+        />
+      )}
+      <div className="relative w-screen">
+        <Breadcrumb breadCrumbItems={['Seller', 'Edit gig']} />
+        <div className="container relative mx-auto my-5 px-2 pb-12 md:px-0">
+          {isUpdatingGig && <CircularPageLoader />}
+          {!authUser.emailVerified && (
+            <div className="absolute left-0 top-0 z-[80] flex h-full w-full justify-center bg-white/[0.8] text-sm font-bold md:text-base lg:text-xl">
+              <span className="mt-40">Please verify your email.</span>
+            </div>
+          )}
+
+          <div className="border-grey left-0 top-0 z-10 mt-4 block rounded border bg-white p-6">
+            <div className="mb-6 grid md:grid-cols-5">
+              <div className="pb-2 text-base font-medium">
+                Gig title<sup className="top-[-0.3em] text-base text-red-500">*</sup>
+              </div>
+              <div className="col-span-4 md:w-11/12 lg:w-8/12">
+                <TextInput
+                  className="border-grey mb-1 w-full rounded border p-2.5 text-sm font-normal text-gray-600 focus:outline-none"
+                  type="text"
+                  name="gigTitle"
+                  value={gigInfo.title}
+                  placeholder="I will build something I'm good at."
+                  maxLength={80}
+                  onChange={(e: ChangeEvent) => {
+                    const gigTitleValue: string = (e.target as HTMLInputElement).value;
+                    setGigInfo({ ...gigInfo, title: gigTitleValue });
+                    const counter: number = GIG_MAX_LENGTH.gigTitle - gigTitleValue.length;
+                    setAllowedGigItemLength({ ...allowedGigItemLength, gigTitle: `${counter}/${GIG_MAX_LENGTH.gigTitle}` });
+                  }}
+                />
+                <span className="flex justify-end text-xs text-[#95979d]">{allowedGigItemLength.gigTitle} Characters</span>
+              </div>
+            </div>
+            <div className="mb-6 grid md:grid-cols-5">
+              <div className="pb-2 text-base font-medium">
+                Basic title<sup className="top-[-0.3em] text-base text-red-500">*</sup>
+              </div>
+              <div className="col-span-4 md:w-11/12 lg:w-8/12">
+                <TextInput
+                  className="border-grey mb-1 w-full rounded border p-2.5 text-sm font-normal text-gray-600 focus:outline-none"
+                  placeholder="Write what exactly you'll do in short."
+                  type="text"
+                  name="basicTitle"
+                  value={gigInfo.basicTitle}
+                  maxLength={40}
+                  onChange={(e: ChangeEvent) => {
+                    const basicTitleValue: string = (e.target as HTMLInputElement).value;
+                    setGigInfo({ ...gigInfo, basicTitle: basicTitleValue });
+                    const counter: number = GIG_MAX_LENGTH.basicTitle - basicTitleValue.length;
+                    setAllowedGigItemLength({ ...allowedGigItemLength, basicTitle: `${counter}/${GIG_MAX_LENGTH.basicTitle}` });
+                  }}
+                />
+                <span className="flex justify-end text-xs text-[#95979d]">{allowedGigItemLength.basicTitle} Characters</span>
+              </div>
+            </div>
+            <div className="mb-6 grid md:grid-cols-5">
+              <div className="pb-2 text-base font-medium">
+                Brief description<sup className="top-[-0.3em] text-base text-red-500">*</sup>
+              </div>
+              <div className="col-span-4 md:w-11/12 lg:w-8/12">
+                <TextAreaInput
+                  className="border-grey mb-1 w-full rounded border p-2.5 text-sm font-normal text-gray-600 focus:outline-none"
+                  placeholder="Write a brief description..."
+                  name="basicDescription"
+                  value={gigInfo.basicDescription}
+                  onChange={(e: ChangeEvent) => {
+                    const basicDescriptionValue: string = (e.target as HTMLTextAreaElement).value;
+                    setGigInfo({ ...gigInfo, basicDescription: basicDescriptionValue });
+                    const counter: number = GIG_MAX_LENGTH.basicDescription - basicDescriptionValue.length;
+                    setAllowedGigItemLength({ ...allowedGigItemLength, basicDescription: `${counter}/${GIG_MAX_LENGTH.basicDescription}` });
+                  }}
+                  rows={5}
+                  maxLength={100}
+                />
+                <span className="flex justify-end text-xs text-[#95979d]">{allowedGigItemLength.basicDescription} Characters</span>
+              </div>
+            </div>
+            <div className="mb-6 grid md:grid-cols-5">
+              <div className="pb-2 text-base font-medium">
+                Full description<sup className="top-[-0.3em] text-base text-red-500">*</sup>
+              </div>
+              <div className="col-span-4 md:w-11/12 lg:w-8/12">
+                <ReactQuill
+                  theme="snow"
+                  value={gigInfo.description}
+                  modules={reactQuillUtils().modules}
+                  formats={reactQuillUtils().formats}
+                  ref={reactQuillRef}
+                  onChange={(event: string, _: unknown, __: unknown, editor: QuillEditor) => {
+                    setGigInfo({ ...gigInfo, description: event });
+                    const counter: number = GIG_MAX_LENGTH.fullDescription - editor.getText().length;
+                    setAllowedGigItemLength({
+                      ...allowedGigItemLength,
+                      descriptionCharacters: `${counter}/${GIG_MAX_LENGTH.fullDescription}`
+                    });
+                  }}
+                  className="border-grey border rounded"
+                />
+                <span className="flex justify-end text-xs text-[#95979d]">{allowedGigItemLength.descriptionCharacters} Characters</span>
+              </div>
+            </div>
+            <div className="relative zIndexDropdown mb-12 grid md:grid-cols-5">
+              <div className="pb-2 text-base font-medium">
+                Category<sup className="top-[-0.3em] text-base text-red-500">*</sup>
+              </div>
+              <div className="relative col-span-4 md:w-11/12 lg:w-8/12">
+                <Dropdown
+                  onClick={(item: string) => {
+                    setGigInfo({ ...gigInfo, categories: item });
+                  }}
+                  text={gigInfo.categories}
+                  maxHeight="300"
+                  mainClassNames="absolute zIndexDropdown bg-white"
+                  values={categories()}
+                />
+              </div>
+            </div>
+
+            <TagsInput
+              title="SubCategory"
+              placeholder="E.g Website Development, Mobile App."
+              gigInfo={gigInfo}
+              setGigInfo={setGigInfo}
+              itemInput={subCategoryInput}
+              tags={subCategory}
+              itemName="subCategories"
+              counterText="Subcategories"
+              setItem={setSubCategory}
+              setItemInput={setSubCategoryInput}
+              inputErrorMessage={false}
+            />
+
+            <TagsInput
+              title="Tags"
+              placeholder="Enter search terms for your gig."
+              gigInfo={gigInfo}
+              setGigInfo={setGigInfo}
+              itemInput={tagsInput}
+              tags={tags}
+              itemName="tags"
+              counterText="Tags"
+              setItem={setTags}
+              setItemInput={setTagsInput}
+              inputErrorMessage={false}
+            />
+
+            <div className="mb-6 grid md:grid-cols-5">
+              <div className="pb-2 text-base font-medium">
+                Price<sup className="top-[-0.3em] text-base text-red-500">*</sup>
+              </div>
+              <div className="col-span-4 md:w-11/12 lg:w-8/12">
+                <TextInput
+                  type="number"
+                  className="border-grey mb-1 w-full rounded border p-3.5 text-sm font-normal text-gray-600 focus:outline-none"
+                  placeholder="Enter minimum price"
+                  name="price"
+                  value={`${gigInfo.price}`}
+                  onChange={(event: ChangeEvent) => {
+                    const value: string = (event.target as HTMLInputElement).value;
+                    setGigInfo({ ...gigInfo, price: parseInt(value) > 0 ? parseInt(value) : 0 });
+                  }}
+                />
+              </div>
+            </div>
+            <div className="mb-12 grid md:grid-cols-5">
+              <div className="pb-2 text-base font-medium">
+                Expected delivery<sup className="top-[-0.3em] text-base text-red-500">*</sup>
+              </div>
+              <div className="relative col-span-4 md:w-11/12 lg:w-8/12">
+                <Dropdown
+                  text={gigInfo.expectedDelivery}
+                  onClick={(item: string) => {
+                    setGigInfo({ ...gigInfo, expectedDelivery: item });
+                  }}
+                  maxHeight="300"
+                  mainClassNames="absolute bg-white z-40"
+                  values={expectedGigDelivery()}
+                />
+              </div>
+            </div>
+            <div className="mb-6 grid md:grid-cols-5">
+              <div className="mt-6 pb-2 text-base font-medium lg:mt-0">
+                Cover image<sup className="top-[-0.3em] text-base text-red-500">*</sup>
+              </div>
+              <div
+                className="relative col-span-4 cursor-pointer md:w-11/12 lg:w-8/12"
+                onMouseEnter={() => {
+                  setShowGigModal((item) => ({ ...item, image: !item.image }));
+                }}
+                onMouseLeave={() => {
+                  setShowGigModal((item) => ({ ...item, image: false }));
+                }}
+              >
+                {gigInfo.coverImage && (
+                  <img src={gigInfo.coverImage} alt="Cover Image" className="left-0 top-0 h-[220px] w-[320px] bg-white object-cover" />
+                )}
+                {!gigInfo.coverImage && (
+                  <div className="left-0 top-0 flex h-[220px] w-[320px] cursor-pointer justify-center bg-[#dee1e7]"></div>
+                )}
+
+                {showGigModal.image && (
+                  <div
+                    onClick={() => {
+                      fileRef.current?.click();
+                    }}
+                    className="absolute left-0 top-0 flex h-[220px] w-[320px] cursor-pointer justify-center bg-[#dee1e7]"
+                  >
+                    <FaCamera className="flex self-center" />
+                  </div>
+                )}
+
+                <TextInput
+                  ref={fileRef}
+                  name="image"
+                  type="file"
+                  style={{ display: 'none' }}
+                  onClick={() => {
+                    if (fileRef.current) {
+                      fileRef.current.value = '';
+                    }
+                  }}
+                  onChange={handleFileChange}
+                />
+              </div>
+            </div>
+            <div className="grid xs:grid-cols-1 md:grid-cols-5">
+              <div className="pb-2 text-base font-medium lg:mt-0"></div>
+              <div className="col-span-4 flex gap-x-4 md:w-11/12 lg:w-8/12">
+                <Button
+                  onClick={onEditGig}
+                  disabled={isUpdatingGig}
+                  className="rounded bg-sky-500 px-8 py-3 text-center text-sm font-bold text-white hover:bg-sky-400 focus:outline-none md:py-3 md:text-base"
+                  label="Update Gig"
+                />
+                <Button
+                  disabled={isUpdatingGig}
+                  className="rounded bg-red-500 px-8 py-3 text-center text-sm font-bold text-white hover:bg-red-400 focus:outline-none md:py-3 md:text-base"
+                  label="Cancel"
+                  onClick={() => {
+                    const isEqual: boolean = equal(gigInfo, gigInfoRef.current);
+                    if (!isEqual) {
+                      setApprovalModalContent({
+                        header: 'Cancel Gig Creation',
+                        body: 'Are you sure you want to cancel the gig creation?',
+                        btnText: 'Yes, Cancel',
+                        btnColor: 'bg-red-500 hover:bg-red-400'
+                      });
+                      setShowGigModal({ ...showGigModal, cancel: true });
+                    } else {
+                      onCancelEdit();
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default EditGig;
