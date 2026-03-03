@@ -49,7 +49,7 @@ export const gigsApi = api.injectEndpoints({
       },
       invalidatesTags: ['Gigs']
     }),
-    updateActiveGig: build.mutation<IResponse, { gigId: string; active: boolean }>({
+    updateActiveGig: build.mutation<IResponse, { gigId: string; active: boolean; sellerId?: string; gig?: ISellerGig }>({
       query({ gigId, active }) {
         return {
           url: `gig/active/${gigId}`,
@@ -57,7 +57,42 @@ export const gigsApi = api.injectEndpoints({
           body: { active }
         };
       },
-      invalidatesTags: ['Gigs']
+      async onQueryStarted({ gigId, active, sellerId, gig }, { dispatch, queryFulfilled }) {
+        if (!sellerId || !gig) return;
+        const updatedGig = { ...gig, active };
+        const patchSellerGigs = dispatch(
+          api.util.updateQueryData(
+            'getGigsBySellerId' as never,
+            sellerId as never,
+            ((draft: { gigs?: ISellerGig[] }) => {
+              if (draft.gigs) {
+                draft.gigs = active
+                  ? [...draft.gigs.filter((g) => `${g.id}` !== `${gigId}`), updatedGig]
+                  : draft.gigs.filter((g) => `${g.id}` !== `${gigId}`);
+              }
+            }) as never
+          )
+        );
+        const patchPausedGigs = dispatch(
+          api.util.updateQueryData(
+            'getSellerPausedGigs' as never,
+            sellerId as never,
+            ((draft: { gigs?: ISellerGig[] }) => {
+              if (draft.gigs) {
+                draft.gigs = active
+                  ? draft.gigs.filter((g) => `${g.id}` !== `${gigId}`)
+                  : [...draft.gigs.filter((g) => `${g.id}` !== `${gigId}`), updatedGig];
+              }
+            }) as never
+          )
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          (patchSellerGigs as { undo: () => void }).undo();
+          (patchPausedGigs as { undo: () => void }).undo();
+        }
+      }
     }),
     deleteGig: build.mutation<IResponse, { gigId: string; sellerId: string }>({
       query({ gigId, sellerId }) {

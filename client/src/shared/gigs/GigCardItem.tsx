@@ -24,7 +24,7 @@ const GigCardItem: FC<IGigsProps> = ({ gig: gigDate }): ReactElement => {
 
   const title: string = replaceSpacesWithDash(gig?.title ?? '');
 
-  const [updateActiveGig, { isLoading: isUpdateActiveGigLoading }] = useUpdateActiveGigMutation();
+  const [updateActiveGig] = useUpdateActiveGigMutation();
   const [deleteGig] = useDeleteGigMutation();
 
   const navigateToEditGig = (gigId: string): void => {
@@ -38,7 +38,12 @@ const GigCardItem: FC<IGigsProps> = ({ gig: gigDate }): ReactElement => {
 
   const onToggleGig = async (active: boolean): Promise<void> => {
     try {
-      await updateActiveGig({ gigId: `${gig.id}`, active }).unwrap();
+      await updateActiveGig({
+        gigId: `${gig.id}`,
+        active,
+        sellerId: `${gig.sellerId}`,
+        gig: { ...gig, active }
+      }).unwrap();
       setGigCartItemModal({
         ...gigCartItemModal,
         overlay: false
@@ -138,11 +143,12 @@ const GigCardItem: FC<IGigsProps> = ({ gig: gigDate }): ReactElement => {
               dispatch(updateHeader('home'));
             }}
             to={`/gig/${lowerCase(`${gig.username}`)}/${title}/${gig.sellerId}/${gig.id}/view`}
+            className="block aspect-[5/4] w-full overflow-hidden bg-gray-100"
           >
             <LazyLoadImage
               src={gig.coverImage}
               alt="Gig cover image"
-              className="w-full"
+              className="h-full w-full object-cover"
               placeholderSrc="https://placehold.co/330x220?text=Profile+Image"
             />
           </Link>
@@ -157,7 +163,7 @@ const GigCardItem: FC<IGigsProps> = ({ gig: gigDate }): ReactElement => {
             </Link>
           </div>
           <div className="flex gap-2 px-2 text-orange-400">
-            {parseInt(`${gig.ratingsCount}`) > 0 ? <FaStar color="orange" size={14} className="mt-1" /> : <FaRegStar size={14} />}( (
+            {parseInt(`${gig.ratingsCount}`) > 0 ? <FaStar color="orange" size={14} className="mt-1" /> : <FaRegStar size={14} />} (
             {rating(parseInt(`${gig.ratingSum}`) / parseFloat(`${gig.ratingsCount}`))})
           </div>
           <div className="flex justify-between px-2 pb-2">

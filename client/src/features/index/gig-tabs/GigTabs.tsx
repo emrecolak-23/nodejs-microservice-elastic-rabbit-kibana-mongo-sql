@@ -41,7 +41,7 @@ const GigTabs: FC = (): ReactElement => {
           </ul>
         </div>
         <div className="t-4 h-full overflow-hidden border px-6 py-6">
-          {categoryGigs.length > 0 ? (
+          {categoryGigs && categoryGigs.length > 0 ? (
             <div className="flex flex-col gap-4">
               <a
                 className="mt-10 w-[10%] rounded border border-black px-6 py-3 text-center text-sm font-bold text-black hover:bg-gray-100 focus:outline-none md:px-4 md:py-2 md:text-base"
