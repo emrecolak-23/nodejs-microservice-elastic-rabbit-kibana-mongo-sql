@@ -18,7 +18,11 @@ export class ValidateMiddleware {
       );
     }
 
-    Object.assign(req, value);
+    if (validationType === 'body') {
+      req.body = value;
+    } else {
+      Object.assign(req.params, value);
+    }
   }
 
   validate(schema: ObjectSchema): RequestHandler {

@@ -48,7 +48,7 @@ export class MessageController {
     const response: AxiosResponse = await this.messageService.addMessage(req.body);
     res.status(response.status).json({
       message: response.data.message,
-      conversationId: response.data.conversation
+      conversationId: response.data.conversationId
     });
   }
 

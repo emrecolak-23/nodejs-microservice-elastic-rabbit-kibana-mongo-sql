@@ -15,8 +15,8 @@ class Application {
   constructor(private readonly chatServer: ChatServer) {}
   public async initialize(): Promise<void> {
     envConfig.cloudinaryConfig();
+    await database.databaseConnection();
     const app: Express = express();
-    database.databaseConnection();
     this.chatServer.start(app);
   }
 }
