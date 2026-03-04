@@ -2,7 +2,7 @@ import { BrowserRouter } from 'react-router-dom';
 import AppRouter from './AppRouter';
 import { FC, ReactElement, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
-import { socketService } from './sockets/socket.service';
+import { socket, socketService } from './sockets/socket.service';
 import { getDataFromSessionStorage, getTokenFromSessionStorage, saveTokenToSessionStorage } from 'src/shared/utils/utils.service';
 import { useRefreshTokenMutation } from './features/auth/services/auth.service';
 
@@ -10,6 +10,13 @@ const App: FC = (): ReactElement => {
   const [refreshToken] = useRefreshTokenMutation();
 
   useEffect(() => {
+    const emitLoggedInUser = () => {
+      const loggedInUser = getDataFromSessionStorage('loggedInuser');
+      if (loggedInUser && socket?.connected) {
+        socket.emit('loggedInUsers', loggedInUser);
+      }
+    };
+
     const initSocket = async () => {
       if (!getTokenFromSessionStorage()) {
         try {
@@ -26,8 +33,22 @@ const App: FC = (): ReactElement => {
         }
       }
       socketService.setupSocketConnection();
+
+      if (socket?.connected) {
+        emitLoggedInUser();
+      } else {
+        socket?.once('connect', emitLoggedInUser);
+      }
     };
     initSocket();
+
+    return () => {
+      socket?.off('connect', emitLoggedInUser);
+      const username = getDataFromSessionStorage('loggedInuser');
+      if (username && socket?.connected) {
+        socket.emit('removeLoggedInUser', username);
+      }
+    };
   }, [refreshToken]);
 
   return (

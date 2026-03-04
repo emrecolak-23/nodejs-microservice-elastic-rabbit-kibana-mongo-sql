@@ -9,7 +9,10 @@ import { createClient, RedisClientType } from 'redis';
 export class RedisConnection {
   private log: Logger = winstonLogger(this.config.ELASTIC_SEARCH_URL, 'gatewayServiceRedisConnection', 'debug');
   private client: RedisClientType = createClient({
-    url: this.config.REDIS_HOST
+    url: this.config.REDIS_HOST,
+    socket: {
+      connectTimeout: 30000
+    }
   });
 
   constructor(private readonly config: EnvConfig) {}

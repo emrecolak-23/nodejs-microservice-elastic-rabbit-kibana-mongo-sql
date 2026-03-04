@@ -2,7 +2,7 @@ import { io, Socket } from 'socket.io-client';
 
 export let socket: Socket | undefined;
 
-const VITE_BASE_ENDPOINT = 'http://jobberemre.com';
+const VITE_BASE_ENDPOINT = 'https://jobberemre.com';
 const SOCKET_TOKEN_KEY = 'socketToken';
 
 const getToken = (): string | null => window.sessionStorage.getItem(SOCKET_TOKEN_KEY);

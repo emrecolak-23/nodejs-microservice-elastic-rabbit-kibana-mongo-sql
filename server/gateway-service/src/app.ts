@@ -13,7 +13,9 @@ class Application {
   public initialize(): void {
     const app: Express = express();
     this.gatewayServer.start(app);
-    this.redisConnection.connect();
+    this.redisConnection.connect().catch((err) => {
+      console.error('Redis connection failed:', err);
+    });
   }
 }
 

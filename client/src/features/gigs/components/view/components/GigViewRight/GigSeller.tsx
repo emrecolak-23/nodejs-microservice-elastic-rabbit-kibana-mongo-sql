@@ -135,7 +135,7 @@ const GigSeller: FC = (): ReactElement => {
             />
           </div>
         </div>
-        {showChatBox && <ChatBox seller={chatSeller} buyer={chatBuyer} gigId={gig._id as string} onClose={() => setShowChatBox(false)} />}
+        {showChatBox && <ChatBox seller={chatSeller} buyer={chatBuyer} gigId={gig.id as string} onClose={() => setShowChatBox(false)} />}
       </div>
     </>
   );

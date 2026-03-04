@@ -153,10 +153,15 @@ export class GatewayServer {
       cors: {
         origin: `${this.config.CLIENT_URL}`,
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
-      }
+      },
+      pingTimeout: 5000,
+      pingInterval: 2000
     });
     const pubClient: RedisClientType = createClient({
-      url: this.config.REDIS_HOST
+      url: this.config.REDIS_HOST,
+      socket: {
+        connectTimeout: 30000
+      }
     });
 
     const subClient = pubClient.duplicate();
