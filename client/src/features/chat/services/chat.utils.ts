@@ -6,23 +6,20 @@ import { AnyAction } from 'redux';
 
 export const chatMessageReceived = (
   conversationId: string,
-  chatMessagesData: IMessageDocument[],
-  chatMessages: IMessageDocument[],
   setChatMessagesData: Dispatch<SetStateAction<IMessageDocument[]>>
-): void => {
-  socket?.on('message received', (data: IMessageDocument) => {
-    chatMessages = cloneDeep(chatMessagesData);
+): (() => void) => {
+  const handler = (data: IMessageDocument) => {
     if (data.conversationId === conversationId) {
-      chatMessages.push(data);
-      const uniqeChatMessages: IMessageDocument[] = chatMessages.filter(
-        (chat: IMessageDocument, index: number, list: IMessageDocument[]) => {
-          const itemIndex = list.findIndex((item: IMessageDocument) => item._id === chat._id);
-          return itemIndex === index;
-        }
-      );
-      setChatMessagesData(uniqeChatMessages);
+      setChatMessagesData((prev) => {
+        const exists = prev.some((m) => m._id === data._id);
+        if (exists) return prev;
+        const next = [...prev, data];
+        return next.filter((chat, index, list) => list.findIndex((item) => item._id === chat._id) === index);
+      });
     }
-  });
+  };
+  socket?.on('message received', handler);
+  return () => socket?.off('message received', handler);
 };
 
 export const chatListMessageReceived = (

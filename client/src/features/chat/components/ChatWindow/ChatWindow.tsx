@@ -1,23 +1,24 @@
-import { ChangeEvent, FC, ReactElement, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, FC, FormEvent, ReactElement, useEffect, useRef, useState } from 'react';
 import { FaPaperclip, FaPaperPlane } from 'react-icons/fa';
 import Button from 'src/shared/button/Button';
 import TextInput from 'src/shared/inputs/TextInput';
 import { IChatWindowProps, IMessageDocument } from '../../interfaces/chat.interface';
 import useChatScrollToBottom from '../../hooks/useChatScrollToBottom';
 import { useParams } from 'react-router-dom';
-import { firstLetterUppercase } from 'src/shared/utils/utils.service';
+import { firstLetterUppercase, showErrorToast, showSuccessToast } from 'src/shared/utils/utils.service';
 import { IBuyerDocument } from 'src/features/buyer/interfaces/buyer.interface';
 import { useGetBuyerByUsernameQuery } from 'src/features/buyer/services/buyer.service';
 import { useGetGigByIdQuery } from 'src/features/gigs/services/gigs.service';
 import { socket, socketService } from 'src/sockets/socket.service';
 import { TimeAgo } from 'src/shared/utils/timeago.utils';
-import { checkFile } from 'src/shared/utils/image-utils.service';
+import { checkFile, fileType, readAsBase64 } from 'src/shared/utils/image-utils.service';
 import ChatImagePreview from './ChatImagePreview';
 import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import OfferModal from 'src/shared/modals/OfferModal';
 import ChatOffer from './ChatOffer';
 import ChatFile from './ChatFile';
+import { useSaveChatMessageMutation } from '../../services/chat.service';
 
 const MESSAGE_STATUS = {
   EMPTY: '',
@@ -40,9 +41,12 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
   const [showImagePreview, setShowImagePreview] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [displayCustomOffer, setDisplayCustomOffer] = useState<boolean>(false);
+  const [isUploadingFile, setIsUploadingFile] = useState<boolean>(false);
 
   const { data: buyerData, isSuccess: isBuyerSuccess } = useGetBuyerByUsernameQuery(`${firstLetterUppercase(username as string)}`);
   const { data } = useGetGigByIdQuery(singleMessageRef.current ? `${singleMessageRef.current?.gigId}` : NOT_EXISTING_ID);
+  const [saveChatMessage] = useSaveChatMessageMutation();
+
   if (buyerData && isBuyerSuccess) {
     receiverRef.current = buyerData.buyer as IBuyerDocument;
   }
@@ -66,6 +70,55 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
     setMessage((event.target as HTMLInputElement).value);
   };
 
+  const sendMessage = async (event: FormEvent): Promise<void> => {
+    event.preventDefault();
+    if (setSkip) {
+      setSkip(true);
+    }
+
+    if (!message && !selectedFile) {
+      return;
+    }
+
+    try {
+      setIsUploadingFile(true);
+      const messageBody: IMessageDocument = {
+        conversationId: singleMessageRef?.current?.conversationId,
+        hasConversationId: true,
+        body: message,
+        gigId: singleMessageRef?.current?.gigId,
+        sellerId: singleMessageRef?.current?.sellerId,
+        buyerId: singleMessageRef?.current?.buyerId,
+        senderUsername: `${authUser?.username}`,
+        senderPicture: `${authUser?.profilePicture}`,
+        receiverUsername: receiverRef?.current?.username,
+        receiverPicture: receiverRef?.current?.profilePicture,
+        isRead: false,
+        hasOffer: false
+      };
+
+      if (selectedFile) {
+        const dataImage: string | ArrayBuffer | null = await readAsBase64(selectedFile);
+        messageBody.body = messageBody.body ? messageBody.body : '1 file sent';
+        messageBody.file = dataImage as string;
+        messageBody.fileType = fileType(selectedFile);
+        messageBody.fileSize = selectedFile.size.toString();
+        messageBody.fileName = selectedFile.name;
+      }
+
+      await saveChatMessage(messageBody).unwrap();
+      setMessage(MESSAGE_STATUS.EMPTY);
+      setSelectedFile(null);
+      setShowImagePreview(MESSAGE_STATUS.IS_LOADING);
+      setIsUploadingFile(false);
+      if (setSkip) setSkip(true);
+    } catch (error) {
+      setIsUploadingFile(false);
+      setMessage(MESSAGE_STATUS.EMPTY);
+      showErrorToast('Please enter a message or select a file');
+      console.error(error);
+    }
+  };
   useEffect(() => {
     if (!isBuyerSuccess) return;
 
@@ -150,10 +203,10 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
               <ChatImagePreview
                 image={URL.createObjectURL(selectedFile as File)}
                 file={selectedFile as File}
-                isLoading={false}
+                isLoading={isUploadingFile}
                 message={message}
                 handleChange={setChatMessage}
-                onSubmit={() => {}}
+                onSubmit={sendMessage}
                 onRemoveImage={() => {
                   setSelectedFile(null);
                   setShowImagePreview(MESSAGE_STATUS.IS_LOADING);
@@ -162,7 +215,7 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
             )}
             {!showImagePreview && (
               <div className="bottom-0 left-0 right-0 z-0 h-28 px-4 ">
-                <form className="mb-1 w-full">
+                <form onSubmit={sendMessage} className="mb-1 w-full">
                   <TextInput
                     type="text"
                     name="message"
@@ -199,6 +252,7 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
                   </div>
                   <div className="flex gap-4">
                     <Button
+                      onClick={sendMessage}
                       className="rounded bg-sky-500 px-6 py-3 text-center text-sm font-bold text-white hover:bg-sky-400 focus:outline-none md:px-4 md:py-2 md:text-base"
                       disabled={false}
                       label={<FaPaperPlane className="self-center" />}

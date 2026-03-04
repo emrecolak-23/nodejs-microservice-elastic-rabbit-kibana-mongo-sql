@@ -1,4 +1,4 @@
-import { FC, ReactElement, useEffect, useRef, useState } from 'react';
+import { FC, ReactElement, useEffect, useState } from 'react';
 import ChatList from './ChatList/ChatList';
 import { useParams } from 'react-router-dom';
 import { IMessageDocument } from '../interfaces/chat.interface';
@@ -8,8 +8,6 @@ import ChatWindow from './ChatWindow/ChatWindow';
 
 const Chat: FC = (): ReactElement => {
   const { conversationId } = useParams();
-
-  const chatMessages = useRef<IMessageDocument[]>([]);
 
   const [skip, setSkip] = useState<boolean>(false);
   const [chatMessagesData, setChatMessagesData] = useState<IMessageDocument[]>([]);
@@ -25,8 +23,10 @@ const Chat: FC = (): ReactElement => {
   }, [isSuccess, data?.message]);
 
   useEffect(() => {
-    chatMessageReceived(`${conversationId}`, chatMessagesData, chatMessages.current, setChatMessagesData);
-  }, [chatMessagesData, conversationId]);
+    if (!conversationId) return;
+    const cleanup = chatMessageReceived(`${conversationId}`, setChatMessagesData);
+    return cleanup;
+  }, [conversationId]);
 
   return (
     <div className="border-grey mx-2 my-5 flex max-h-[90%] flex-wrap border lg:container lg:mx-auto">
