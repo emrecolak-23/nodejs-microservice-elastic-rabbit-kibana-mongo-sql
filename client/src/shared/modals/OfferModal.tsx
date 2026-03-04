@@ -128,11 +128,11 @@ const OfferModal: FC<IModalProps> = ({ header, gigTitle, receiver, authUser, sin
                 <Dropdown
                   text={offer.delivery}
                   onClick={(value: string) => {
-                    setOffer({ ...offer, delivery: value });
-                    const deliverInDays: number = parseInt(value);
+                    setOffer((prev: ISellerOffer) => ({ ...prev, delivery: value }));
+                    const deliverInDays: number = parseInt(value.split(' ')[0]);
                     const newDate: Date = new Date();
                     newDate.setDate(newDate.getDate() + deliverInDays);
-                    setOffer({ ...offer, deliveryDate: newDate.toISOString() });
+                    setOffer((prev: ISellerOffer) => ({ ...prev, deliveryDate: newDate.toISOString() }));
                   }}
                   maxHeight="200"
                   mainClassNames="absolute bg-white z-50"

@@ -15,6 +15,8 @@ import { checkFile } from 'src/shared/utils/image-utils.service';
 import ChatImagePreview from './ChatImagePreview';
 import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
+import OfferModal from 'src/shared/modals/OfferModal';
+import ChatOffer from './ChatOffer';
 
 const MESSAGE_STATUS = {
   EMPTY: '',
@@ -25,6 +27,7 @@ const MESSAGE_STATUS = {
 const NOT_EXISTING_ID = '649b5224649b5224649b5224';
 
 const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }): ReactElement => {
+  const authUser = useAppSelector((state: IReduxState) => state.authUser);
   const seller = useAppSelector((state: IReduxState) => state.seller);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useChatScrollToBottom([]);
@@ -35,6 +38,7 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
   const [message, setMessage] = useState<string>(MESSAGE_STATUS.EMPTY);
   const [showImagePreview, setShowImagePreview] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [displayCustomOffer, setDisplayCustomOffer] = useState<boolean>(false);
 
   const { data: buyerData, isSuccess: isBuyerSuccess } = useGetBuyerByUsernameQuery(`${firstLetterUppercase(username as string)}`);
   const { data } = useGetGigByIdQuery(singleMessageRef.current ? `${singleMessageRef.current?.gigId}` : NOT_EXISTING_ID);
@@ -86,6 +90,16 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
 
   return (
     <>
+      {!isLoading && displayCustomOffer && (
+        <OfferModal
+          header="Create Custom Offer"
+          gigTitle={data && data?.gig?.title ? data?.gig?.title : ''}
+          singleMessage={singleMessageRef.current as IMessageDocument | undefined}
+          receiver={receiverRef.current as IBuyerDocument | undefined}
+          authUser={authUser}
+          cancelBtnHandler={() => setDisplayCustomOffer(false)}
+        />
+      )}
       {!isLoading && (
         <div className="flex min-h-full w-full flex-col">
           <div className="border-grey flex w-full flex-col border-b px-5 py-0.5 ">
@@ -120,7 +134,7 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
                         </div>
                         <div className="flex flex-col text-[#777d74]">
                           <span>{message.body}</span>
-                          {/* ChatOffer ChatFile */}
+                          {message.hasOffer && <ChatOffer message={message} seller={seller} gig={data?.gig} />}
                         </div>
                       </div>
                     </div>
@@ -164,6 +178,7 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
                         className="rounded bg-sky-500 px-6 py-3 text-center text-sm font-bold text-white hover:bg-sky-400 focus:outline-none md:px-4 md:py-2 md:text-base"
                         disabled={false}
                         label="Add Offer"
+                        onClick={() => setDisplayCustomOffer(true)}
                       />
                     )}
 
