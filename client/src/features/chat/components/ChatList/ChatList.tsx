@@ -4,12 +4,13 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { useAppDispatch, useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import { IMessageDocument } from '../../interfaces/chat.interface';
-import { NavigateFunction, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { NavigateFunction, useLocation, useNavigate, useParams, Location } from 'react-router-dom';
 import { useGetConversationListQuery, useMarkMultipleMessagesAsReadMutation } from '../../services/chat.service';
 import { cn } from 'src/shared/utils/cn';
 import { TimeAgo } from 'src/shared/utils/timeago.utils';
 import { lowerCase, showErrorToast } from 'src/shared/utils/utils.service';
 import { socket } from 'src/sockets/socket.service';
+import { chatListMessageReceived, chatListMessageUpdated } from '../../services/chat.utils';
 
 const ChatList: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -27,7 +28,6 @@ const ChatList: FC = (): ReactElement => {
   const { data, isSuccess } = useGetConversationListQuery(`${authUser?.username}`);
   const [markMultipleMessagesAsRead] = useMarkMultipleMessagesAsReadMutation();
 
-  console.log(data, 'data');
   const selectUserFromList = async (user: IMessageDocument): Promise<void> => {
     try {
       setSelectedUser(user);
@@ -61,8 +61,14 @@ const ChatList: FC = (): ReactElement => {
         return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime();
       }) as IMessageDocument[];
       setChatList(sortedConversations);
+      // dispatch update notification
     }
   }, [data?.messages, isSuccess]);
+
+  useEffect(() => {
+    chatListMessageReceived(`${authUser?.username}`, chatList, conversationListRef.current, dispatch, setChatList);
+    chatListMessageUpdated(`${authUser?.username}`, chatList, conversationListRef.current, dispatch, setChatList);
+  }, [chatList, conversationListRef, dispatch, setChatList]);
 
   return (
     <>
