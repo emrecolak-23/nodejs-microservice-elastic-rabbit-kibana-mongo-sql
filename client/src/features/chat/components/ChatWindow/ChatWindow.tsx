@@ -17,6 +17,7 @@ import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import OfferModal from 'src/shared/modals/OfferModal';
 import ChatOffer from './ChatOffer';
+import ChatFile from './ChatFile';
 
 const MESSAGE_STATUS = {
   EMPTY: '',
@@ -135,6 +136,7 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
                         <div className="flex flex-col text-[#777d74]">
                           <span>{message.body}</span>
                           {message.hasOffer && <ChatOffer message={message} seller={seller} gig={data?.gig} />}
+                          {message.file && <ChatFile message={message} />}
                         </div>
                       </div>
                     </div>

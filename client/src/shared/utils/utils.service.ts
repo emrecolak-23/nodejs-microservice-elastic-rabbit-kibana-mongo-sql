@@ -9,6 +9,7 @@ import { socketService } from 'src/sockets/socket.service';
 import { IOrderDocument } from 'src/features/order/interfaces/order.interface';
 import { millify } from 'millify';
 import { toast } from 'react-toastify';
+import axios, { AxiosResponse } from 'axios';
 
 countries.registerLocale(enLocale);
 
@@ -233,4 +234,23 @@ export const bytesToSize = (bytes: number): string => {
     return `${bytes} ${sizes[i]}`;
   }
   return `${(bytes / 1024 ** i).toFixed(1)} ${sizes[i]}`;
+};
+
+export const getFileBlob = async (url: string): Promise<AxiosResponse> => {
+  const response: AxiosResponse = await axios.get(url, { responseType: 'blob' });
+  return response;
+};
+
+export const downloadFile = (blobUrl: string, fileName: string): void => {
+  const link: HTMLAnchorElement = document.createElement('a');
+  link.href = blobUrl;
+  link.setAttribute('download', `${fileName}`);
+  // Append to html link element page
+  document.body.appendChild(link);
+  // Start download
+  link.click();
+  // Clean up and remove link
+  if (link.parentNode) {
+    link.parentNode.removeChild(link);
+  }
 };
