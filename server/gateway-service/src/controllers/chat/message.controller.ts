@@ -13,7 +13,7 @@ export class MessageController {
     const response: AxiosResponse = await this.messageService.getConversation(senderUsername as string, receiverUsername as string);
     res.status(response.status).json({
       message: response.data.message,
-      conversation: response.data.conversation
+      conversations: response.data.conversations
     });
   }
 
