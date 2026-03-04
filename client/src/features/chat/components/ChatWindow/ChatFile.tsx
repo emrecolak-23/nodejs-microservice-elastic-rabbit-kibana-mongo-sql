@@ -2,9 +2,21 @@ import { FC, ReactElement } from 'react';
 import { FaDownload, FaRegFileArchive, FaRegPlayCircle } from 'react-icons/fa';
 import { IChatMessageProps } from '../../interfaces/chat.interface';
 import { checkUrlExtension } from 'src/shared/utils/image-utils.service';
-import { bytesToSize } from 'src/shared/utils/utils.service';
+import { bytesToSize, downloadFile, getFileBlob, showErrorToast } from 'src/shared/utils/utils.service';
+import { AxiosResponse } from 'axios';
 
 const ChatFile: FC<IChatMessageProps> = ({ message }): ReactElement => {
+  const downloadChatFile = async (url: string, fileName: string): Promise<void> => {
+    try {
+      const response: AxiosResponse = await getFileBlob(url);
+      const blobUrl: string = URL.createObjectURL(response.data);
+      downloadFile(blobUrl, fileName);
+    } catch (error) {
+      showErrorToast('Error downloading file');
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex w-64 min-w-[100%] flex-col">
       <div className="z-1 mt-2 flex flex-col rounded">
@@ -24,7 +36,7 @@ const ChatFile: FC<IChatMessageProps> = ({ message }): ReactElement => {
         )}
       </div>
       <div className="flex w-auto justify-between">
-        <div className="flex gap-1 truncate">
+        <div onClick={() => downloadChatFile(`${message.file}`, `${message.fileName}`)} className="flex gap-1 truncate">
           <FaDownload size={10} className="flex self-center" />
           <span className="truncate text-xs md:text-sm">{message.fileName}</span>
         </div>
