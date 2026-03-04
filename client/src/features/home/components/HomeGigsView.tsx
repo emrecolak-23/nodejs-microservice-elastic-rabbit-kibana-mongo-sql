@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { replaceSpacesWithDash } from 'src/shared/utils/utils.service';
 import { ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
 import GigCardDisplayItem from 'src/shared/gigs/GigCardDisplayItem';
+import { socket } from 'src/sockets/socket.service';
 
 const HomeGigsView: FC<IHomeProps> = ({ gigs, title, subTitle, category }): ReactElement => {
   return (
@@ -14,7 +15,9 @@ const HomeGigsView: FC<IHomeProps> = ({ gigs, title, subTitle, category }): Reac
             <h2 className="flex self-center text-base font-bold md:text-lg lg:text-2xl">{title}</h2>
             {category && (
               <span className="flex self-center text-base font-bold cursor-pointer text-sky-500 md:text-lg lg:text-2xl hover:text-sky-400 hover:underline">
-                <Link to={`/categories/${replaceSpacesWithDash(category)}`}>{category}</Link>
+                <Link onClick={() => socket?.emit('getLoggedInUsers', '')} to={`/categories/${replaceSpacesWithDash(category)}`}>
+                  {category}
+                </Link>
               </span>
             )}
           </div>

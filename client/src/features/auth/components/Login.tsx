@@ -13,7 +13,8 @@ import { useSignInMutation } from '../services/auth.service';
 import { IResponse } from 'src/shared/shared.interface';
 import { addAuthUser } from '../reducers/auth.reducer';
 import { updateLogout } from '../reducers/logout.reducer';
-import { saveToSessionStorage } from 'src/shared/utils/utils.service';
+import { saveToSessionStorage, saveTokenToSessionStorage } from 'src/shared/utils/utils.service';
+import { socketService } from 'src/sockets/socket.service';
 import { cn } from 'src/shared/utils/cn';
 import { updateContainerCategory } from 'src/shared/header/reducers/category.reducer';
 import { updateHeader } from 'src/shared/header/reducers/header.reducer';
@@ -35,12 +36,15 @@ const Login: FC<IModalBgProps> = ({ onClose, onToggle, onTogglePassword }): Reac
       const isValid = await schemaValidation();
       if (isValid) {
         const result: IResponse = await signIn(userInfo).unwrap();
-        console.log(result);
         dispatch(addAuthUser({ authInfo: result.user }));
         dispatch(updateLogout(false));
         dispatch(updateHeader('home'));
         dispatch(updateContainerCategory(true));
         saveToSessionStorage(JSON.stringify(true), JSON.stringify(result.user?.username || ''));
+        if (result.token) {
+          saveTokenToSessionStorage(result.token);
+          socketService.setupSocketConnection();
+        }
         setAlertMessage('');
       }
     } catch (error) {

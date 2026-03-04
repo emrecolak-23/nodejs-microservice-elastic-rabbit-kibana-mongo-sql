@@ -18,6 +18,7 @@ import { addBuyer } from './buyer/reducers/buyer.reducer';
 import { useGetSellerByUsernameQuery } from './sellers/services/seller.service';
 import { addSeller } from './sellers/reducers/seller.reducer';
 import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
+import { socket } from 'src/sockets/socket.service';
 
 const AppPage: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -52,6 +53,10 @@ const AppPage: FC = (): ReactElement => {
         const becomeASeller = getDataFromLocalStorage('becomeASeller');
         if (becomeASeller) {
           navigate('/seller-onboarding');
+        }
+
+        if (authUser.username !== null && socket?.connected) {
+          socket.emit('loggedInUsers', authUser.username);
         }
       }
     } catch (error) {

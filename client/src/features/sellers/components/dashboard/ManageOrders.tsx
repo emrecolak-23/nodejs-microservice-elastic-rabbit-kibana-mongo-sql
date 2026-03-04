@@ -1,9 +1,11 @@
-import { FC, ReactElement, useMemo, useState } from 'react';
+import { FC, ReactElement, useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { cn } from 'src/shared/utils/cn';
 import { SellerContextType } from '../../interfaces/seller.interface';
 import { orderTypes, sellerOrderList, shortenLargeNumbers } from 'src/shared/utils/utils.service';
 import ManageOrdersTable from './components/ManageOrdersTable';
+import { socket } from 'src/sockets/socket.service';
+import { IOrderDocument } from 'src/features/order/interfaces/order.interface';
 
 export const SELLER_GIG_STATUS = {
   ACTIVE: 'active',
@@ -29,6 +31,15 @@ const ManageOrders: FC = (): ReactElement => {
       'border-b-2 border-sky-500 font-medium text-sky-600': type === status
     });
   };
+
+  useEffect(() => {
+    socket?.on('order notification', (order: IOrderDocument) => {
+      const index = ordersRef.findIndex((o: IOrderDocument) => o.orderId === order.orderId);
+      if (index > -1) {
+        ordersRef.splice(index, 1, order);
+      }
+    });
+  }, [ordersRef]);
 
   return (
     <div className="container mx-auto mt-8 px-6 md:px-12 lg:px-6">

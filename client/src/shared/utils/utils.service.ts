@@ -5,6 +5,7 @@ import { NavigateFunction } from 'react-router-dom';
 import { logout } from 'src/features/auth/reducers/logout.reducer';
 import { authApi } from 'src/features/auth/services/auth.service';
 import { api } from 'src/store/api';
+import { socketService } from 'src/sockets/socket.service';
 import { IOrderDocument } from 'src/features/order/interfaces/order.interface';
 import { millify } from 'millify';
 import { toast } from 'react-toastify';
@@ -83,6 +84,20 @@ export const saveToSessionStorage = (data: string, username: string): void => {
   window.sessionStorage.setItem('loggedInuser', username);
 };
 
+const SOCKET_TOKEN_KEY = 'socketToken';
+
+export const saveTokenToSessionStorage = (token: string): void => {
+  window.sessionStorage.setItem(SOCKET_TOKEN_KEY, token);
+};
+
+export const getTokenFromSessionStorage = (): string | null => {
+  return window.sessionStorage.getItem(SOCKET_TOKEN_KEY);
+};
+
+export const deleteTokenFromSessionStorage = (): void => {
+  window.sessionStorage.removeItem(SOCKET_TOKEN_KEY);
+};
+
 export const getDataFromSessionStorage = (key: string) => {
   const data = window.sessionStorage.getItem(key) as string;
   return JSON.parse(data);
@@ -115,6 +130,8 @@ export const applicationLogout = (dispatch: Dispatch, navigate: NavigateFunction
   dispatch(api.util.resetApiState());
   dispatch(authApi.endpoints.logout.initiate() as never);
   saveToSessionStorage(JSON.stringify(false), JSON.stringify(''));
+  deleteTokenFromSessionStorage();
+  socketService.disconnect();
   deleteFromLocalStorage('becomeASeller');
   navigate('/');
 };

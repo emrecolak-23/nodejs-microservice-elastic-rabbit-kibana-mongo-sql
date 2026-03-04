@@ -22,7 +22,7 @@ export class AuthService {
   }
 
   async getRefreshToken(username: string): Promise<AxiosResponse> {
-    const response: AxiosResponse = await axiosAuthInstance.get(`/refresh-token/${username}`);
+    const response: AxiosResponse = await axiosAuthInstance.post(`/refresh-token/${username}`);
     return response;
   }
 

@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { useNavigate } from 'react-router-dom';
-import { applicationLogout, getDataFromSessionStorage } from 'src/shared/utils/utils.service';
+import { applicationLogout, getDataFromSessionStorage, saveTokenToSessionStorage } from 'src/shared/utils/utils.service';
+import { socketService } from 'src/sockets/socket.service';
 
 const BASE_ENDPOINT = 'https://jobberemre.com';
 
@@ -21,7 +22,14 @@ const baseQueryWithReAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
       const isLoggedIn = getDataFromSessionStorage('isLoggedIn');
       const loggedInUsername: string = getDataFromSessionStorage('loggedInuser') || '';
       if (isLoggedIn && loggedInUsername) {
-        await baseQuery(`/auth/refresh-token/${loggedInUsername}`, api, extraOptions);
+        const refreshResult = await baseQuery(`/auth/refresh-token/${loggedInUsername}`, api, extraOptions);
+        if (refreshResult.data && typeof refreshResult.data === 'object' && 'token' in refreshResult.data) {
+          const token = (refreshResult.data as { token?: string }).token;
+          if (token) {
+            saveTokenToSessionStorage(token);
+            socketService.setupSocketConnection();
+          }
+        }
       }
     } catch {
       applicationLogout(api.dispatch, useNavigate());

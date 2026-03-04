@@ -88,6 +88,14 @@ export const authApi = api.injectEndpoints({
       },
       invalidatesTags: ['Auth']
     }),
+    refreshToken: build.mutation<IResponse, string>({
+      query(username: string) {
+        return {
+          url: `/auth/refresh-token/${username}`,
+          method: 'POST'
+        };
+      }
+    }),
     checkCurrentUser: build.query<IResponse, void>({
       query: () => 'auth/current-user',
       providesTags: ['Currentuser']
@@ -116,6 +124,7 @@ export const authApi = api.injectEndpoints({
 });
 
 export const {
+  useRefreshTokenMutation,
   useGetAuthGigsByCategoryQuery,
   useCheckCurrentUserQuery,
   useGetLoggedInUserQuery,

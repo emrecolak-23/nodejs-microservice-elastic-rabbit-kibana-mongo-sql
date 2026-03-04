@@ -1,8 +1,9 @@
-import { FC, ReactElement, useState } from 'react';
+import { FC, ReactElement, useEffect, useState } from 'react';
 import { cn } from 'src/shared/utils/cn';
 import BuyerTable from './BuyerTable';
 import { orderTypes } from 'src/shared/utils/utils.service';
 import { IOrderDocument } from 'src/features/order/interfaces/order.interface';
+import { socket, socketService } from 'src/sockets/socket.service';
 // import { useParams } from 'react-router-dom';
 
 export const BUYER_GIG_STATUS = {
@@ -18,6 +19,11 @@ const BuyerDashboard: FC = (): ReactElement => {
   //   const { buyerId } = useParams<string>();
 
   const orders: IOrderDocument[] = [];
+
+  useEffect(() => {
+    socketService.setupSocketConnection();
+    socket?.emit('getLoggedInUsers', '');
+  }, []);
 
   const typeClass = (status: string) => {
     return cn('px-4 py-3 text-xs text-[#555555] no-underline sm:text-sm md:text-base', {

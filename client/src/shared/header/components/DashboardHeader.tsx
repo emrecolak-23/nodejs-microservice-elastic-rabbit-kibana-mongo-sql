@@ -1,5 +1,5 @@
 import { Transition } from '@headlessui/react';
-import { FC, ReactElement, useState } from 'react';
+import { FC, ReactElement, useEffect, useState } from 'react';
 import { FaBars } from 'react-icons/fa';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { Link } from 'react-router-dom';
@@ -10,12 +10,25 @@ import { IReduxState } from 'src/store/store.interface';
 import SettingsDropdown from './SettingsDropdown';
 import { ISellerDocument } from 'src/features/sellers/interfaces/seller.interface';
 import { IBuyerDocument } from 'src/features/buyer/interfaces/buyer.interface';
+import { socket, socketService } from 'src/sockets/socket.service';
 
 const DashboardHeader: FC = (): ReactElement => {
   const seller = useAppSelector((state: IReduxState) => state.seller);
   const buyer = useAppSelector((state: IReduxState) => state.buyer);
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [authUsername, setAuthUsername] = useState<string>('');
+
+  useEffect(() => {
+    socketService.setupSocketConnection();
+    socket?.emit('getLoggedInUsers', '');
+    socket?.on('online', (data: string[]) => {
+      const username = data.find((username: string) => username === authUser.username);
+      if (username) {
+        setAuthUsername(username);
+      }
+    });
+  }, [authUser.username]);
 
   return (
     <header>
@@ -67,6 +80,9 @@ const DashboardHeader: FC = (): ReactElement => {
                               placeholderSrc="https://placehold.co/330x220?text=Profile+Image"
                               effect="blur"
                             />
+                            {authUsername === authUser.username && (
+                              <span className="absolute bottom-1 left-8 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-400"></span>
+                            )}
                           </>
                         }
                       />
