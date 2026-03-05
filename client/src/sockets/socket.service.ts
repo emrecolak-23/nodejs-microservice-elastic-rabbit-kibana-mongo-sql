@@ -2,10 +2,9 @@ import { io, Socket } from 'socket.io-client';
 
 export let socket: Socket | undefined;
 
-const VITE_BASE_ENDPOINT = 'https://jobberemre.com';
 const SOCKET_TOKEN_KEY = 'socketToken';
 
-const getToken = (): string | null => window.sessionStorage.getItem(SOCKET_TOKEN_KEY);
+const getToken = (): string | null => window.sessionStorage.getItem(import.meta.env.VITE_SOCKET_TOKEN_KEY);
 
 let isConnecting = false;
 
@@ -30,7 +29,7 @@ class SocketService {
     }
     isConnecting = true;
     console.log('[Socket] Connecting...');
-    socket = io(VITE_BASE_ENDPOINT, {
+    socket = io(import.meta.env.VITE_BASE_ENDPOINT, {
       transports: ['websocket'],
       secure: true,
       withCredentials: true,

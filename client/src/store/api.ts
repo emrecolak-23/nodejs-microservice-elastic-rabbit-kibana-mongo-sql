@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { applicationLogout, getDataFromSessionStorage, saveTokenToSessionStorage } from 'src/shared/utils/utils.service';
 import { socketService } from 'src/sockets/socket.service';
 
-const BASE_ENDPOINT = 'https://jobberemre.com';
-
 const baseQuery = fetchBaseQuery({
-  baseUrl: `${BASE_ENDPOINT}/api/gateway/v1`,
+  baseUrl: `${import.meta.env.VITE_BASE_ENDPOINT}/api/gateway/v1`,
   prepareHeaders: (headers) => {
     headers.set('Content-Type', 'application/json');
     headers.set('Accept', 'application/json');
