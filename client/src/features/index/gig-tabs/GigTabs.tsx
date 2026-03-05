@@ -17,7 +17,7 @@ const GigTabs: FC = (): ReactElement => {
   });
   let categoryGigs: ISellerGig[] = [];
   if (isSuccess) {
-    categoryGigs = data.gigs as ISellerGig[];
+    categoryGigs = data.gig as any;
   }
 
   return (
