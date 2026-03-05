@@ -1,8 +1,61 @@
-import { ReactElement, FC } from 'react';
+import { ReactElement, FC, useState, useRef } from 'react';
+import { NavigateFunction, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
 import Button from 'src/shared/button/Button';
 import TextAreaInput from 'src/shared/inputs/TextAreaInput';
+import { useAppSelector } from 'src/store/store';
+import { IReduxState } from 'src/store/store.interface';
+import { IOffer, IOrderInvoice } from '../interfaces/order.interface';
+import { generateRandomNumber } from 'src/shared/utils/utils.service';
+import { useGetGigByIdQuery } from 'src/features/gigs/services/gigs.service';
+import { useCreateOrderMutation } from '../services/order.service';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { OrderContext } from '../context/OrderContext';
+import Invoice from './invoice/Invoice';
 
 const Requirement: FC = (): ReactElement => {
+  const buyer = useAppSelector((state: IReduxState) => state.buyer);
+  const [requirement, setRequirement] = useState<string>('');
+  const { gigId } = useParams<string>();
+
+  const [searchParams] = useSearchParams();
+  const gigRef = useRef<ISellerGig>(null);
+  const placeholder = 'https://placehold.co/330x220?text=Placeholder';
+  const offer: IOffer = JSON.parse(`${searchParams.get('offer')}`);
+  const order_date = `${searchParams.get('order_date')}`;
+  const serviceFee: number = offer.price > 50 ? (5.5 / 100) * offer.price : 5.5 + 2 + (5.5 / 100) * offer.price;
+  const navigate: NavigateFunction = useNavigate();
+
+  const orderId = `JO${generateRandomNumber(11)}`;
+  const invoiceId = `JI${generateRandomNumber(11)}`;
+
+  const { data, isSuccess } = useGetGigByIdQuery(`${gigId}`);
+
+  const [createOrder] = useCreateOrderMutation();
+
+  if (data?.gig && isSuccess) {
+    gigRef.current = data.gig;
+  }
+
+  const orderInvoice: IOrderInvoice = {
+    invoiceId,
+    orderId,
+    date: `${new Date()}`,
+    buyerUsername: `${buyer.username}`,
+    orderService: [
+      {
+        service: `${gigRef.current?.title}`,
+        quantity: 1,
+        price: offer.price
+      },
+      {
+        service: `Service Fee`,
+        quantity: 1,
+        price: serviceFee
+      }
+    ]
+  };
+
   return (
     <div className="container mx-auto lg:h-screen">
       <div className="flex flex-wrap">
@@ -10,7 +63,16 @@ const Requirement: FC = (): ReactElement => {
           <div className="mb-4 flex w-full flex-col flex-wrap bg-[#d4edda] p-4">
             <span className="text-base font-bold text-black lg:text-xl">Thank you for your purchase</span>
             <div className="flex gap-1">
-              You can <div className="cursor-pointer text-blue-400 underline">download your invoice</div>
+              You can{' '}
+              <PDFDownloadLink
+                document={
+                  <OrderContext.Provider value={{ orderInvoice }}>
+                    <Invoice />
+                  </OrderContext.Provider>
+                }
+              >
+                <div className="cursor-pointer text-blue-400 underline">download your invoice</div>
+              </PDFDownloadLink>
             </div>
           </div>
           <div className="border-grey border">
