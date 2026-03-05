@@ -71,6 +71,20 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
     setIsOrderDropdown(false);
   };
 
+  const slideLeft = (): void => {
+    if (navElement.current) {
+      const maxScrollLeft = navElement.current.scrollWidth + navElement.current.clientWidth; // maximum scroll position
+      navElement.current.scrollLeft = navElement.current.scrollLeft < maxScrollLeft ? navElement.current.scrollLeft - 1000 : maxScrollLeft;
+    }
+  };
+
+  const slideRight = (): void => {
+    if (navElement.current) {
+      const maxScrollLeft = navElement.current.scrollWidth - navElement.current.clientWidth; // maximum scroll position
+      navElement.current.scrollLeft = navElement.current.scrollLeft < maxScrollLeft ? navElement.current.scrollLeft + 1000 : maxScrollLeft;
+    }
+  };
+
   useEffect(() => {
     socketService.setupSocketConnection();
     socket?.emit('getLoggedInUsers', '');
@@ -84,9 +98,16 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
       }
     });
 
-    socket?.on('order notification', (data: IOrderNotifcation) => {
+    socket?.on('order notification', (_, data: IOrderNotifcation) => {
       if (data.userTo === `${authUser.username}` && !data.isRead) {
         dispatch(updateNotification({ hasUnreadNotification: true }));
+      }
+    });
+
+    socket?.on('online', (data: string[]) => {
+      const username = data.find((name: string) => name === `${authUser.username}`);
+      if (username) {
+        setAuthUsername(username);
       }
     });
   }, [authUser.username, dispatch]);
@@ -227,6 +248,9 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                           label={
                             <>
                               <img src={`${authUser.profilePicture}`} alt="profile" className="h-7 w-7 rounded-full object-cover" />
+                              {authUsername === authUser.username && (
+                                <span className="absolute bottom-0 left-8 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-400"></span>
+                              )}
                               <span className="flex self-center">{authUser.username}</span>
                             </>
                           }
@@ -261,7 +285,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
           {showCategoryContainer && (
             <div className="border-grey z-40 hidden w-full border border-x-0 border-b-0 sm:flex">
               <div className="justify-left md:justify-left container mx-auto flex px-6 lg:justify-center">
-                <span className="flex w-auto cursor-pointer self-center pr-1 xl:hidden">
+                <span onClick={slideLeft} className="flex w-auto cursor-pointer self-center pr-1 xl:hidden">
                   <FaAngleLeft size={20} />
                 </span>
                 <div
@@ -274,7 +298,7 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                     </span>
                   ))}
                 </div>
-                <span className="flex w-auto cursor-pointer self-center pl-1 xl:hidden">
+                <span onClick={slideRight} className="flex w-auto cursor-pointer self-center pl-1 xl:hidden">
                   <FaAngleRight size={20} />
                 </span>
               </div>
