@@ -1,5 +1,5 @@
 import { FC, ReactElement, useCallback, useEffect, useState } from 'react';
-import { Navigate, NavigateFunction, useNavigate } from 'react-router-dom';
+import { Navigate, NavigateFunction, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import { useCheckCurrentUserQuery } from './auth/services/auth.service';
@@ -18,10 +18,13 @@ export interface IProtectedRouteProps {
 const ProtectedRoute: FC<IProtectedRouteProps> = ({ children }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
   const showCategoryContainer = useAppSelector((state: IReduxState) => state.showCategoryContainer);
-  const header = useAppSelector((state: IReduxState) => state.header);
   const [tokenIsValid, setTokenIsValid] = useState<boolean>(false);
   const dispatch = useAppDispatch();
   const navigate: NavigateFunction = useNavigate();
+  const { pathname } = useLocation();
+
+  const isSellerDashboard = pathname.includes('seller-dashboard') || pathname.includes('manage-orders') || pathname.includes('manage-earnings');
+  const showHomeHeader = !isSellerDashboard;
 
   const { data, isError } = useCheckCurrentUserQuery();
   const { data: buyerData } = useGetCurrentBuyerByUsernameQuery(undefined, { skip: !authUser?.id });
@@ -54,7 +57,7 @@ const ProtectedRoute: FC<IProtectedRouteProps> = ({ children }): ReactElement =>
     if (tokenIsValid) {
       return (
         <>
-          {header && header === 'home' && <HomeHeader showCategoryContainer={showCategoryContainer} />}
+          {showHomeHeader && <HomeHeader showCategoryContainer={showCategoryContainer} />}
           {children}
         </>
       );
