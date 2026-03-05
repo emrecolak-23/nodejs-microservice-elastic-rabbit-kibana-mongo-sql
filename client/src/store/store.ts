@@ -11,6 +11,7 @@ import buyerReducer from 'src/features/buyer/reducers/buyer.reducer';
 import sellerReducer from 'src/features/sellers/reducers/seller.reducer';
 import headerReducer from 'src/shared/header/reducers/header.reducer';
 import categoryReducer from 'src/shared/header/reducers/category.reducer';
+import notificationReducer from 'src/shared/header/reducers/notification.reducer';
 
 export const combineReducer = combineReducers({
   [api.reducerPath]: api.reducer,
@@ -19,7 +20,8 @@ export const combineReducer = combineReducers({
   buyer: buyerReducer,
   seller: sellerReducer,
   header: headerReducer,
-  showCategoryContainer: categoryReducer
+  showCategoryContainer: categoryReducer,
+  notification: notificationReducer
 });
 
 export const rootReducer: Reducer<RootState, AnyAction> = (state, action) => {

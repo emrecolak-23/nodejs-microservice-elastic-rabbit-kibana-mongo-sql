@@ -1,4 +1,4 @@
-import { FC, ReactElement, useRef } from 'react';
+import { FC, ReactElement, useEffect, useRef } from 'react';
 import { IHomeHeaderProps } from '../interfaces/header.interface';
 import Button from 'src/shared/button/Button';
 import { FaAngleLeft, FaAngleRight, FaBars, FaRegBell, FaRegEnvelope } from 'react-icons/fa';
@@ -19,6 +19,10 @@ import { updateHeader } from '../reducers/header.reducer';
 import { updateContainerCategory } from '../reducers/category.reducer';
 import HeaderSearchInput from './HeaderSearchInput';
 import MessageDropdown from './MessageDropdown';
+import { socket, socketService } from 'src/sockets/socket.service';
+import { IMessageDocument } from 'src/features/chat/interfaces/chat.interface';
+import { updateNotification } from '../reducers/notification.reducer';
+import { IOrderNotifcation } from 'src/features/order/interfaces/order.interface';
 
 const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -62,6 +66,26 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
     setIsNotificationDropdown(false);
     setIsOrderDropdown(false);
   };
+
+  useEffect(() => {
+    socketService.setupSocketConnection();
+    socket?.emit('getLoggedInUsers', '');
+  }, []);
+
+  useEffect(() => {
+    socket?.on('message received', (data: IMessageDocument) => {
+      // only for receiver
+      if (data.receiverUsername === `${authUser.username}` && !data.isRead) {
+        dispatch(updateNotification({ hasUnreadMessage: true }));
+      }
+    });
+
+    socket?.on('order notification', (data: IOrderNotifcation) => {
+      if (data.userTo === `${authUser.username}` && !data.isRead) {
+        dispatch(updateNotification({ hasUnreadNotification: true }));
+      }
+    });
+  }, [authUser.username, dispatch]);
 
   return (
     <header>
@@ -139,19 +163,19 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                           </>
                         }
                       />
-                    <Transition
-                      show={isMessageDropdown}
-                      enter="transition ease-out duration-200"
-                      enterFrom="opacity-0 translate-y-1"
-                      enterTo="opacity-100 translate-y-0"
-                      leave="transition ease-in duration-150"
-                      leaveFrom="opacity-100 translate-y-0"
-                      leaveTo="opacity-0 translate-y-1"
-                    >
-                      <div className="absolute right-0 mt-5 w-96">
-                        <MessageDropdown setIsMessageDropdownOpen={setIsMessageDropdown} />
-                      </div>
-                    </Transition>
+                      <Transition
+                        show={isMessageDropdown}
+                        enter="transition ease-out duration-200"
+                        enterFrom="opacity-0 translate-y-1"
+                        enterTo="opacity-100 translate-y-0"
+                        leave="transition ease-in duration-150"
+                        leaveFrom="opacity-100 translate-y-0"
+                        leaveTo="opacity-0 translate-y-1"
+                      >
+                        <div className="absolute right-0 mt-5 w-96">
+                          <MessageDropdown setIsMessageDropdownOpen={setIsMessageDropdown} />
+                        </div>
+                      </Transition>
                     </div>
                   </li>
                   <li className="relative z-50 flex cursor-pointer items-center">

@@ -11,6 +11,7 @@ import { TimeAgo } from 'src/shared/utils/timeago.utils';
 import { lowerCase, showErrorToast } from 'src/shared/utils/utils.service';
 import { socket } from 'src/sockets/socket.service';
 import { chatListMessageReceived, chatListMessageUpdated } from '../../services/chat.utils';
+import { updateNotification } from 'src/shared/header/reducers/notification.reducer';
 
 const ChatList: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -61,9 +62,11 @@ const ChatList: FC = (): ReactElement => {
         return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime();
       }) as IMessageDocument[];
       setChatList(sortedConversations);
-      // dispatch update notification
+      if (!sortedConversations.length) {
+        dispatch(updateNotification({ hasUnreadMessage: false }));
+      }
     }
-  }, [data?.messages, isSuccess]);
+  }, [data?.messages, isSuccess, dispatch, username]);
 
   useEffect(() => {
     chatListMessageReceived(`${authUser?.username}`, chatList, conversationListRef.current, dispatch, setChatList);

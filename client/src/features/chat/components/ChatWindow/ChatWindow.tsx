@@ -9,16 +9,17 @@ import { firstLetterUppercase, showErrorToast, showSuccessToast } from 'src/shar
 import { IBuyerDocument } from 'src/features/buyer/interfaces/buyer.interface';
 import { useGetBuyerByUsernameQuery } from 'src/features/buyer/services/buyer.service';
 import { useGetGigByIdQuery } from 'src/features/gigs/services/gigs.service';
+import { useSaveChatMessageMutation } from '../../services/chat.service';
 import { socket, socketService } from 'src/sockets/socket.service';
 import { TimeAgo } from 'src/shared/utils/timeago.utils';
 import { checkFile, fileType, readAsBase64 } from 'src/shared/utils/image-utils.service';
 import ChatImagePreview from './ChatImagePreview';
-import { useAppSelector } from 'src/store/store';
+import { useAppDispatch, useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import OfferModal from 'src/shared/modals/OfferModal';
 import ChatOffer from './ChatOffer';
 import ChatFile from './ChatFile';
-import { useSaveChatMessageMutation } from '../../services/chat.service';
+import { updateNotification } from 'src/shared/header/reducers/notification.reducer';
 
 const MESSAGE_STATUS = {
   EMPTY: '',
@@ -42,7 +43,7 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [displayCustomOffer, setDisplayCustomOffer] = useState<boolean>(false);
   const [isUploadingFile, setIsUploadingFile] = useState<boolean>(false);
-
+  const dispatch = useAppDispatch();
   const { data: buyerData, isSuccess: isBuyerSuccess } = useGetBuyerByUsernameQuery(`${firstLetterUppercase(username as string)}`);
   const { data } = useGetGigByIdQuery(singleMessageRef.current ? `${singleMessageRef.current?.gigId}` : NOT_EXISTING_ID);
   const [saveChatMessage] = useSaveChatMessageMutation();
@@ -119,6 +120,15 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    const list: IMessageDocument[] = chatMessages.filter(
+      (message: IMessageDocument) => !message.isRead && message.receiverUsername === username
+    );
+
+    dispatch(updateNotification({ hasUnreadMessage: list.length > 0 }));
+  }, [chatMessages, dispatch, username]);
+
   useEffect(() => {
     if (!isBuyerSuccess) return;
 

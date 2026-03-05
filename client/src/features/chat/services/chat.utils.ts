@@ -3,6 +3,7 @@ import { IMessageDocument } from '../interfaces/chat.interface';
 import { socket } from 'src/sockets/socket.service';
 import { cloneDeep, lowerCase } from 'src/shared/utils/utils.service';
 import { AnyAction } from 'redux';
+import { updateNotification } from 'src/shared/header/reducers/notification.reducer';
 
 export const chatMessageReceived = (
   conversationId: string,
@@ -47,7 +48,7 @@ export const chatListMessageReceived = (
           return !message.isRead && message.receiverUsername === username;
         });
 
-        console.log(list);
+        dispatch(updateNotification({ hasUnreadMessage: list.length > 0 }));
       }
 
       setChatList(conversationListRef);
@@ -77,7 +78,7 @@ export const chatListMessageUpdated = (
           return !message.isRead && message.receiverUsername === username;
         });
 
-        console.log(list);
+        dispatch(updateNotification({ hasUnreadMessage: list.length > 0 }));
       }
 
       setChatList(conversationListRef);
