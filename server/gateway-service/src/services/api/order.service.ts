@@ -31,8 +31,8 @@ export class OrderService {
     return response;
   }
 
-  async createOrderIntent(price: number, buyerId: string): Promise<AxiosResponse> {
-    const response: AxiosResponse = await axiosOrderInstance.post('/create-payment-intent', { price, buyerId });
+  async createOrderIntent(price: number, buyerId: string, email: string): Promise<AxiosResponse> {
+    const response: AxiosResponse = await axiosOrderInstance.post('/create-payment-intent', { price, buyerId, email });
     return response;
   }
 

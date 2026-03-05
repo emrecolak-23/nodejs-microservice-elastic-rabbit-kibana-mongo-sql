@@ -9,8 +9,8 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   async createPaymentIntent(req: Request, res: Response): Promise<void> {
-    const { price, buyerId } = req.body;
-    const response: AxiosResponse = await this.orderService.createOrderIntent(price, buyerId);
+    const { price, buyerId, email } = req.body;
+    const response: AxiosResponse = await this.orderService.createOrderIntent(price, buyerId, email);
     res.status(response.status).json({
       message: response.data.message,
       clientSecret: response.data.clientSecret,
