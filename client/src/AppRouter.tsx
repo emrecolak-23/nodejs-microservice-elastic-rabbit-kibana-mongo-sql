@@ -21,6 +21,7 @@ import EditGig from './features/gigs/components/gig/Edit.Gig';
 import Chat from './features/chat/components/Chat';
 import Checkout from './features/order/components/Checkout';
 import Requirement from './features/order/components/Requirement';
+import Order from './features/order/components/Order';
 
 const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
   return (
@@ -233,6 +234,18 @@ const AppRouter = () => {
           <ProtectedRoute>
             <Layout backgroundColor="#fffff">
               <Requirement />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: '/orders/:orderId/activities',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#fffff">
+              <Order />
             </Layout>
           </ProtectedRoute>
         </Suspense>

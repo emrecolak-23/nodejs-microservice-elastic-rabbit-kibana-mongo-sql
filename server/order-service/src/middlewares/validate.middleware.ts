@@ -14,11 +14,15 @@ export class ValidateMiddleware {
       const errorMessage = error.details.map((detail) => detail.message).join(', ');
       throw new BadRequestError(
         errorMessage,
-        `AuthService ValidateMiddleware for ${path} route validate${validationType === 'body' ? '()' : 'Params()'} method error`
+        `OrderService ValidateMiddleware for ${path} route validate${validationType === 'body' ? '()' : 'Params()'} method error`
       );
     }
 
-    Object.assign(req, value);
+    if (validationType === 'body') {
+      req.body = value;
+    } else {
+      Object.assign(req, value);
+    }
   }
 
   validate(schema: ObjectSchema): RequestHandler {

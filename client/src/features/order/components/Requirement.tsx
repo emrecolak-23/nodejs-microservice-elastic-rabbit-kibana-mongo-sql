@@ -1,17 +1,19 @@
-import { ReactElement, FC, useState, useRef } from 'react';
+import { ReactElement, FC, useState, useRef, ChangeEvent } from 'react';
 import { NavigateFunction, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
 import Button from 'src/shared/button/Button';
 import TextAreaInput from 'src/shared/inputs/TextAreaInput';
 import { useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
-import { IOffer, IOrderInvoice } from '../interfaces/order.interface';
-import { generateRandomNumber } from 'src/shared/utils/utils.service';
+import { IOffer, IOrderDocument, IOrderInvoice } from '../interfaces/order.interface';
+import { deleteFromLocalStorage, generateRandomNumber, getDataFromLocalStorage, showErrorToast } from 'src/shared/utils/utils.service';
 import { useGetGigByIdQuery } from 'src/features/gigs/services/gigs.service';
 import { useCreateOrderMutation } from '../services/order.service';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { OrderContext } from '../context/OrderContext';
 import Invoice from './invoice/Invoice';
+import { TimeAgo } from 'src/shared/utils/timeago.utils';
+import { IResponse } from 'src/shared/shared.interface';
 
 const Requirement: FC = (): ReactElement => {
   const buyer = useAppSelector((state: IReduxState) => state.buyer);
@@ -56,6 +58,60 @@ const Requirement: FC = (): ReactElement => {
     ]
   };
 
+  const startOrder = async (): Promise<void> => {
+    try {
+      const paymentIntentId = getDataFromLocalStorage('paymentIntentId');
+
+      const order: IOrderDocument = {
+        offer: {
+          gigTitle: offer.gigTitle,
+          price: offer.price,
+          description: offer.description,
+          deliveryInDays: offer.deliveryInDays,
+          oldDeliveryDate: offer.oldDeliveryDate,
+          newDeliveryDate: offer.newDeliveryDate,
+          accepted: true,
+          cancelled: offer.cancelled
+        },
+        gigId: `${gigId}`,
+        sellerId: `${gigRef?.current?.sellerId}`,
+        sellerImage: `${gigRef?.current?.profilePicture}`,
+        sellerUsername: `${gigRef?.current?.username}`,
+        sellerEmail: `${gigRef?.current?.email}`,
+        gigCoverImage: `${gigRef?.current?.coverImage}`,
+        gigMainTitle: `${gigRef?.current?.title}`,
+        gigBasicTitle: `${gigRef?.current?.basicTitle}`,
+        gigBasicDescription: `${gigRef?.current?.basicDescription}`,
+        buyerId: `${buyer._id}`,
+        buyerUsername: `${buyer.username}`,
+        buyerImage: `${buyer.profilePicture}`,
+        buyerEmail: `${buyer.email}`,
+        status: 'in progress',
+        orderId,
+        invoiceId,
+        quantity: 1,
+        dateOrdered: `${new Date()}`,
+        price: offer.price,
+        requirements: requirement,
+        paymentIntent: `${paymentIntentId}`,
+        events: {
+          placeOrder: order_date,
+          requirements: `${new Date()}`,
+          orderStarted: `${new Date()}`
+        }
+      };
+
+      const response: IResponse = await createOrder(order).unwrap();
+      navigate(`/orders/${orderId}/activities`, {
+        state: response.order
+      });
+
+      deleteFromLocalStorage('paymentIntentId');
+    } catch (error) {
+      showErrorToast('Error starting your order');
+    }
+  };
+
   return (
     <div className="container mx-auto lg:h-screen">
       <div className="flex flex-wrap">
@@ -86,13 +142,17 @@ const Requirement: FC = (): ReactElement => {
               <TextAreaInput
                 rows={5}
                 name="requirement"
-                value=""
+                value={requirement}
                 placeholder="Write a brief description..."
                 className="border-grey mb-1 w-full rounded border p-3.5 text-sm font-normal text-gray-600 focus:outline-none"
+                onChange={(event: ChangeEvent) => {
+                  setRequirement((event.target as HTMLInputElement).value);
+                }}
               />
               <Button
                 className="mt-3 rounded bg-sky-500 px-6 py-3 text-center text-sm font-bold text-white hover:bg-sky-400 focus:outline-none md:px-4 md:py-2 md:text-base"
                 label="Start Order"
+                onClick={startOrder}
               />
             </div>
           </div>
@@ -101,11 +161,11 @@ const Requirement: FC = (): ReactElement => {
         <div className="w-full p-4 lg:w-1/3">
           <div className="border-grey mb-8 border">
             <div className="mb-2 flex flex-col border-b md:flex-row">
-              <img className="w-full object-cover" src="https://placehold.co/330x220?text=Placeholder" alt="Gig Cover Image" />
+              <img className="w-full object-cover" src={gigRef.current?.coverImage || placeholder} alt="Gig Cover Image" />
             </div>
             <ul className="mb-0 list-none">
               <li className="border-grey flex border-b px-4 pb-3 pt-1">
-                <div className="text-sm font-normal">gigTitle</div>
+                <div className="text-sm font-normal">{offer.gigTitle}</div>
               </li>
               <li className="flex justify-between px-4 pb-2 pt-4">
                 <div className="flex gap-2 text-sm font-normal">Status</div>
@@ -113,11 +173,11 @@ const Requirement: FC = (): ReactElement => {
               </li>
               <li className="flex justify-between px-4 pb-2 pt-2">
                 <div className="flex gap-2 text-sm font-normal">Order</div>
-                <span className="text-sm">#JO1234566</span>
+                <span className="text-sm">#{orderId}</span>
               </li>
               <li className="flex justify-between px-4 pb-2 pt-2">
                 <div className="flex gap-2 text-sm font-normal">Order Date</div>
-                <span className="text-sm">20/09/2025</span>
+                <span className="text-sm">{TimeAgo.dayMonthYear(`${new Date()}`)}</span>
               </li>
               <li className="flex justify-between px-4 pb-2 pt-2">
                 <div className="flex gap-2 text-sm font-normal">Quantity</div>
@@ -125,7 +185,7 @@ const Requirement: FC = (): ReactElement => {
               </li>
               <li className="flex justify-between px-4 pb-4 pt-2">
                 <div className="flex gap-2 text-sm font-normal">Price</div>
-                <span className="text-sm">$10</span>
+                <span className="text-sm">${offer.price}</span>
               </li>
             </ul>
           </div>

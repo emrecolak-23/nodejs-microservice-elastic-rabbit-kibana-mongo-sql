@@ -14,12 +14,13 @@ export class OrderController {
     res.status(response.status).json({
       message: response.data.message,
       clientSecret: response.data.clientSecret,
-      paymentIntenId: response.data.paymentIntenId
+      paymentIntentId: response.data.paymentIntentId
     });
   }
 
   async createOrder(req: Request, res: Response): Promise<void> {
-    const { order } = req.body;
+    const order = req.body?.order ?? req.body;
+
     const response: AxiosResponse = await this.orderService.createOrder(order);
     res.status(response.status).json({
       message: response.data.message,
