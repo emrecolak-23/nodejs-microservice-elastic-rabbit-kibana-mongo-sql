@@ -34,6 +34,11 @@ export class StripeService {
     return priceInCents + serviceFeeInCents;
   }
 
+  calculateServiceFee(price: number): number {
+    const serviceFeeInCents = price < 50 ? Math.round(price * 5.5) + 200 : Math.round(price * 5.5);
+    return serviceFeeInCents / 100;
+  }
+
   async getExistingCustomer(email: string): Promise<Stripe.Customer | null> {
     const sanitizedEmail = this.sanitizeEmail(email);
     const customer: Stripe.Response<Stripe.ApiSearchResult<Stripe.Customer>> = await this.stripe.customers.search({

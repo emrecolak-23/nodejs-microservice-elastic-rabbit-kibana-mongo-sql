@@ -126,6 +126,7 @@ const Requirement: FC = (): ReactElement => {
                     <Invoice />
                   </OrderContext.Provider>
                 }
+                fileName={`${orderInvoice.invoiceId}.pdf`}
               >
                 <div className="cursor-pointer text-blue-400 underline">download your invoice</div>
               </PDFDownloadLink>

@@ -17,6 +17,7 @@ export interface IOrderAttributes {
   buyerImage: string;
   status: string;
   orderId: string;
+  invoiceId: string;
   quantity: number;
   price: number;
   serviceFee?: number;
@@ -116,6 +117,7 @@ const orderSchema: Schema<IOrderDocument, IOrderModel> = new Schema(
     buyerImage: { type: String, required: true },
     status: { type: String, required: true },
     orderId: { type: String, required: true, index: true },
+    invoiceId: { type: String, required: true },
     quantity: { type: Number, required: true },
     price: { type: Number, required: true },
     serviceFee: { type: Number, default: 0 },

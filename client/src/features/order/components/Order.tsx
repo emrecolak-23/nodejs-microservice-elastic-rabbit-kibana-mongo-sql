@@ -9,6 +9,7 @@ import { socket, socketService } from 'src/sockets/socket.service';
 import { TimeAgo } from 'src/shared/utils/timeago.utils';
 import { cn } from 'src/shared/utils/cn';
 import DeliveryTimer from './DeliveryTimer';
+import OrderDetailsTable from './OrderDetailsTable';
 
 const Order: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -39,7 +40,7 @@ const Order: FC = (): ReactElement => {
     <div className="container mx-auto">
       <div className="flex flex-wrap">
         <div className="order-last w-full p-4 lg:order-first lg:w-2/3">
-          {/* <!-- OrderDetailsTable --> */}
+          <OrderDetailsTable order={order as IOrderDocument} authUser={authUser} />
           {order && order.buyerUsername === authUser.username && (
             <div className="mt-4 flex flex-col justify-between bg-white md:flex-row">
               <div className="flex w-full flex-col flex-wrap p-4 md:w-2/3">
