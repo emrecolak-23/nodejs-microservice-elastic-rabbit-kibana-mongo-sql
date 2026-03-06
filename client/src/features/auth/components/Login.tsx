@@ -96,7 +96,7 @@ const Login: FC<IModalBgProps> = ({ onClose, onToggle, onTogglePassword }): Reac
               <TextInput
                 id="password"
                 name="password"
-                type="password"
+                type={passwordType}
                 value={userInfo.password}
                 onChange={(event: ChangeEvent) => setUserInfo({ ...userInfo, password: (event.target as HTMLInputElement).value })}
                 className="flex h-10 w-full items-center rounded border border-gray-300 pl-3 text-sm font-normal text-gray-600 focus:border focus:border-sky-500/50 focus:outline-none"

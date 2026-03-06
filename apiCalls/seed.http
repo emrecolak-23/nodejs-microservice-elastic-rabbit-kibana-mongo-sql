@@ -3,13 +3,13 @@
 
 
 ###
-PUT {{baseUrl}}/{{urlPath}}/auth/seeds/10
+PUT {{baseUrl}}/{{urlPath}}/auth/seeds/20
 Content-Type: application/json
 Accept: application/json
 
 
 ###
-PUT {{baseUrl}}/{{urlPath}}/seller/seed/10
+PUT {{baseUrl}}/{{urlPath}}/seller/seed/20
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
@@ -18,7 +18,7 @@ withCredentials: true
 
 ###
 # Gig seed - Auth gerekir (önce login ol)
-GET {{baseUrl}}/{{urlPath}}/gig/seed/10
+GET {{baseUrl}}/{{urlPath}}/gig/seed/40
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
