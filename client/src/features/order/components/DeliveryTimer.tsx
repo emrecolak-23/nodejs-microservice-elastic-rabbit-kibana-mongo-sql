@@ -5,6 +5,7 @@ import { IOrderDisplayModal } from '../interfaces/order.interface';
 import useCountDown from '../hooks/useCountDown';
 import ExtendDateModal from 'src/shared/modals/ExtendDateModal';
 import { IOrderDocument } from '../interfaces/order.interface';
+import DeliverWorkModal from 'src/shared/modals/DeliverWorkModal';
 
 const DeliveryTimer: FC<IModalProps> = ({ order, authUser }): ReactElement => {
   const [displayModal, setDisplayModal] = useState<IOrderDisplayModal>({
@@ -18,6 +19,9 @@ const DeliveryTimer: FC<IModalProps> = ({ order, authUser }): ReactElement => {
     <>
       {displayModal.extendDelivery && (
         <ExtendDateModal order={order as IOrderDocument} onClose={() => setDisplayModal({ ...displayModal, extendDelivery: false })} />
+      )}
+      {displayModal.deliverWork && (
+        <DeliverWorkModal order={order as IOrderDocument} onClose={() => setDisplayModal({ ...displayModal, deliverWork: false })} />
       )}
       <div className="mb-6 flex flex-col gap-4 rounded-[4px] bg-white px-4 py-3">
         <div className="text-base font-bold">
@@ -46,7 +50,8 @@ const DeliveryTimer: FC<IModalProps> = ({ order, authUser }): ReactElement => {
           <div className="flex w-full cursor-pointer flex-col gap-4">
             <Button
               className="w-full rounded bg-green-500 px-4 py-2 text-center text-sm font-bold text-white hover:bg-green-400 focus:outline-none md:text-base"
-              label="Deliver Now"
+              label={`Deliver ${!order?.delivered ? 'Now' : 'Again'}`}
+              onClick={() => setDisplayModal({ ...displayModal, deliverWork: !displayModal.deliverWork })}
             />
             {!order?.delivered && (
               <div
