@@ -10,6 +10,7 @@ import { TimeAgo } from 'src/shared/utils/timeago.utils';
 import { cn } from 'src/shared/utils/cn';
 import DeliveryTimer from './DeliveryTimer';
 import OrderDetailsTable from './OrderDetailsTable';
+import OrderActivities from './order-activities/OrderActivities';
 
 const Order: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -77,7 +78,9 @@ const Order: FC = (): ReactElement => {
             </div>
           )}
 
-          {/* <!-- OrderActivities --> */}
+          {order && Object.keys(order).length > 0 && (
+            <OrderActivities order={order} authUser={authUser} viewDeliveryBtnClicked={showDeliveryPanel} ref={elementRef} />
+          )}
         </div>
 
         <div className="w-full p-4 lg:w-1/3 ">
