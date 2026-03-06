@@ -5,6 +5,7 @@ import { TimeAgo } from 'src/shared/utils/timeago.utils';
 import { OrderContext } from '../../context/OrderContext';
 import ChatBox from 'src/features/chat/components/ChatBox/ChatBox';
 import OrderPlaced from './OrderPlaced';
+import OrderExtension from './OrderExtension';
 
 const OrderActivities: ForwardRefExoticComponent<Omit<IOrderActivitiesProps, 'ref'> & RefAttributes<HTMLDivElement>> = forwardRef<
   DivElementRefType,
@@ -34,6 +35,7 @@ const OrderActivities: ForwardRefExoticComponent<Omit<IOrderActivitiesProps, 're
       </div>
       <OrderContext.Provider value={{ order, authUser, viewDeliveryBtnClicked }}>
         <OrderPlaced />
+        <OrderExtension />
       </OrderContext.Provider>
       <div className="px-3 pt-2 flex">
         If you need to contact the {order.buyerUsername === authUser.username ? 'seller' : 'buyer'},{' '}

@@ -244,7 +244,7 @@ const AppRouter = () => {
       element: (
         <Suspense>
           <ProtectedRoute>
-            <Layout backgroundColor="#fffff">
+            <Layout backgroundColor="#f5f5f5">
               <Order />
             </Layout>
           </ProtectedRoute>

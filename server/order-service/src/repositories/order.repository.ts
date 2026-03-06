@@ -67,10 +67,10 @@ export class OrderRepository {
         { orderId },
         {
           $set: {
-            ['requestDeliverExtension.originalDate']: originalDate,
-            ['requestDeliverExtension.newDate']: newDate,
-            ['requestDeliverExtension.days']: days,
-            ['requestDeliverExtension.reason']: reason
+            ['requestExtension.originalDate']: originalDate,
+            ['requestExtension.newDate']: newDate,
+            ['requestExtension.days']: days,
+            ['requestExtension.reason']: reason
           }
         },
         { new: true }
