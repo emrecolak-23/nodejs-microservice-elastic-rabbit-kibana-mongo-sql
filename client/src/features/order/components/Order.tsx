@@ -7,6 +7,7 @@ import { useParams } from 'react-router-dom';
 import { useGetOrderByOrderIdQuery } from '../services/order.service';
 import { socket, socketService } from 'src/sockets/socket.service';
 import { TimeAgo } from 'src/shared/utils/timeago.utils';
+import { cn } from 'src/shared/utils/cn';
 
 const Order: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -84,8 +85,13 @@ const Order: FC = (): ReactElement => {
             <div className="mb-2 flex flex-col border-b px-4 pb-4 pt-3 md:flex-row">
               <img className="h-11 w-20 object-cover" src={order?.gigCoverImage} alt="Gig Cover Image" />
               <div className="flex flex-col">
-                <h4 className="mt-2 text-sm font-bold text-[#161c2d] md:mt-0 md:pl-4">{order?.offer.gigTitle}</h4>
-                <span className="status mt-1 w-24 rounded px-[3px] py-[3px] text-xs font-bold uppercase text-white md:ml-4">
+                <h4 className="mt-2 text-sm font-bold text-[#161c2d] md:mt-0 md:pl-4">{order?.offer?.gigTitle}</h4>
+                <span
+                  className={cn(
+                    'status mt-1 w-24 rounded px-[3px] py-[3px] text-xs font-bold uppercase text-white md:ml-4',
+                    order?.status?.replace(/ /g, '')
+                  )}
+                >
                   {order?.status.replace(/ /g, '')}
                 </span>
               </div>
@@ -101,7 +107,9 @@ const Order: FC = (): ReactElement => {
               </li>
               <li className="flex justify-between px-4 pb-2 pt-2">
                 <div className="flex gap-2 text-sm font-normal">Delivery date</div>
-                <span className="text-sm font-bold">{TimeAgo.dayMonthYear(order?.offer.newDeliveryDate as string)}</span>
+                <span className="text-sm font-bold">
+                  {order?.offer?.newDeliveryDate ? TimeAgo.dayMonthYear(`${order?.offer?.newDeliveryDate}`) : 'N/A'}
+                </span>
               </li>
               <li className="flex justify-between px-4 pb-4 pt-2">
                 <div className="flex gap-2 text-sm font-normal">Total price</div>
