@@ -8,6 +8,7 @@ import { useGetOrderByOrderIdQuery } from '../services/order.service';
 import { socket, socketService } from 'src/sockets/socket.service';
 import { TimeAgo } from 'src/shared/utils/timeago.utils';
 import { cn } from 'src/shared/utils/cn';
+import DeliveryTimer from './DeliveryTimer';
 
 const Order: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -79,44 +80,54 @@ const Order: FC = (): ReactElement => {
         </div>
 
         <div className="w-full p-4 lg:w-1/3 ">
-          {/* <!-- DeliveryTimer --> */}
+          {order && Object.keys(order).length > 0 ? (
+            <>
+              {order?.delivered && authUser.username === order.sellerUsername && <DeliveryTimer order={order} authUser={authUser} />}
+              {order?.delivered && authUser.username === order.buyerUsername && <></>}
+              {!order?.delivered && <DeliveryTimer order={order} authUser={authUser} />}
+            </>
+          ) : (
+            <></>
+          )}
 
-          <div className="bg-white">
-            <div className="mb-2 flex flex-col border-b px-4 pb-4 pt-3 md:flex-row">
-              <img className="h-11 w-20 object-cover" src={order?.gigCoverImage} alt="Gig Cover Image" />
-              <div className="flex flex-col">
-                <h4 className="mt-2 text-sm font-bold text-[#161c2d] md:mt-0 md:pl-4">{order?.offer?.gigTitle}</h4>
-                <span
-                  className={cn(
-                    'status mt-1 w-24 rounded px-[3px] py-[3px] text-xs font-bold uppercase text-white md:ml-4',
-                    order?.status?.replace(/ /g, '')
-                  )}
-                >
-                  {order?.status.replace(/ /g, '')}
-                </span>
+          {order && (
+            <div className="bg-white">
+              <div className="mb-2 flex flex-col border-b px-4 pb-4 pt-3 md:flex-row">
+                <img className="h-11 w-20 object-cover" src={order?.gigCoverImage} alt="Gig Cover Image" />
+                <div className="flex flex-col">
+                  <h4 className="mt-2 text-sm font-bold text-[#161c2d] md:mt-0 md:pl-4">{order?.offer?.gigTitle}</h4>
+                  <span
+                    className={cn(
+                      'status mt-1 w-24 rounded px-[3px] py-[3px] text-xs font-bold uppercase text-white md:ml-4',
+                      order?.status?.replace(/ /g, '')
+                    )}
+                  >
+                    {order?.status.replace(/ /g, '')}
+                  </span>
+                </div>
               </div>
+              <ul className="mb-0 list-none">
+                <li className="flex justify-between px-4 pb-2 pt-2">
+                  <div className="flex gap-2 text-sm font-normal">Ordered from</div>
+                  <span className="text-sm font-bold text-green-500">{order?.sellerUsername}</span>
+                </li>
+                <li className="flex justify-between px-4 pb-2 pt-2">
+                  <div className="flex gap-2 text-sm font-normal">Order</div>
+                  <span className="text-sm font-bold">#{order?.orderId}</span>
+                </li>
+                <li className="flex justify-between px-4 pb-2 pt-2">
+                  <div className="flex gap-2 text-sm font-normal">Delivery date</div>
+                  <span className="text-sm font-bold">
+                    {order?.offer?.newDeliveryDate ? TimeAgo.dayMonthYear(`${order?.offer?.newDeliveryDate}`) : 'N/A'}
+                  </span>
+                </li>
+                <li className="flex justify-between px-4 pb-4 pt-2">
+                  <div className="flex gap-2 text-sm font-normal">Total price</div>
+                  <span className="text-sm font-bold">${order?.price.toFixed(2)}</span>
+                </li>
+              </ul>
             </div>
-            <ul className="mb-0 list-none">
-              <li className="flex justify-between px-4 pb-2 pt-2">
-                <div className="flex gap-2 text-sm font-normal">Ordered from</div>
-                <span className="text-sm font-bold text-green-500">{order?.sellerUsername}</span>
-              </li>
-              <li className="flex justify-between px-4 pb-2 pt-2">
-                <div className="flex gap-2 text-sm font-normal">Order</div>
-                <span className="text-sm font-bold">#{order?.orderId}</span>
-              </li>
-              <li className="flex justify-between px-4 pb-2 pt-2">
-                <div className="flex gap-2 text-sm font-normal">Delivery date</div>
-                <span className="text-sm font-bold">
-                  {order?.offer?.newDeliveryDate ? TimeAgo.dayMonthYear(`${order?.offer?.newDeliveryDate}`) : 'N/A'}
-                </span>
-              </li>
-              <li className="flex justify-between px-4 pb-4 pt-2">
-                <div className="flex gap-2 text-sm font-normal">Total price</div>
-                <span className="text-sm font-bold">${order?.price.toFixed(2)}</span>
-              </li>
-            </ul>
-          </div>
+          )}
         </div>
       </div>
     </div>
