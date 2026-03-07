@@ -7,6 +7,7 @@ import ChatBox from 'src/features/chat/components/ChatBox/ChatBox';
 import OrderPlaced from './OrderPlaced';
 import OrderExtension from './OrderExtension';
 import OrderDelivered from './OrderDelivered';
+import OrderReview from './OrderReview';
 
 const OrderActivities: ForwardRefExoticComponent<Omit<IOrderActivitiesProps, 'ref'> & RefAttributes<HTMLDivElement>> = forwardRef<
   DivElementRefType,
@@ -38,6 +39,7 @@ const OrderActivities: ForwardRefExoticComponent<Omit<IOrderActivitiesProps, 're
         <OrderPlaced />
         <OrderExtension />
         <OrderDelivered ref={ref} />
+        <OrderReview />
       </OrderContext.Provider>
       <div className="px-3 pt-2 flex">
         If you need to contact the {order.buyerUsername === authUser.username ? 'seller' : 'buyer'},{' '}

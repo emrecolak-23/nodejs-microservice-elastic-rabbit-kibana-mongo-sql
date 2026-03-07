@@ -26,7 +26,7 @@ export class ReviewService {
     };
 
     await this.reviewerProducer.publishFanoutMessage({
-      exchangeName: 'reviewer',
+      exchangeName: 'jobber-review',
       message: JSON.stringify(reviewMessage),
       logMessage: 'Review message sent to reviewer service'
     });
