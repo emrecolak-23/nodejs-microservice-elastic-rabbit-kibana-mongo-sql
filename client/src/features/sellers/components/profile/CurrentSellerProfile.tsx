@@ -17,6 +17,9 @@ import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
 import { useGetGigsBySellerIdQuery } from 'src/features/gigs/services/gigs.service';
 import { ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
 import GigCardDisplayItem from 'src/shared/gigs/GigCardDisplayItem';
+import { useGetReviewsBySellerIdQuery } from 'src/features/order/services/review.service';
+import { IReviewDocument } from 'src/features/order/interfaces/review.interface';
+import GigViewReview from 'src/features/gigs/components/view/components/GigViewLeft/GigViewReview';
 
 const CurrentSellerProfile: FC = (): ReactElement => {
   const seller = useAppSelector((state: IReduxState) => state.seller);
@@ -25,10 +28,23 @@ const CurrentSellerProfile: FC = (): ReactElement => {
   const [type, setType] = useState<string>('Overview');
   const dispatch = useAppDispatch();
   const { sellerId } = useParams();
+
+  const {
+    data: sellerData,
+    isSuccess: isGigReviewSuccess,
+    isLoading: isGigReviewLoading
+  } = useGetReviewsBySellerIdQuery(sellerId as string);
+
+  let reviews: IReviewDocument[] = [];
+
+  if (isGigReviewSuccess && sellerData?.reviews) {
+    reviews = sellerData.reviews;
+  }
+
   const [updateSeller, { isLoading: isUpdatingSeller }] = useUpdateSellerMutation();
   const { data, isSuccess: isSellerGigsSuccess, isLoading: isSellerGigsLoading } = useGetGigsBySellerIdQuery(sellerId as string);
 
-  const isLoading: boolean = isUpdatingSeller || isSellerGigsLoading;
+  const isLoading: boolean = isUpdatingSeller || isSellerGigsLoading || isGigReviewLoading;
   useEffect(() => {
     if (seller?._id) {
       setSellerProfile(seller);
@@ -102,7 +118,7 @@ const CurrentSellerProfile: FC = (): ReactElement => {
                   })}
               </div>
             )}
-            {type === 'Ratings & Reviews' && <div>Seller Ratings & Reviews</div>}
+            {type === 'Ratings & Reviews' && <GigViewReview showRatings={false} reviews={reviews} />}
           </div>
         </div>
       )}
