@@ -3,13 +3,13 @@
 
 
 ###
-PUT {{baseUrl}}/{{urlPath}}/auth/seeds/20
+PUT {{baseUrl}}/{{urlPath}}/auth/seeds/30
 Content-Type: application/json
 Accept: application/json
 
 
 ###
-PUT {{baseUrl}}/{{urlPath}}/seller/seed/20
+PUT {{baseUrl}}/{{urlPath}}/seller/seed/30
 Content-Type: application/json
 Accept: application/json
 withCredentials: true

@@ -24,7 +24,7 @@ export class OrderRoute {
     this.router.post('/create-payment-intent', this.orderController.createIntent.bind(this.orderController));
     this.router.put('/cancel/:orderId', this.orderController.cancelOrder.bind(this.orderController));
     this.router.put('/extension/:orderId', this.orderController.requestDeliveryExtension.bind(this.orderController));
-    this.router.put('/delivery-order/:orderId', this.orderController.deliverOrder.bind(this.orderController));
+    this.router.put('/deliver-order/:orderId', this.orderController.deliverOrder.bind(this.orderController));
     this.router.put('/approve-order/:orderId', this.orderController.approveOrder.bind(this.orderController));
     this.router.put('/gig/:type/:orderId', this.orderController.deliveryDate.bind(this.orderController));
     return this.router;

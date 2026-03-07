@@ -49,7 +49,7 @@ export class OrderRepository {
       .findOneAndUpdate(
         { orderId },
         {
-          $set: { delivered, deliveredWork, status: 'Delivered', ['events.orderDelivered']: new Date() },
+          $set: { delivered, status: 'Delivered', ['events.orderDelivered']: new Date() },
           $push: { deliveredWork }
         },
         { new: true }

@@ -26,7 +26,7 @@ const GigSeller: FC = (): ReactElement => {
   const [showChatBox, setShowChatBox] = useState<boolean>(false);
 
   const chatSeller: IChatSellerProps = {
-    username: `${seller.username}`,
+    username: `${seller?.username}`,
     _id: `${seller._id}`,
     profilePicture: `${seller.profilePicture}`,
     responseTime: parseInt(`${seller.responseTime}`)

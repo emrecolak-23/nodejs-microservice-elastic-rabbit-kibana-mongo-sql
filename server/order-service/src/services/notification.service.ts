@@ -43,6 +43,6 @@ export class NotificationService {
 
     const orderNotification: INotificationDocument = await this.createNotification(notification);
 
-    socketIOOrderObject.emit('orderNotification', data, orderNotification);
+    socketIOOrderObject.emit('order notification', data, orderNotification);
   }
 }
