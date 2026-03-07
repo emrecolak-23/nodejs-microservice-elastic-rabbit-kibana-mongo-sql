@@ -6,6 +6,7 @@ import { IOrderDocument } from 'src/features/order/interfaces/order.interface';
 import { ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
 import { ISellerDocument } from '../../interfaces/seller.interface';
 import { useGetGigsBySellerIdQuery, useGetSellerPausedGigsQuery } from 'src/features/gigs/services/gigs.service';
+import { useGetOrdersBySellerIdQuery } from 'src/features/order/services/order.service';
 
 const Seller: FC = (): ReactElement => {
   const { sellerId } = useParams();
@@ -17,9 +18,11 @@ const Seller: FC = (): ReactElement => {
     skip: !sellerId
   });
 
-  const orders: IOrderDocument[] = [];
+  const { data: sellerOrders, isSuccess: isSellerOrdersSuccess } = useGetOrdersBySellerIdQuery(`${sellerId}`);
+
   let gigs: ISellerGig[] = [];
   let pausedGig: ISellerGig[] = [];
+  let orders: IOrderDocument[] = [];
   let seller: ISellerDocument | undefined = undefined;
 
   if (isSuccess) {
@@ -32,6 +35,10 @@ const Seller: FC = (): ReactElement => {
 
   if (isPausedGigsSuccess && pausedGigs?.gigs) {
     pausedGig = pausedGigs.gigs;
+  }
+
+  if (isSellerOrdersSuccess && sellerOrders?.orders) {
+    orders = sellerOrders.orders;
   }
 
   return (
