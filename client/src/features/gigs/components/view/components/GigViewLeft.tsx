@@ -8,7 +8,7 @@ const GigViewLeft: FC = (): ReactElement => {
     <>
       <GigLeftOverview />
       <GigLeftAbout />
-      <GigViewReview showRatings={true} />
+      <GigViewReview showRatings={true} hasFetchedReviews={false} />
     </>
   );
 };

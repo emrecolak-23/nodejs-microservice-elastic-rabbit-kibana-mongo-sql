@@ -46,7 +46,7 @@ export class ReviewRepository {
   async getReviewsBySellerId(sellerId: string): Promise<IReviewDocument[]> {
     const { rows } = (await this.database.query(
       'SELECT * FROM reviews WHERE reviews.sellerId = $1 AND reviews.reviewType = $2 ORDER BY createdAt DESC',
-      [sellerId, 'seller-review']
+      [sellerId, 'buyer-review']
     )) as QueryResult<IReviewDocument>;
 
     return rows as IReviewDocument[];

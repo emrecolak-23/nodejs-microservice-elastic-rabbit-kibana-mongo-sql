@@ -1,6 +1,7 @@
 import { FC, ReactElement, useContext } from 'react';
 import { GigContext } from 'src/features/gigs/context/GigContext';
 import HtmlParser from 'src/shared/html-parser/HtmlParser';
+import { v4 as uuidv4 } from 'uuid';
 
 const GigLeftAbout: FC = (): ReactElement => {
   const { gig } = useContext(GigContext);
@@ -20,7 +21,11 @@ const GigLeftAbout: FC = (): ReactElement => {
           <span className="text-[#95979d]">Sub Categories</span>
           <div className="flex flex-col">
             {gig.subCategories.map((category: string, index: number) => {
-              return <span className="font-normal">{`${category} ${index === gig.subCategories.length - 1 ? '' : ', '}`}&nbsp;</span>;
+              return (
+                <span key={uuidv4()} className="font-normal">
+                  {`${category} ${index === gig.subCategories.length - 1 ? '' : ', '}`}&nbsp;
+                </span>
+              );
             })}
           </div>
         </div>

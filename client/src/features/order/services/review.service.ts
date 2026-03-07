@@ -21,7 +21,7 @@ export const reviewApi = api.injectEndpoints({
           body
         };
       },
-      invalidatesTags: ['Review', 'Order']
+      invalidatesTags: ['Review', 'Order', 'Gigs']
     })
   })
 });

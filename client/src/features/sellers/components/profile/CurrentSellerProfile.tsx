@@ -118,7 +118,7 @@ const CurrentSellerProfile: FC = (): ReactElement => {
                   })}
               </div>
             )}
-            {type === 'Ratings & Reviews' && <GigViewReview showRatings={false} reviews={reviews} />}
+            {type === 'Ratings & Reviews' && <GigViewReview showRatings={false} reviews={reviews} hasFetchedReviews={true} />}
           </div>
         </div>
       )}

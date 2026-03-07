@@ -10,6 +10,9 @@ import CircularPageLoader from 'src/shared/page-loader/CircularPageLoader';
 import { useGetGigsBySellerIdQuery } from 'src/features/gigs/services/gigs.service';
 import { ISellerGig } from 'src/features/gigs/interfaces/gig.interface';
 import GigCardDisplayItem from 'src/shared/gigs/GigCardDisplayItem';
+import GigViewReview from 'src/features/gigs/components/view/components/GigViewLeft/GigViewReview';
+import { useGetReviewsBySellerIdQuery } from 'src/features/order/services/review.service';
+import { IReviewDocument } from 'src/features/order/interfaces/review.interface';
 
 const SellerProfile: FC = (): ReactElement => {
   const [type, setType] = useState<string>('Overview');
@@ -19,7 +22,19 @@ const SellerProfile: FC = (): ReactElement => {
   const { data: sellerData, isLoading: isLoadingSeller, isSuccess: isSuccessSeller } = useGetSellerByIdQuery(sellerId as string);
   const { data: gigsData, isLoading: isLoadingGigs, isSuccess: isSuccessGigs } = useGetGigsBySellerIdQuery(sellerId as string);
 
-  const isLoading: boolean = isLoadingSeller || isLoadingGigs;
+  const {
+    data: sellerReviewsData,
+    isSuccess: isGigReviewSuccess,
+    isLoading: isGigReviewLoading
+  } = useGetReviewsBySellerIdQuery(`${sellerId}`);
+
+  let reviews: IReviewDocument[] = [];
+
+  if (isGigReviewSuccess && sellerReviewsData?.reviews) {
+    reviews = sellerReviewsData.reviews;
+  }
+
+  const isLoading: boolean = isLoadingSeller || isLoadingGigs || isGigReviewLoading;
   const isSuccess: boolean = isSuccessSeller || isSuccessGigs;
 
   return (
@@ -45,7 +60,7 @@ const SellerProfile: FC = (): ReactElement => {
                   })}
               </div>
             )}
-            {type === 'Ratings & Reviews' && <div>Seller Ratings & Reviews</div>}
+            {type === 'Ratings & Reviews' && <GigViewReview showRatings={false} reviews={reviews} hasFetchedReviews={true} />}
           </div>
         </div>
       )}

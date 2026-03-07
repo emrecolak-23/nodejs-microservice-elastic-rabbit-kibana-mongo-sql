@@ -10,16 +10,18 @@ import { TimeAgo } from 'src/shared/utils/timeago.utils';
 import { rating, shortenLargeNumbers } from 'src/shared/utils/utils.service';
 import { v4 as uuidv4 } from 'uuid';
 
-const GigViewReview: FC<IGigViewReviewsProps> = ({ showRatings }): ReactElement => {
+const GigViewReview: FC<IGigViewReviewsProps> = ({ showRatings, reviews, hasFetchedReviews }): ReactElement => {
   const { gigId } = useParams<string>();
 
+  console.log(reviews, 'reviews');
   const { gig } = useContext(GigContext);
 
-  const { data, isSuccess } = useGetReviewsByGigIdQuery(`${gigId}`);
+  const { data, isSuccess } = useGetReviewsByGigIdQuery(`${gigId}`, {
+    skip: hasFetchedReviews
+  });
 
-  let reviews: IReviewDocument[] = [];
-
-  if (isSuccess && data?.reviews) {
+  console.log(data, 'data');
+  if (isSuccess && !hasFetchedReviews) {
     reviews = data.reviews;
   }
 
@@ -64,7 +66,7 @@ const GigViewReview: FC<IGigViewReviewsProps> = ({ showRatings }): ReactElement 
                 <div className="flex flex-col gap-y-3 md:flex-row md:gap-x-4">
                   <img
                     className="flex self-center h-12 w-12 mt-4 rounded-full object-cover md:self-auto"
-                    src={item.reviewerImage}
+                    src={item.reviewerimage}
                     alt="Reviewer Image"
                   />
                   <div className="flex flex-col self-center">
@@ -78,7 +80,7 @@ const GigViewReview: FC<IGigViewReviewsProps> = ({ showRatings }): ReactElement 
                       </div>
                       <div className="ml-2 mt-[1px] flex gap-1 text-sm">
                         <span className="text-orange-400">{rating(item.rating)}</span>|
-                        <span>{TimeAgo.chatMessageTransform(`${item.createdAt}`)}</span>
+                        <span>{TimeAgo.chatMessageTransform(`${item.createdat}`)}</span>
                       </div>
                     </div>
                     <p className="mt-2 text-sm text-center md:text-base md:text-left">{item.review}</p>

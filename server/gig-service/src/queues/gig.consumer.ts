@@ -101,8 +101,10 @@ export class GigConsumer {
             return;
           }
 
-          const { gigReview } = JSON.parse(msg.content.toString());
-          await this.gigService.updateGigReview(JSON.parse(gigReview) as IReviewMessageDetails);
+          const parsed = JSON.parse(msg.content.toString());
+          const gigReview =
+            typeof parsed.gigReview === 'string' ? JSON.parse(parsed.gigReview) : parsed.gigReview;
+          await this.gigService.updateGigReview(gigReview as IReviewMessageDetails);
 
           await this.idempotencyService.markAsProcessed(messageId);
           channel.ack(msg);

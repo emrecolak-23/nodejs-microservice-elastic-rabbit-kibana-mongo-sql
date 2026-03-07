@@ -19,10 +19,10 @@ export interface IReviewDocument {
   reviewerId: string;
   sellerId: string;
   review: string;
-  reviewerImage: string;
+  reviewerimage: string;
   rating: number;
   orderId: string;
-  createdAt: Date | string;
+  createdat: Date | string;
   reviewerUsername: string;
   country: string;
   reviewType?: string;
