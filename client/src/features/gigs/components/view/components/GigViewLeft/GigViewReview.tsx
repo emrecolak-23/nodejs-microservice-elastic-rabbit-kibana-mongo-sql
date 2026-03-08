@@ -13,14 +13,12 @@ import { v4 as uuidv4 } from 'uuid';
 const GigViewReview: FC<IGigViewReviewsProps> = ({ showRatings, reviews, hasFetchedReviews }): ReactElement => {
   const { gigId } = useParams<string>();
 
-  console.log(reviews, 'reviews');
   const { gig } = useContext(GigContext);
 
   const { data, isSuccess } = useGetReviewsByGigIdQuery(`${gigId}`, {
     skip: hasFetchedReviews
   });
 
-  console.log(data, 'data');
   if (isSuccess && !hasFetchedReviews) {
     reviews = data.reviews;
   }
@@ -66,7 +64,7 @@ const GigViewReview: FC<IGigViewReviewsProps> = ({ showRatings, reviews, hasFetc
                 <div className="flex flex-col gap-y-3 md:flex-row md:gap-x-4">
                   <img
                     className="flex self-center h-12 w-12 mt-4 rounded-full object-cover md:self-auto"
-                    src={item.reviewerimage}
+                    src={item.reviewerImage}
                     alt="Reviewer Image"
                   />
                   <div className="flex flex-col self-center">
@@ -80,7 +78,7 @@ const GigViewReview: FC<IGigViewReviewsProps> = ({ showRatings, reviews, hasFetc
                       </div>
                       <div className="ml-2 mt-[1px] flex gap-1 text-sm">
                         <span className="text-orange-400">{rating(item.rating)}</span>|
-                        <span>{TimeAgo.chatMessageTransform(`${item.createdat}`)}</span>
+                        <span>{TimeAgo.chatMessageTransform(`${item.createdAt}`)}</span>
                       </div>
                     </div>
                     <p className="mt-2 text-sm text-center md:text-base md:text-left">{item.review}</p>
