@@ -22,6 +22,7 @@ import Chat from './features/chat/components/Chat';
 import Checkout from './features/order/components/Checkout';
 import Requirement from './features/order/components/Requirement';
 import Order from './features/order/components/Order';
+import Settings from './features/settings/components/Settings';
 
 const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
   return (
@@ -246,6 +247,18 @@ const AppRouter = () => {
           <ProtectedRoute>
             <Layout backgroundColor="#f5f5f5">
               <Order />
+            </Layout>
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: '/:username/edit',
+      element: (
+        <Suspense>
+          <ProtectedRoute>
+            <Layout backgroundColor="#f5f5f5">
+              <Settings />
             </Layout>
           </ProtectedRoute>
         </Suspense>

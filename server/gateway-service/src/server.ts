@@ -24,8 +24,11 @@ import { SocketIOAppHandler } from '@gateway/sockets/socket';
 import { axiosMessageInstance } from './services/api/message.service';
 import { axiosOrderInstance } from './services/api/order.service';
 import { axiosReviewInstance } from './services/api/review.service';
+import { isAxiosError } from 'axios';
 
 const SERVER_PORT = 4000;
+const DEFAULT_ERROR_CODE = StatusCodes.BAD_REQUEST;
+const DEFAULT_ERROR_MESSAGE = 'Error occured';
 export let socketIO: Server;
 
 @singleton()
@@ -124,6 +127,13 @@ export class GatewayServer {
       if (err instanceof CustomError) {
         this.log.log('error', `GatewayService ${err.comingFrom}: `, err);
         return res.status(err.statusCode).json(err.serializeError());
+      }
+
+      if (isAxiosError(err)) {
+        this.log.log('error', `GatewayService Axios error - ${err.response?.data.comingFrom}:`, err);
+        return res.status(err.response?.data.statusCode ?? DEFAULT_ERROR_CODE).json({
+          message: err.response?.data.message ?? DEFAULT_ERROR_MESSAGE
+        });
       }
 
       this.log.log('error', `GatewayService ${(err as IErrorResponse).comingFrom || 'Unknown error'}: `, err);

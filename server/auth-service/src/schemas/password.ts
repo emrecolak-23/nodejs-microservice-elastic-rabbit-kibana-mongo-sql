@@ -28,9 +28,11 @@ const changePasswordSchema: ObjectSchema = Joi.object().keys({
     'string.max': 'Invalid password',
     'string.empty': 'Password is a required field'
   }),
-  newPassword: Joi.string().required().valid(Joi.ref('password')).messages({
-    'any.only': 'Passwords should match',
-    'any.required': 'Confirm password is a required field'
+  newPassword: Joi.string().required().min(4).max(12).messages({
+    'string.base': 'Password should be of type string',
+    'string.min': 'Invalid password',
+    'string.max': 'Invalid password',
+    'string.empty': 'Password is a required field'
   })
 });
 
