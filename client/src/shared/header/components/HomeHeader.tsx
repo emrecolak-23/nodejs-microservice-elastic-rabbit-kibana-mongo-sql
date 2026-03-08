@@ -221,7 +221,9 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                           label={
                             <>
                               <FaRegEnvelope />
-                              {/* <span className="absolute -top-1 right-0 mr-2 inline-flex h-[6px] w-[6px] items-center justify-center rounded-full bg-[#ff62ab]"></span> */}
+                              {notification && notification.hasUnreadMessage && (
+                                <span className="absolute -top-1 right-0 mr-2 inline-flex h-[6px] w-[6px] items-center justify-center rounded-full bg-[#ff62ab]"></span>
+                              )}
                             </>
                           }
                         />

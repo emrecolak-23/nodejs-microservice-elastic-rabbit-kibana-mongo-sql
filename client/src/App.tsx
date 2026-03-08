@@ -5,8 +5,10 @@ import { ToastContainer } from 'react-toastify';
 import { socket, socketService } from './sockets/socket.service';
 import { getDataFromSessionStorage, getTokenFromSessionStorage, saveTokenToSessionStorage } from 'src/shared/utils/utils.service';
 import { useRefreshTokenMutation } from './features/auth/services/auth.service';
+import useBeforeWindowUnload from './shared/hooks/useBeforeWindowUnload';
 
 const App: FC = (): ReactElement => {
+  useBeforeWindowUnload();
   const [refreshToken] = useRefreshTokenMutation();
 
   useEffect(() => {
@@ -44,10 +46,6 @@ const App: FC = (): ReactElement => {
 
     return () => {
       socket?.off('connect', emitLoggedInUser);
-      const username = getDataFromSessionStorage('loggedInuser');
-      if (username && socket?.connected) {
-        socket.emit('removeLoggedInUser', username);
-      }
     };
   }, [refreshToken]);
 

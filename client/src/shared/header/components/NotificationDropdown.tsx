@@ -69,7 +69,7 @@ const NotificationDropdown: FC<IHomeHeaderProps> = ({ setIsNotificationDropdownO
                     <div className="text-[13px] font-normal leading-4 flex justify-between">
                       <div className="font-normal w-[85%]">
                         <span className="font-bold pr-1">
-                          {notification.userTo === authUser.username ? notification.senderUsername : notification.receiverUsername}
+                          {notification.senderUsername === authUser.username ? notification.receiverUsername : notification.senderUsername}
                         </span>
                         {notification.message}
                       </div>
