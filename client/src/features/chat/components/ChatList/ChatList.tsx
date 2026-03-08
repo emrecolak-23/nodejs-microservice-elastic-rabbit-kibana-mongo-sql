@@ -8,7 +8,7 @@ import { NavigateFunction, useLocation, useNavigate, useParams, Location } from 
 import { useGetConversationListQuery, useMarkMultipleMessagesAsReadMutation } from '../../services/chat.service';
 import { cn } from 'src/shared/utils/cn';
 import { TimeAgo } from 'src/shared/utils/timeago.utils';
-import { lowerCase, showErrorToast } from 'src/shared/utils/utils.service';
+import { isFetchBaseQueryError, lowerCase, showErrorToast } from 'src/shared/utils/utils.service';
 import { socket } from 'src/sockets/socket.service';
 import { chatListMessageReceived, chatListMessageUpdated } from '../../services/chat.utils';
 import { updateNotification } from 'src/shared/header/reducers/notification.reducer';
@@ -52,7 +52,9 @@ const ChatList: FC = (): ReactElement => {
         }
       }
     } catch (error) {
-      showErrorToast('Error selecting chat user');
+      if (isFetchBaseQueryError(error)) {
+        showErrorToast(error.data.message);
+      }
     }
   };
 

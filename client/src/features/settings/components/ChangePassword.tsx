@@ -6,7 +6,7 @@ import Button from 'src/shared/button/Button';
 import TextInput from 'src/shared/inputs/TextInput';
 import { cn } from 'src/shared/utils/cn';
 import { PASSWORD_TYPE } from 'src/shared/utils/static-data';
-import { applicationLogout, showErrorToast } from 'src/shared/utils/utils.service';
+import { applicationLogout, isFetchBaseQueryError, showErrorToast } from 'src/shared/utils/utils.service';
 import { useAppDispatch } from 'src/store/store';
 import { useChangePasswordMutation } from '../services/settings.service';
 
@@ -40,8 +40,11 @@ const ChangePassword: FC = (): ReactElement => {
         applicationLogout(dispatch, navigate);
       }, 3000);
     } catch (error) {
-      setAlertMessage(error?.data?.message);
-      showErrorToast('Error updating password');
+      if (isFetchBaseQueryError(error)) {
+        setAlertMessage(error.data.message);
+        showErrorToast(error.data.message);
+      }
+
       console.log(error);
     }
   };
