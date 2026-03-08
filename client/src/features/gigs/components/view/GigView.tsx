@@ -16,7 +16,7 @@ import TopGigsView from 'src/shared/gigs/TopGigsView';
 
 const GigView: FC = (): ReactElement => {
   const { gigId, sellerId } = useParams<string>();
-
+  console.log(sellerId, 'sellerId');
   const { data: gigData, isSuccess: isGigDataSuccess, isLoading: isGigDataLoading } = useGetGigByIdQuery(gigId as string);
   const { data: sellerData, isSuccess: isSellerDataSuccess, isLoading: isSellerDataLoading } = useGetSellerByIdQuery(sellerId as string);
   const {

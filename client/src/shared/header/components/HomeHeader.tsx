@@ -25,6 +25,7 @@ import { updateNotification } from '../reducers/notification.reducer';
 import { IOrderNotifcation } from 'src/features/order/interfaces/order.interface';
 import HomeHeaderSideBar from './mobile/HomeHeaderSideBar';
 import MobileHeaderSearchInput from './mobile/MobileHeaderSearchInput';
+import OrderDropdown from './OrderDropdown';
 
 const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
@@ -69,6 +70,13 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
     setIsSettingsDropdown(false);
     setIsNotificationDropdown(false);
     setIsOrderDropdown(false);
+  };
+
+  const toggleOrdersDropdown = (): void => {
+    setIsOrderDropdown(!isOrderDropdown);
+    setIsSettingsDropdown(false);
+    setIsNotificationDropdown(false);
+    setIsMessageDropdown(false);
   };
 
   const slideLeft = (): void => {
@@ -209,26 +217,30 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                       </div>
                     </li>
                     <li className="relative z-50 flex cursor-pointer items-center">
-                      <Button
-                        className="px-3"
-                        label={
-                          <>
-                            <span>Orders</span>
-                          </>
-                        }
-                      />
-                      <Transition
-                        ref={orderDropdownRef}
-                        show={isOrderDropdown}
-                        enter="transition ease-out duration-200"
-                        enterFrom="opacity-0 translate-y-1"
-                        enterTo="opacity-100 translate-y-0"
-                        leave="transition ease-in duration-150"
-                        leaveFrom="opacity-100 translate-y-0"
-                        leaveTo="opacity-0 translate-y-1"
-                      >
-                        <div className="absolute right-0 mt-5 w-96">{/* <!-- OrderDropdown --> */}</div>
-                      </Transition>
+                      <div ref={orderDropdownRef} className="relative">
+                        <Button
+                          className="px-3"
+                          onClick={toggleOrdersDropdown}
+                          label={
+                            <>
+                              <span>Orders</span>
+                            </>
+                          }
+                        />
+                        <Transition
+                          show={isOrderDropdown}
+                          enter="transition ease-out duration-200"
+                          enterFrom="opacity-0 translate-y-1"
+                          enterTo="opacity-100 translate-y-0"
+                          leave="transition ease-in duration-150"
+                          leaveFrom="opacity-100 translate-y-0"
+                          leaveTo="opacity-0 translate-y-1"
+                        >
+                          <div className="absolute right-0 mt-5 w-96">
+                            <OrderDropdown buyer={buyer} setIsDropdownOpen={setIsOrderDropdown} />
+                          </div>
+                        </Transition>
+                      </div>
                     </li>
                     {buyer && !buyer.isSeller && (
                       <li className="relative flex items-center">

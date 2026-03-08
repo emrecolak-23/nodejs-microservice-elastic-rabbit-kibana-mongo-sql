@@ -20,7 +20,6 @@ const GigSeller: FC = (): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
   const buyer = useAppSelector((state: IReduxState) => state.buyer);
   const { gig, seller } = useContext(GigContext);
-
   const [approvalModalContent, setApprovalModalContent] = useState<IApprovalModalContent>();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showChatBox, setShowChatBox] = useState<boolean>(false);

@@ -34,14 +34,14 @@ const ReviewModal: FC<IModalProps> = ({ order, type, onClose }): ReactElement =>
         gigId: `${order?.gigId}`,
         reviewerId: type === 'buyer-review' ? `${order?.buyerId}` : `${order?.sellerId}`,
         sellerId: `${order?.sellerId}`,
-        reviewerimage: type === 'buyer-review' ? `${order?.buyerImage}` : `${order?.sellerImage}`,
+        reviewerImage: type === 'buyer-review' ? `${order?.buyerImage}` : `${order?.sellerImage}`,
         review,
         rating: reviewRating,
         orderId: `${order?.orderId}`,
         reviewType: type,
         reviewerUsername: `${authUser?.username}`,
         country: `${authUser?.username}`,
-        createdat: `${new Date()}`
+        createdAt: `${new Date()}`
       };
       await addReview({ body: reviewDocument });
       setStatus(LOADING_STATUS.SUCCESS);

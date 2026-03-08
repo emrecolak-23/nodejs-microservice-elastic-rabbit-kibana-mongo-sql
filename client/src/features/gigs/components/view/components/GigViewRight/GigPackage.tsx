@@ -36,7 +36,8 @@ const GigPackage: FC = (): ReactElement => {
     navigate(
       `/gig/checkout/${gig.id}?${createSearchParams({
         offer: JSON.stringify(offerParams)
-      })}`
+      })}`,
+      { state: gig }
     );
   };
 
