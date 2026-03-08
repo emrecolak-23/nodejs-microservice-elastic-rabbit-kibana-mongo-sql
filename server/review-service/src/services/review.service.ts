@@ -3,6 +3,24 @@ import { ReviewRepository } from '@review/repositories/review.repository';
 import { IReviewDocument, IReviewMessageDetails } from '@emrecolak-23/jobber-share';
 import { ReviewerProducer } from '@review/queues/reviewer.producer';
 
+interface IReviewerObjectKeys {
+  [key: string]: string | number | Date | undefined;
+}
+
+const objKeys: IReviewerObjectKeys = {
+  review: 'review',
+  rating: 'rating',
+  country: 'country',
+  gigid: 'gigId',
+  reviewerid: 'reviewerId',
+  createdat: 'createdAt',
+  orderid: 'orderId',
+  sellerid: 'sellerId',
+  reviewerimage: 'reviewerImage',
+  reviewerusername: 'reviewerUsername',
+  reviewtype: 'reviewType'
+};
+
 @singleton()
 @injectable()
 export class ReviewService {
@@ -31,14 +49,25 @@ export class ReviewService {
       logMessage: 'Review message sent to reviewer service'
     });
 
-    return row;
+    const result: IReviewDocument = Object.fromEntries(
+      Object.entries(row).map(([key, value]: [string, unknown]) => [objKeys[key] || key, value])
+    );
+    return result;
   }
 
   async getReviewsByGigId(gigId: string): Promise<IReviewDocument[]> {
-    return this.reviewRepository.getReviewsByGigId(gigId);
+    const reviews: IReviewDocument[] = await this.reviewRepository.getReviewsByGigId(gigId);
+    const mappedResult: IReviewDocument[] = reviews.map((review) => {
+      return Object.fromEntries(Object.entries(review).map(([key, value]: [string, unknown]) => [objKeys[key] || key, value]));
+    });
+    return mappedResult;
   }
 
   async getReviewsBySellerId(sellerId: string): Promise<IReviewDocument[]> {
-    return this.reviewRepository.getReviewsBySellerId(sellerId);
+    const reviews: IReviewDocument[] = await this.reviewRepository.getReviewsBySellerId(sellerId);
+    const mappedResult: IReviewDocument[] = reviews.map((review) => {
+      return Object.fromEntries(Object.entries(review).map(([key, value]: [string, unknown]) => [objKeys[key] || key, value]));
+    });
+    return mappedResult;
   }
 }
