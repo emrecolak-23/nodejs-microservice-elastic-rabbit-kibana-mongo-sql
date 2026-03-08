@@ -5,10 +5,11 @@ import { cn } from 'src/shared/utils/cn';
 import { categories, replaceSpacesWithDash, replaceAmpersandAndDashWithSpace } from 'src/shared/utils/utils.service';
 import { v4 as uuidv4 } from 'uuid';
 import { useGetAuthGigsByCategoryQuery } from 'src/features/auth/services/auth.service';
+import { lowerCase } from 'src/shared/utils/utils.service';
 
 const GigTabs: FC = (): ReactElement => {
   const [activeTab, setActiveTab] = useState<string>('Graphics & Design');
-  const queryType = `query=${replaceSpacesWithDash(`${activeTab}`)}`;
+  const queryType = `query=${replaceAmpersandAndDashWithSpace(`${lowerCase(activeTab)}`)}`;
   const { data, isSuccess } = useGetAuthGigsByCategoryQuery({
     query: `${queryType}`,
     from: '0',
