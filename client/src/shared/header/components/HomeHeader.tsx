@@ -26,12 +26,15 @@ import { IOrderNotifcation } from 'src/features/order/interfaces/order.interface
 import HomeHeaderSideBar from './mobile/HomeHeaderSideBar';
 import MobileHeaderSearchInput from './mobile/MobileHeaderSearchInput';
 import OrderDropdown from './OrderDropdown';
+import NotificationDropdown from './NotificationDropdown';
+import { useGetNotificationsByIdQuery } from 'src/features/order/services/notification.service';
 
 const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactElement => {
   const authUser = useAppSelector((state: IReduxState) => state.authUser);
   const logout = useAppSelector((state: IReduxState) => state.logout);
   const buyer = useAppSelector((state: IReduxState) => state.buyer);
   const seller = useAppSelector((state: IReduxState) => state.seller);
+  const notification = useAppSelector((state: IReduxState) => state.notification);
 
   const settingsDropdownRef = useRef<HTMLDivElement>(null);
   const messageDropdownRef = useRef<HTMLDivElement>(null);
@@ -45,6 +48,8 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
   const [isMessageDropdown, setIsMessageDropdown] = useDetectOutsideClick(messageDropdownRef, false);
   const [isNotificationDropdown, setIsNotificationDropdown] = useDetectOutsideClick(notificationDropdownRef, false);
   const [isOrderDropdown, setIsOrderDropdown] = useDetectOutsideClick(orderDropdownRef, false);
+
+  const { data, isSuccess } = useGetNotificationsByIdQuery(`${authUser.username}`, { refetchOnMountOrArgChange: true });
 
   const [resendEmail] = useResendEmailMutation();
   const dispatch = useAppDispatch();
@@ -79,6 +84,13 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
     setIsMessageDropdown(false);
   };
 
+  const toggleNotificationsDropdown = (): void => {
+    setIsNotificationDropdown(!isNotificationDropdown);
+    setIsSettingsDropdown(false);
+    setIsOrderDropdown(false);
+    setIsMessageDropdown(false);
+  };
+
   const slideLeft = (): void => {
     if (navElement.current) {
       const maxScrollLeft = navElement.current.scrollWidth + navElement.current.clientWidth; // maximum scroll position
@@ -96,7 +108,13 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
   useEffect(() => {
     socketService.setupSocketConnection();
     socket?.emit('getLoggedInUsers', '');
-  }, []);
+    if (isSuccess && data?.notifications) {
+      const list: IOrderNotifcation[] = data?.notifications.filter(
+        (item: IOrderNotifcation) => !item.isRead && item.userTo === authUser?.username
+      );
+      dispatch(updateNotification({ hasUnreadNotification: list.length > 0 }));
+    }
+  }, [isSuccess, authUser.username, dispatch, data]);
 
   useEffect(() => {
     socket?.on('message received', (data: IMessageDocument) => {
@@ -167,27 +185,33 @@ const HomeHeader: FC<IHomeHeaderProps> = ({ showCategoryContainer }): ReactEleme
                 <div className="text-[#74767e] lg:pr-4">
                   <ul className="flex text-base font-medium">
                     <li className="relative z-50 flex cursor-pointer items-center">
-                      <Button
-                        className="px-4"
-                        label={
-                          <>
-                            <FaRegBell />
-                            {/* <span className="absolute -top-0 right-0 mr-3 inline-flex h-[6px] w-[6px] items-center justify-center rounded-full bg-[#ff62ab]"></span> */}
-                          </>
-                        }
-                      />
-                      <Transition
-                        ref={notificationDropdownRef}
-                        show={isNotificationDropdown}
-                        enter="transition ease-out duration-200"
-                        enterFrom="opacity-0 translate-y-1"
-                        enterTo="opacity-100 translate-y-0"
-                        leave="transition ease-in duration-150"
-                        leaveFrom="opacity-100 translate-y-0"
-                        leaveTo="opacity-0 translate-y-1"
-                      >
-                        <div className="absolute right-0 mt-5 w-96">{/* <!-- NotificationDropdown --> */}</div>
-                      </Transition>
+                      <div ref={notificationDropdownRef}>
+                        <Button
+                          onClick={toggleNotificationsDropdown}
+                          className="px-4"
+                          label={
+                            <>
+                              <FaRegBell />
+                              {notification && notification.hasUnreadNotification && (
+                                <span className="absolute -top-0 right-0 mr-3 inline-flex h-[6px] w-[6px] items-center justify-center rounded-full bg-[#ff62ab]"></span>
+                              )}
+                            </>
+                          }
+                        />
+                        <Transition
+                          show={isNotificationDropdown}
+                          enter="transition ease-out duration-200"
+                          enterFrom="opacity-0 translate-y-1"
+                          enterTo="opacity-100 translate-y-0"
+                          leave="transition ease-in duration-150"
+                          leaveFrom="opacity-100 translate-y-0"
+                          leaveTo="opacity-0 translate-y-1"
+                        >
+                          <div className="absolute right-0 mt-5 w-96">
+                            <NotificationDropdown setIsNotificationDropdownOpen={setIsNotificationDropdown} />
+                          </div>
+                        </Transition>
+                      </div>
                     </li>
                     <li className="relative z-50 flex cursor-pointer items-center">
                       <div ref={messageDropdownRef} className="relative">
