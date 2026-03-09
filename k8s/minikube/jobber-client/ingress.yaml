@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jobber-client-ingress
+  namespace: production
+#  annotations:
+#    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  defaultBackend:
+    service:
+      name: jobber-client
+      port:
+        number: 80
+  tls:
+    - hosts:
+        - jobberemre.info
+      secretName: client-ingress-tls
+  rules:
+    - host: jobberemre.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: jobber-client
+                port:
+                  number: 80
