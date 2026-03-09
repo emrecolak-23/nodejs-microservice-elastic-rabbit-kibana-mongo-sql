@@ -42,7 +42,7 @@ const CurrentSellerProfile: FC = (): ReactElement => {
   }
 
   const [updateSeller, { isLoading: isUpdatingSeller }] = useUpdateSellerMutation();
-  const { data, isSuccess: isSellerGigsSuccess, isLoading: isSellerGigsLoading } = useGetGigsBySellerIdQuery(sellerId as string);
+  const { data, isLoading: isSellerGigsLoading } = useGetGigsBySellerIdQuery(sellerId as string);
 
   const isLoading: boolean = isUpdatingSeller || isSellerGigsLoading || isGigReviewLoading;
   useEffect(() => {

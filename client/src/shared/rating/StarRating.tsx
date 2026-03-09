@@ -4,7 +4,7 @@ import { FaRegStar, FaStar } from 'react-icons/fa';
 import { v4 as uuidv4 } from 'uuid';
 
 const StarRating: FC<IStarRatingProps> = ({ value, size, setReviewRating }): ReactElement => {
-  const [numberOfStars, setNumberOfStars] = useState<number[]>([...Array(5).keys()].map((i) => i + 1));
+  const numberOfStars = [...Array(5).keys()].map((i) => i + 1);
 
   const [rating, setRating] = useState<number>(0);
 

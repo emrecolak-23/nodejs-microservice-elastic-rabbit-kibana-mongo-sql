@@ -2,8 +2,6 @@ import { io, Socket } from 'socket.io-client';
 
 export let socket: Socket | undefined;
 
-const SOCKET_TOKEN_KEY = 'socketToken';
-
 const getToken = (): string | null => window.sessionStorage.getItem(import.meta.env.VITE_SOCKET_TOKEN_KEY);
 
 let isConnecting = false;

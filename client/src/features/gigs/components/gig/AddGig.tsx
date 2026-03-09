@@ -8,7 +8,7 @@ import TextInput from 'src/shared/inputs/TextInput';
 import { useAppDispatch, useAppSelector } from 'src/store/store';
 import { IReduxState } from 'src/store/store.interface';
 import { GIG_MAX_LENGTH, IAllowedGigItem, ICreateGig, IShowGigModal } from '../../interfaces/gig.interface';
-import ReactQuill, { Quill } from 'react-quill-new';
+import ReactQuill from 'react-quill-new';
 import {
   categories,
   expectedGigDelivery,
@@ -124,10 +124,11 @@ const AddGig: FC = (): ReactElement => {
         };
 
         const response: IResponse = await createGig(gig).unwrap();
+        const gigResponse = response.gig ? (Array.isArray(response.gig) ? response.gig[0] : response.gig) : undefined;
         const updatedSeller: ISellerDocument = { ...seller, totalGigs: (seller.totalGigs as number) + 1 };
         dispatch(addSeller(updatedSeller));
         const title: string = replaceSpacesWithDash(gig.title);
-        navigate(`/gig/${lowerCase(`${authUser.username}/${title}/${response.gig?.sellerId}`)}/${response.gig?.id}/view`);
+        navigate(`/gig/${lowerCase(authUser.username ?? '')}/${title}/${gigResponse?.sellerId}/${gigResponse?.id}/view`);
       }
     } catch (error) {
       showErrorToast('Error while creating gig');

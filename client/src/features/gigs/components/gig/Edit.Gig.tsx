@@ -123,9 +123,10 @@ const EditGig: FC = (): ReactElement => {
           gigId: gigId as string,
           gig
         }).unwrap();
+        const gigResponse = response.gig ? (Array.isArray(response.gig) ? response.gig[0] : response.gig) : undefined;
         const title: string = replaceSpacesWithDash(`${gig.title}`);
         showSuccessToast('Updated gig successfully');
-        navigate(`/gig/${lowerCase(`${authUser.username}/${title}/${response.gig?.sellerId}`)}/${response.gig?.id}/view`);
+        navigate(`/gig/${lowerCase(authUser.username ?? '')}/${title}/${gigResponse?.sellerId}/${gigResponse?.id}/view`);
       }
     } catch (error) {
       showErrorToast('Error updating gig');

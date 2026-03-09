@@ -1,5 +1,5 @@
 import { forwardRef, ForwardRefExoticComponent, ReactElement, RefAttributes, useState } from 'react';
-import { DivElementRefType, IOrderActivitiesProps, IOrderDocument } from '../../interfaces/order.interface';
+import { DivElementRefType, IOrderActivitiesProps } from '../../interfaces/order.interface';
 import { IChatBuyerProps, IChatSellerProps } from 'src/features/chat/interfaces/chat.interface';
 import { TimeAgo } from 'src/shared/utils/timeago.utils';
 import { OrderContext } from '../../context/OrderContext';

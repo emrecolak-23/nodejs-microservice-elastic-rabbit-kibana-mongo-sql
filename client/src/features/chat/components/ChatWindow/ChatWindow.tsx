@@ -5,7 +5,7 @@ import TextInput from 'src/shared/inputs/TextInput';
 import { IChatWindowProps, IMessageDocument } from '../../interfaces/chat.interface';
 import useChatScrollToBottom from '../../hooks/useChatScrollToBottom';
 import { useParams } from 'react-router-dom';
-import { firstLetterUppercase, showErrorToast, showSuccessToast } from 'src/shared/utils/utils.service';
+import { firstLetterUppercase, showErrorToast } from 'src/shared/utils/utils.service';
 import { IBuyerDocument } from 'src/features/buyer/interfaces/buyer.interface';
 import { useGetBuyerByUsernameQuery } from 'src/features/buyer/services/buyer.service';
 import { useGetGigByIdQuery } from 'src/features/gigs/services/gigs.service';
@@ -46,6 +46,7 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
   const dispatch = useAppDispatch();
   const { data: buyerData, isSuccess: isBuyerSuccess } = useGetBuyerByUsernameQuery(`${firstLetterUppercase(username as string)}`);
   const { data } = useGetGigByIdQuery(singleMessageRef.current ? `${singleMessageRef.current?.gigId}` : NOT_EXISTING_ID);
+  const gig = data?.gig ? (Array.isArray(data.gig) ? data.gig[0] : data.gig) : undefined;
   const [saveChatMessage] = useSaveChatMessageMutation();
 
   if (buyerData && isBuyerSuccess) {
@@ -157,7 +158,7 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
       {!isLoading && displayCustomOffer && (
         <OfferModal
           header="Create Custom Offer"
-          gigTitle={data && data?.gig?.title ? data?.gig?.title : ''}
+          gigTitle={gig?.title ?? ''}
           singleMessage={singleMessageRef.current as IMessageDocument | undefined}
           receiver={receiverRef.current as IBuyerDocument | undefined}
           authUser={authUser}
@@ -198,7 +199,7 @@ const ChatWindow: FC<IChatWindowProps> = ({ chatMessages, isLoading, setSkip }):
                         </div>
                         <div className="flex flex-col text-[#777d74]">
                           <span>{message.body}</span>
-                          {message.hasOffer && <ChatOffer message={message} seller={seller} gig={data?.gig} />}
+                          {message.hasOffer && <ChatOffer message={message} seller={seller} gig={gig} />}
                           {message.file && <ChatFile message={message} />}
                         </div>
                       </div>

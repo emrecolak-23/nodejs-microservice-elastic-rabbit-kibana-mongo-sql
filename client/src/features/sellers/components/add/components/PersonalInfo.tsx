@@ -1,5 +1,5 @@
 import { ChangeEvent, FC, KeyboardEvent, ReactElement, useState } from 'react';
-import { IPersonalInfoData, IPersonalInfoProps } from 'src/features/sellers/interfaces/seller.interface';
+import { IPersonalInfoProps } from 'src/features/sellers/interfaces/seller.interface';
 import TextInput from 'src/shared/inputs/TextInput';
 import TextAreaInput from 'src/shared/inputs/TextAreaInput';
 import Dropdown from 'src/shared/dropdown/Dropdown';

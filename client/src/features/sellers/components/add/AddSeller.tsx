@@ -86,7 +86,7 @@ const AddSeller: FC = (): ReactElement => {
   const dispatch = useAppDispatch();
   const navigate: NavigateFunction = useNavigate();
 
-  const [createSeller, { isLoading: isCreatingSeller }] = useCreateSellerMutation();
+  const [createSeller] = useCreateSellerMutation();
 
   const errors = [...personalInfoErrors, ...experienceErrors, ...educationErrors, ...skillsErrors, ...languageErrors];
   const onCreateSeller = async (event: FormEvent): Promise<void> => {

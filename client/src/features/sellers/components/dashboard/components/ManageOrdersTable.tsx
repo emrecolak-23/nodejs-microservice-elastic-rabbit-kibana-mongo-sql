@@ -41,7 +41,13 @@ const ManageOrdersTable: FC<IOrderTableProps> = ({ type, orders, orderTypes }): 
 
   return (
     <>
-      {showCancelModal && <ApprovalModal approvalModalContent={approvalModalContent} onClose={() => setShowCancelModal(false)} />}
+      {showCancelModal && (
+        <ApprovalModal
+          approvalModalContent={approvalModalContent}
+          onClose={() => setShowCancelModal(false)}
+          onClick={onCancelOrder}
+        />
+      )}
       <div className="flex flex-col">
         <div className="border-grey border border-b-0 px-3 py-3">
           <div className="text-xs font-bold uppercase sm:text-sm md:text-base">{type} orders </div>

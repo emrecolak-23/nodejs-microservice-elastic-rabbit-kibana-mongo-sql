@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction, Slice } from '@reduxjs/toolkit';
+import { createSlice, Slice } from '@reduxjs/toolkit';
 import { IAuthUser, IReduxAddAuthUser } from '../interfaces/auth.interface';
 import { initialAuthUserValues } from 'src/shared/utils/static-data';
 

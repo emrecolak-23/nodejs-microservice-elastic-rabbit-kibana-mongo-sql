@@ -8,7 +8,6 @@ import { FaTimes } from 'react-icons/fa';
 import { IModalProps } from './interfaces/modal.interface';
 import { useSaveChatMessageMutation } from 'src/features/chat/services/chat.service';
 import { expectedGigDelivery, showErrorToast, showSuccessToast } from '../utils/utils.service';
-import { IResponse } from '../shared.interface';
 import { IMessageDocument } from 'src/features/chat/interfaces/chat.interface';
 
 interface ISellerOffer {

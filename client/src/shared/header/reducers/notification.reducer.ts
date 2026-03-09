@@ -1,5 +1,5 @@
 import { createSlice, Slice } from '@reduxjs/toolkit';
-import { INotification, IReduxHeader, IReduxNotification } from '../interfaces/header.interface';
+import { INotification, IReduxNotification } from '../interfaces/header.interface';
 
 const initialState: INotification = {
   hasUnreadMessage: false,

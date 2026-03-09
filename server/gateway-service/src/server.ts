@@ -63,9 +63,10 @@ export class GatewayServer {
     );
     app.use(hpp());
     app.use(helmet());
+    const allowedOrigins = this.config.CLIENT_URL.split(',').map((url) => url.trim()).filter(Boolean);
     app.use(
       cors({
-        origin: `${this.config.CLIENT_URL}`,
+        origin: allowedOrigins.length > 1 ? allowedOrigins : this.config.CLIENT_URL,
         credentials: true,
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
       })
@@ -159,9 +160,10 @@ export class GatewayServer {
   }
 
   private async createSocketIO(httpServer: http.Server): Promise<Server> {
+    const allowedOrigins = this.config.CLIENT_URL.split(',').map((url) => url.trim()).filter(Boolean);
     const io: Server = new Server(httpServer, {
       cors: {
-        origin: `${this.config.CLIENT_URL}`,
+        origin: allowedOrigins.length > 1 ? allowedOrigins : this.config.CLIENT_URL,
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
       },
       pingTimeout: 5000,

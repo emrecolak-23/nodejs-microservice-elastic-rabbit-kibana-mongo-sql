@@ -36,7 +36,7 @@ const Requirement: FC = (): ReactElement => {
   const [createOrder] = useCreateOrderMutation();
 
   if (data?.gig && isSuccess) {
-    gigRef.current = data.gig;
+    gigRef.current = Array.isArray(data.gig) ? data.gig[0] : data.gig;
   }
 
   const orderInvoice: IOrderInvoice = {

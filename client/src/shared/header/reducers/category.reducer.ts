@@ -7,8 +7,7 @@ const categorySlice: Slice = createSlice({
   name: 'category',
   initialState,
   reducers: {
-    updateContainerCategory: (state: boolean, action: IReduxShowCategory): boolean => {
-      state = action.payload;
+    updateContainerCategory: (_state: boolean, action: IReduxShowCategory): boolean => {
       return action.payload;
     }
   }
