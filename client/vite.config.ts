@@ -16,6 +16,9 @@ export default defineConfig({
       src: '/src'
     }
   },
+  build: {
+    outDir: './build'
+  },
   server: {
     port: 3000
   }
