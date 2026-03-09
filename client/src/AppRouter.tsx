@@ -24,6 +24,7 @@ import Requirement from './features/order/components/Requirement';
 import Order from './features/order/components/Order';
 import Settings from './features/settings/components/Settings';
 import GigsIndexDisplay from './features/index/gig-tabs/GigsIndexDisplay';
+import GigInfoDisplay from './features/index/gig-tabs/GigInfoDisplay';
 
 const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
   return (
@@ -53,6 +54,26 @@ const AppRouter = () => {
         <Suspense>
           <Layout backgroundColor="#fffff">
             <GigsIndexDisplay type="categories" />
+          </Layout>
+        </Suspense>
+      )
+    },
+    {
+      path: '/gigs/search',
+      element: (
+        <Suspense>
+          <Layout backgroundColor="#fffff">
+            <GigsIndexDisplay type="search" />
+          </Layout>
+        </Suspense>
+      )
+    },
+    {
+      path: '/gigs/:gigId/:title',
+      element: (
+        <Suspense>
+          <Layout backgroundColor="#fffff">
+            <GigInfoDisplay />
           </Layout>
         </Suspense>
       )
