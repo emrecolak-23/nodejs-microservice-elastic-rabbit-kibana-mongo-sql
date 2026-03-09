@@ -23,6 +23,7 @@ import Checkout from './features/order/components/Checkout';
 import Requirement from './features/order/components/Requirement';
 import Order from './features/order/components/Order';
 import Settings from './features/settings/components/Settings';
+import GigsIndexDisplay from './features/index/gig-tabs/GigsIndexDisplay';
 
 const Layout = ({ backgroundColor = '#fffff', children }: { backgroundColor?: string; children: React.ReactNode }): JSX.Element => {
   return (
@@ -45,6 +46,16 @@ const AppRouter = () => {
     {
       path: '/confirm-email',
       element: <ConfirmEmail />
+    },
+    {
+      path: '/search/categories/:category',
+      element: (
+        <Suspense>
+          <Layout backgroundColor="#fffff">
+            <GigsIndexDisplay type="categories" />
+          </Layout>
+        </Suspense>
+      )
     },
     {
       path: '/',

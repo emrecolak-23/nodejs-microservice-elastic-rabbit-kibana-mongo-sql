@@ -31,7 +31,7 @@ export interface IResponse {
   buyer?: IBuyerDocument;
   seller?: ISellerDocument;
   sellers?: ISellerDocument[];
-  gig?: ISellerGig;
+  gig?: ISellerGig | ISellerGig[];
   gigs?: ISellerGig[];
   total?: number;
   sortItems?: string[];
